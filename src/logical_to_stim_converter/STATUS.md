@@ -1,5 +1,14 @@
 # STATUS — Package root
 
+## M6-C update — 2026-11-08
+
+The public converter remains decoder-neutral. The ordinary-memory MWPM consumer
+lives under examples/ with integration tests, aggregate reports and figures.
+No PyMatching/Matplotlib imports or mandatory dependencies enter the package.
+DecoderView schema v2 replaces lossy circuit/DEM text snapshots with exact
+immutable public instruction tuples and full-precision source fingerprints.
+See decoding/STATUS.md and root STATUS for precision regression and evidence.
+
 ## M6-B update — 2026-11-08
 
 Public DecoderView/DetectorSelector/DEMOptions, GF2Map/RecordFlipMap, factories,

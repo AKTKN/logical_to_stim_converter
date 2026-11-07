@@ -2,7 +2,101 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M6_B_IMPLEMENTED` (local physics verification)
+**Overall state:** `M6_C_IMPLEMENTED` (ordinary-memory external-consumer demonstration)
+
+## M6-C implemented and verified — 2026-11-08
+
+Baseline local/remote commit: `cf4106becd2031e71f42bb25b2858cfaf01a74ed`.
+
+- examples/memory_offline_decoding.py uses only public converter/view APIs for
+  ordinary X/Z memory, independent d/R, explicit NoiseModel or uniform p, and
+  seed/shot parameters. R includes one init syndrome round. The minimal CLI's
+  fixed suite contains d=3/5 X/Z R=d and two independent concurrent X/Z patches.
+- One raw physical batch per experiment supplies Stim m2d event/observable-flip
+  labels for global, observable-local and strict patch strategies. Results retain
+  original immutable raw order, canonical ideal/noisy circuits, public metadata,
+  the undecomposed global DEM, view mappings, predictions and exact XOR failures.
+  Reports distinguish any-observable shot errors from per-observable errors.
+- PyMatching 2.3.1 operates only in the example/tests. Derived views explicitly
+  request Stim graphlike decomposition; the adapter rejects any remaining
+  component with more than two detectors. Correlated ^ mechanisms stay intact;
+  two-pass correlated MWPM is documented as a heuristic, not exact inference.
+  Canonical DEM semantics never depend on the selected decoder.
+- JSON/CSV aggregates and PNG/SVG figures include parameters, versions, source/raw
+  hashes, scopes, counts and timings. Figures use 95% Wilson intervals and matched
+  observable scopes. Matplotlib is a dev dependency. Small requested reports and
+  figures are explicitly committed under implementation_files/e2etest; raw shots
+  and large logs stay ignored, and distribution manifests prune that directory.
+- A necessary M6-B precision correction replaces Stim text snapshots with exact
+  immutable instruction tuples. Remote M6-B run 42422493437 passed both Linux
+  jobs but failed six exact model comparisons on each Windows job: Stim 1.15 DEM
+  text uses only 16 significant digits on MSVC. Circuit text also rounds gate
+  arguments to six digits. Exact copies now preserve probabilities, targets,
+  tags, repeats, shifts and ^ components through public Stim append APIs.
+  Schema v2 fingerprints include full circuit precision, eliminating rounded
+  source-identity collisions. Regenerate older v1 fingerprints. Existing exact
+  equality assertions remain unchanged; upstream sources were not modified.
+- README/development/architecture and affected AGENTS/STATUS files document the
+  consumer and observable conventions. CI adds the fifth example with a bounded
+  128 shots/case. No runner, dataset framework, runtime decoder, Knill-specific
+  inference or knill_bench dependency is introduced.
+
+### M6-C evidence
+
+Pins remain Stim **1.15.0** and stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`. Inspected installed Stim raw sampling,
+m2d/reference and DEM APIs, PyMatching 2.3.1 model/decode_batch correlation flags,
+fault-ID dimensions and documented hyperedge behavior. Read-only surface-sim
+`493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` memory example and lomatching
+`b55a7a65969a106a547622287b620f0da2cb5e39` batch decoder/selection were inspected.
+Stim printer source was inspected to diagnose platform precision. No external
+source was changed, imported at runtime, or vendored.
+
+Final local Linux/WSL2 Python 3.12.7 checks:
+
+- `python -m pytest --junitxml=implementation_files/e2etest/pytest.xml`:
+  **394 passed in 162.14 s** (26 new tests, all 368 previous tests retained).
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- All five examples passed; the M6-C example ran both the bounded 128-shot/case
+  isolated-wheel suite and the requested 20,000-shot/case figure suite.
+- Isolated installed-wheel check passed with PyMatching/Matplotlib/test/reference
+  imports blocked: exact full-precision source/model copies and same-raw m2d parity.
+  A copied standalone demo ran against the installed wheel. Distribution contents
+  include the consumer source/tests and exclude implementation reports, raw samples,
+  local environments and reference clones.
+- `python -m pip check`: no broken requirements. `git diff --check` passed;
+  all four upstream reference working trees remain clean.
+- Full test/lint logs, aggregate JSON/CSV, PNG/SVG and a compact verification
+  report are in implementation_files/e2etest. Only compact reports/figures and
+  final test/lint results are committed, with no raw shot dataset.
+
+Figure command (Linux/WSL2 Python 3.12.7, NumPy 2.5.4, Matplotlib 3.11.2):
+`python examples/memory_offline_decoding.py --suite --shots 20000 --p 0.003
+--seed 20261108 --output-dir implementation_files/e2etest`.
+Five experiments, **100,000 physical shots**, with one sampling call each:
+
+| Memory | d | R | Seed | Global failures / shots | LER |
+|---|---|---|---|---|---|
+| X | 3 | 3 | 20261108 | 253 / 20000 | 0.01265 |
+| Z | 3 | 3 | 20261109 | 265 / 20000 | 0.01325 |
+| X | 5 | 5 | 20261110 | 118 / 20000 | 0.00590 |
+| Z | 5 | 5 | 20261111 | 92 / 20000 | 0.00460 |
+| mixed XZ | 3 | 3 | 20261112 | 528 / 20000 (any output) | 0.02640 |
+
+Mixed-patch observable order is a_input/Z/global L0 (276 failures) then
+z_input/X/global L1 (255 failures), deliberately different from physical order.
+Observable-local and strict patch predictions agree with the global decoder per
+observable on these same independent-patch samples. Three shots fail both outputs,
+so the union count is 528, not 531. These are demonstration estimates for this
+noise/circuit/decoder configuration, not a threshold or performance guarantee.
+Seeds are reproducible only for fixed Stim/version/machine/call structure.
+
+Implemented but unverified: no additional behavior is claimed. Local results do
+not establish portable RNG equality or exact maximum-likelihood decoding. Remote
+CI verification is performed after push and reported separately. Conditional
+preparation/Bell/Knill noisy decoding remains M6-D/future work; production decoder
+interfaces, optimized regions, adaptive control and runner integration stay deferred.
 
 ## M6-B implemented and verified — 2026-11-08
 

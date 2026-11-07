@@ -25,7 +25,9 @@ audit and source fingerprint are authoritative; NumPy widths alone cannot prove
 sample identity. No view code may depend on private compiler/evaluation state.
 
 Keep source/model snapshots and public metadata immutable, return copies of Stim
-objects/matrices, and never edit caller raw arrays in place. All performance-sensitive
+objects/matrices, and never edit caller raw arrays in place. Use exact immutable
+instruction snapshots and full-precision source fingerprints; Stim circuit/DEM
+text roundtrips can round floating-point arguments, especially on Windows. All performance-sensitive
 sample transformations operate on whole batches. Physical correction selection and
 automatic Pauli-to-record maps remain outside this milestone. Read STATUS before
 changes and update it plus root STATUS with exact physics/model evidence.

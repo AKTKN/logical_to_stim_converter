@@ -1,6 +1,6 @@
 # logical_to_stim_converter
 
-**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance and offline decoder views.**
+**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance, offline decoder views and an ordinary-memory MWPM demo.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -8,9 +8,9 @@ The memory path implements code algebra,
 physical layouts, signed stabilizer/logical flows, concurrent syndrome extraction,
 destructive readout, decoder-independent metadata, and circuit-level noise.
 
-The package is independent of `knill_bench`. Sampling and later decoder/experiment
-comparison belong to the caller. No production decoder or logical error-rate benchmark is
-implemented here.
+The package is independent of `knill_bench`. Sampling and decoder/experiment comparison belong to the caller. A development
+example demonstrates ordinary-memory logical error rates with PyMatching; the
+converter has no production decoder or experiment runner.
 
 ## Installation
 
@@ -449,7 +449,10 @@ selected effects. No DEM line filtering or manual `^` rewriting occurs.
 `flatten_loops=True` requests a flattened output DEM. Unsupported decompositions
 or noise requiring disjoint-error approximation raise `DEMConstructionError`.
 Gauge elimination, silent MWPM approximation and direct global-DEM rewriting are
-unsupported. Public circuit/DEM properties return independent copies.
+unsupported. Public circuit/DEM properties return independent copies. Exact
+instruction snapshots preserve full floating-point arguments, tags and repeats
+on Linux and Windows; `schema_version` is now `decoder-view-v2`. Fingerprints
+include full argument precision, so earlier v1 fingerprints must be regenerated.
 
 `project_detection_events`, `project_observable_flips`, and
 `project_raw_measurements` slice already sampled global batches. `events_from_raw`
@@ -487,3 +490,89 @@ snapshots, covering ideal/noisy circuits and semantic metadata. Use
 `view.assert_source(compiled)` or pass the recorded fingerprint to projection
 methods when exchanging batches. Bare NumPy arrays carry no source identity;
 matching widths alone cannot detect a batch from a different experiment.
+
+
+## Ordinary memory decoding demonstration (M6-C)
+
+With `.[dev]` installed (PyMatching 2.3.1 and Matplotlib), run:
+
+```bash
+python examples/memory_offline_decoding.py --distance 5 --rounds 5 --basis X --p 0.003 --shots 20000 --seed 7
+python examples/memory_offline_decoding.py --two-patch --shots 1000 --seed 8
+python examples/memory_offline_decoding.py --suite --shots 20000 --p 0.003 --seed 20261108 --output-dir implementation_files/e2etest
+```
+
+`R` counts **all** syndrome rounds: one in `LogicalInit` and `R-1` in
+`SyndromeExtraction`. Distance and round count are independent. The fixed suite
+runs X/Z memory at d=3/5, R=d, and concurrent independent X/Z patches at d=3.
+It writes aggregate JSON/CSV and PNG/SVG figures when an output directory is
+specified. Each experiment samples exactly once; all decoding strategies reuse
+that raw batch. The figures show 95% Wilson intervals, with no threshold claim.
+Full-suite verification results and figures from this task are in
+[`implementation_files/e2etest`](implementation_files/e2etest).
+
+The importable source example exposes `run_memory`, `build_memory` and
+`analyze_memory`. `run_memory(noise_model=your_noise, shots=..., seed=...)` accepts
+an explicit `NoiseModel` instead of `p`; custom models report `p=None` and their
+actual rules. Its result retains the compiled ideal/noisy circuits and metadata,
+canonical undecomposed global DEM, immutable raw records, events, true flips,
+predictions, failure masks and sampling/decoding times. `analyze_memory` accepts
+an already sampled batch and does no sampling. These functions belong to the
+example, not the installed converter's API.
+
+A separate consumer needs only public package APIs. For example, after compiling
+the two-patch `program` above with your `compiler`:
+
+```python
+from logical_to_stim_converter import DEMOptions, observable_local_views
+
+compiled = result  # CircuitCompiler.compile(...) from the two-patch example
+raw = compiled.noisy_circuit.compile_sampler(seed=7).sample(shots=1000)
+events, actual_flips = compiled.noisy_circuit.compile_m2d_converter().convert(
+    measurements=raw, separate_observables=True)
+canonical_dem = compiled.noisy_circuit.detector_error_model()
+options = DEMOptions(decompose_errors=True)
+full = compiled.make_decoder_view(dem_options=options)
+local = observable_local_views(compiled, dem_options=options)[1]
+full_events = full.project_detection_events(events)
+local_events = local.project_detection_events(
+    events, source_fingerprint=full.source_fingerprint)
+full_dem = full.detector_error_model
+local_dem = local.detector_error_model
+local_truth = local.project_observable_flips(actual_flips)
+assert local.observable_map.global_ids == (1,)  # local output column 0
+assert (local.events_from_raw(raw) == local_events).all()
+```
+
+Supply each DEM and its event matrix to an external decoder; its prediction
+columns must follow that view's `observable_map`. The runnable demo validates
+models with `make_matching` before calling `decode_batch`. For predictions in
+local order, `failures = predicted_flips ^ local_truth`, and
+`logical_errors = failures.any(axis=1).sum()`. Divide by the number of shots for
+LER. For a multi-observable view this counts shots with **any** wrong output;
+per-observable rates use the corresponding failure column. The mixed-patch
+figure compares the same observable scope across strategies. Logical names
+intentionally sort differently from physical patch IDs to exercise remapping.
+
+Observable flip labels are reference-relative errors, not raw logical outcomes.
+Independently, the final raw readout parity XOR the full declared affine frame
+correction gives the interpreted logical bit; XOR `ObservableInfo.expected_value`
+to obtain the Stim flip label. A noiseless deterministic -1 input therefore has
+bit 1 and flip label 0. Tests cover both signs and physical/virtual logical Paulis,
+random preparation gauges, raw detector reconstruction, and known injected faults.
+
+Only derived decoder views request Stim graphlike decomposition. The canonical
+DEM remains unchanged, including hyperedges and correlated `^` mechanisms. The
+adapter rejects any component with more than two detectors before PyMatching can
+silently ignore it, and reports Stim decomposition failures explicitly.
+PyMatching's two-pass correlated MWPM (`enable_correlations=True` for construction
+and decoding) is a heuristic approximation to maximum-likelihood decoding; `^`
+components are parts of one correlated mechanism. No fault is deleted to make a
+model graphlike. Uniform circuit-level depolarizing memory noise is tested.
+
+Fixed seeds reproduce results for the same circuit, Stim version, machine and
+sampling call structure; Stim does not promise identical samples across versions,
+SIMD architectures or different batch sizes. Offline decoding of the stored batch
+is tested to agree when split into consecutive chunks. Raw records are retained
+in canonical order. Knill/Bell noisy recovery and conditional decoding remain
+M6-D work; `knill_bench` remains an independent future consumer.

@@ -26,6 +26,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pymatching==2.3.1",
+  "matplotlib>=3.8",
   "pytest>=8",
   "ruff>=0.9",
   "build>=1.2",

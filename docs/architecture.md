@@ -2,6 +2,7 @@
 
 **2026-11-08:** Rotated-surface memory, M3 H/CNOT/Pauli, M5 Bell/Knill
 teleportation, and M6-A/B global detector/provenance and offline-view contracts are implemented.
+M6-C demonstrates external ordinary-memory MWPM without a runtime decoder.
 See [repository status](../STATUS.md).
 
 ## Implemented pipeline
@@ -355,8 +356,12 @@ The view validates global indices, record keys/parities, coordinates, physical
 support and source annotation agreement against public artifact metadata. A SHA256
 content fingerprint covers the ideal and physical circuits, Stim version, schema
 version and relevant metadata, including semantic operation/relocation history.
-No per-shot state is retained. Source/derived circuit and DEM text are immutable
-snapshots; properties materialize copies. Input arrays can optionally carry a
+No per-shot state is retained. Source/derived circuits and DEMs use immutable exact instruction
+snapshots; properties materialize copies through public Stim append APIs. Text
+roundtrips are avoided: Stim 1.15 circuit text rounds arguments, and its Windows
+DEM printer can round double probabilities. Schema v2 fingerprints include exact
+circuit arguments; regenerate v1 fingerprints. Tags, targets, shifts, repeat
+structure and correlated separators survive copying. Input arrays can optionally carry a
 separately stored fingerprint; their width alone cannot prove provenance.
 
 `DetectorInfo.basis` records the actual physical check basis at its anchor module,
@@ -422,3 +427,26 @@ semantic ancilla/check identity, basis and detector history. Hex
 5de58f2f80791054411ad3c0885a4fe3671ed56a separates correction-to-measurement maps
 from static sampling. These informed the boundary, not runtime imports or copied
 integration code. Stim/stimflow pins are unchanged.
+
+
+## External ordinary-memory decoding example (M6-C)
+
+`examples/memory_offline_decoding.py` is an external consumer of public compiler,
+view and metadata APIs. It samples one full raw batch per experiment, uses Stim's
+m2d conversion for reference-relative event/observable labels, and compares full,
+observable-local and strict patch views without resampling. Concurrent mixed X/Z
+patches have nontrivial global/local observable remapping. The package owns no
+PyMatching types, Monte Carlo framework, LER aggregator or plotting dependency.
+
+The example retains the canonical undecomposed global DEM. Derived views request
+Stim decomposition, and an adapter rejects remaining hyperedges before PyMatching
+could ignore them. Two-pass correlated MWPM uses retained ^ correlations
+heuristically; it does not promise exact maximum-likelihood decoding. Logical
+failure is predicted XOR actual reference-relative observable flip. Raw readout
+parity, full affine interpretation and intended eigenvalue are independently
+checked, including -1 and virtual/physical Pauli cases. Results are scoped per
+view, with an any-observable shot count and separate per-observable counts.
+
+PyMatching and Matplotlib belong to the development extra/example only. JSON/CSV
+summaries and PNG/SVG figures are small demonstration outputs, not a persistent
+sample format. Conditional preparation/Bell/Knill recovery stays deferred.

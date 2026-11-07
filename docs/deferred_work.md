@@ -7,7 +7,9 @@ physics and noise. Noisy hypotheses can be propagated without asserting strict
 noiseless final-sector equations; the strict proof remains separately available.
 Offline decoder views now re-extract exact detector/observable marginals from the
 full physical circuit, preserving fault effects across excluded annotations. Public
-GF(2) record maps support software frame updates. These remaining requirements
+GF(2) record maps support software frame updates. M6-C demonstrates ordinary-memory
+noisy MWPM/LER as an external consumer of one shared raw batch; it adds no runtime
+decoder framework. These remaining requirements
 are future work; no GitHub issue creation is claimed.
 
 - State-preparation decoding: infer physical sector corrections from noisy
@@ -22,7 +24,9 @@ are future work; no GitHub issue creation is claimed.
   M6-B physical marginals preserve all retained inter-stage fault effects; they
   do not establish independently decoded or conditional stage models.
 - Noisy preparation-sector estimation, automatic physical-correction-to-record
-  maps, and decoder-dependent logical error-rate benchmarking. The test-only final-sector PyMatching helper is inadequate here.
+  maps, and Knill/conditional decoder-dependent logical error-rate benchmarking.
+  The test-only final-sector PyMatching helper is inadequate here; the ordinary
+  memory M6-C example does not resolve noisy preparation sectors.
 - Adaptive SE, postselection, retries, physical block reuse, and scheduling
   optimization. Current Knill circuits are fixed single-round Clifford programs.
 

@@ -78,8 +78,50 @@ class DecoderInputs:
     records: np.ndarray
 
 
+def _freeze_circuit(circuit):
+    """Snapshot exact arguments/targets; Stim text is not a lossless float format."""
+    return tuple(
+        ("REPEAT", inst.repeat_count, _freeze_circuit(inst.body_copy()), inst.tag)
+        if isinstance(inst, stim.CircuitRepeatBlock)
+        else (inst.name, tuple(inst.gate_args_copy()), tuple(inst.targets_copy()), inst.tag)
+        for inst in circuit
+    )
+
+
+def _thaw_circuit(snapshot):
+    circuit = stim.Circuit()
+    for name, args, targets, tag in snapshot:
+        if name == "REPEAT":
+            circuit.append(stim.CircuitRepeatBlock(args, _thaw_circuit(targets), tag=tag))
+        else:
+            circuit.append(name, targets, args, tag=tag)
+    return circuit
+
+
+def _freeze_dem(model):
+    """Keep exact double probabilities on Windows as well as Linux."""
+    return tuple(
+        ("repeat", inst.repeat_count, _freeze_dem(inst.body_copy()))
+        if isinstance(inst, stim.DemRepeatBlock)
+        else (inst.type, tuple(inst.args_copy()), tuple(inst.targets_copy()), inst.tag)
+        for inst in model
+    )
+
+
+def _thaw_dem(snapshot):
+    model = stim.DetectorErrorModel()
+    for instruction in snapshot:
+        if instruction[0] == "repeat":
+            _, count, body = instruction
+            model.append(stim.DemRepeatBlock(count, _thaw_dem(body)))
+        else:
+            name, args, targets, tag = instruction
+            model.append(name, args, targets, tag=tag)
+    return model
+
+
 def source_fingerprint(compiled):
-    """Content identity (schema v1) covering both physical circuits and public metadata."""
+    """Content identity (schema v2) covering both physical circuits and public metadata."""
     metadata = {
         name: [asdict(v) for v in getattr(compiled, name)]
         for name in (
@@ -102,12 +144,12 @@ def source_fingerprint(compiled):
     text = json.dumps(metadata, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(
         (
-            "decoder-view-v1\n"
+            "decoder-view-v2\n"
             + stim.__version__
             + "\n"
-            + str(compiled.ideal_circuit)
+            + repr(_freeze_circuit(compiled.ideal_circuit))
             + "\n"
-            + str(compiled.circuit)
+            + repr(_freeze_circuit(compiled.circuit))
             + "\n"
             + text
         ).encode()
@@ -268,26 +310,26 @@ class DecoderView:
     dem_options: DEMOptions
     detector_record_map: GF2Map
     observable_record_map: GF2Map
-    _source_text: str = field(repr=False)
-    _circuit_text: str = field(repr=False)
-    _dem_text: str = field(repr=False)
+    _source_instructions: tuple = field(repr=False)
+    _circuit_instructions: tuple = field(repr=False)
+    _dem_instructions: tuple = field(repr=False)
     _reference_bytes: bytes = field(repr=False)
 
     @property
     def schema_version(self):
-        return "decoder-view-v1"
+        return "decoder-view-v2"
 
     @property
     def source_circuit(self):
-        return stim.Circuit(self._source_text)
+        return _thaw_circuit(self._source_instructions)
 
     @property
     def circuit(self):
-        return stim.Circuit(self._circuit_text)
+        return _thaw_circuit(self._circuit_instructions)
 
     @property
     def detector_error_model(self):
-        return stim.DetectorErrorModel(self._dem_text)
+        return _thaw_dem(self._dem_instructions)
 
     @property
     def reference_sample(self):
@@ -455,9 +497,9 @@ def make_decoder_view(
         dem_options,
         GF2Map(source.num_measurements, tuple(d.measurement_indices for d in detectors)),
         GF2Map(source.num_measurements, tuple(o.measurement_indices for o in observables)),
-        str(source),
-        str(selected),
-        str(dem),
+        _freeze_circuit(source),
+        _freeze_circuit(selected),
+        _freeze_dem(dem),
         source.reference_sample().tobytes(),
     )
 

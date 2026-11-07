@@ -511,3 +511,64 @@ def test_cross_stage_boundary_policy_is_explicit_and_auditable(source):
     assert view.audit.cross_region_policy == "omit"
     assert not set(expected) & set(view.detector_map.global_ids)
     assert physical_instructions(view.circuit) == physical_instructions(source.circuit)
+
+
+def test_view_preserves_exact_probabilities_and_fingerprints(monkeypatch):
+    # Stim 1.15 circuit text rounds to six significant digits; the Windows DEM
+    # printer uses only 16. Neither is a lossless snapshot of arbitrary doubles.
+    probability = 0.12345678901234566
+    assert float(format(probability, ".16g")) != probability
+    circuit = stim.Circuit("R 0")
+    circuit.append("X_ERROR", [0], probability, tag="fault]tag")
+    circuit.append("M", [0])
+    circuit.append("DETECTOR", [stim.target_rec(-1)], [0.12345678901234566])
+    circuit.append("OBSERVABLE_INCLUDE", [stim.target_rec(-1)], 0)
+    source = hand_artifact(circuit)
+    expected = circuit.detector_error_model()
+
+    def lossy_dem_text(model):
+        # This is the single-error model above, emulating the Windows precision.
+        return f"error({model[0].args_copy()[0]:.16g}) D0 L0"
+
+    monkeypatch.setattr(stim.DetectorErrorModel, "__str__", lossy_dem_text)
+    view = source.make_decoder_view()
+    assert view.source_circuit == source.circuit
+    assert physical_instructions(view.circuit) == physical_instructions(source.circuit)
+    assert view.detector_error_model == expected
+    assert view.detector_error_model[0].args_copy() == [probability]
+    assert view.detector_error_model[0].tag == "fault]tag"
+    assert view.schema_version == "decoder-view-v2"
+    other = circuit[:1]
+    other.append("X_ERROR", [0], probability + 1e-10, tag="fault]tag")
+    other += circuit[2:]
+    assert str(other) == str(circuit)  # Text would incorrectly identify these sources.
+    with pytest.raises(SourceMismatchError):
+        view.assert_source(hand_artifact(other))
+
+
+def test_exact_snapshots_keep_repeat_shift_separator_and_tags():
+    from logical_to_stim_converter.decoding.views import (
+        _freeze_circuit,
+        _freeze_dem,
+        _thaw_circuit,
+        _thaw_dem,
+    )
+
+    circuit = stim.Circuit("R 0")
+    body = stim.Circuit("X_ERROR[fault](0.12345678901234566) 0\nM 0\nR 0")
+    circuit.append(stim.CircuitRepeatBlock(3, body, tag="repeated]fault"))
+    assert _thaw_circuit(_freeze_circuit(circuit)) == circuit
+    model = stim.DetectorErrorModel("""
+        repeat 3 {
+            error[fault](0.12345678901234566) D0 D1 ^ D2 L0
+            detector[coordinate](0.12345678901234566, 2) D0
+            shift_detectors(0, 0, 1) 3
+        }
+        logical_observable[output] L0
+    """)
+    snapshot = _freeze_dem(model)
+    copy = _thaw_dem(snapshot)
+    assert copy == model
+    assert copy[0].body_copy()[0].args_copy() == [0.12345678901234566]
+    copy.append("error", 0.5, [stim.target_relative_detector_id(0)])
+    assert _thaw_dem(snapshot) == model  # Returned models cannot mutate the snapshot.

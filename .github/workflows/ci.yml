@@ -35,3 +35,5 @@ jobs:
         run: python examples/knill_ec_single_round.py
       - name: Offline decoder views (one physical batch)
         run: python examples/offline_dem_views.py
+      - name: Memory offline MWPM demonstration
+        run: python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731

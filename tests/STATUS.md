@@ -1,5 +1,25 @@
 # STATUS — Tests
 
+## M6-C update — 2026-11-08
+
+Added 24 tests in test_memory_offline_decoding.py plus two exact snapshot/source
+identity regressions in test_decoder_views.py. All 368 prior tests are retained.
+The memory tests cover d=3/5 X/Z R=d noiseless gauges and repeated seeds; signed
+-1 inputs and physical/virtual Pauli interpretation; raw detector and observable
+truth reconstruction independent of the adapter; noisy exact XOR failure counts
+with independent d/R; one sampling call; immutable raw reuse; nontrivial mixed X/Z
+patch/global observable order; chunk-independent decoding; registration-order
+reproducibility; deterministic data/result fault signatures; hyperedge rejection
+and supported correlated graphlike models; custom noise and report generation.
+
+No stochastic LER target is asserted. Bounded integration tests use 64–512 shots
+per batch; the separate requested figure uses 20,000 shots for each of five cases.
+The precision tests emulate Windows DEM formatting, preserve tagged repeats,
+shifts and ^ components, and catch source-fingerprint collisions caused by circuit
+text rounding. Full-precision equality assertions remain unchanged. PyMatching
+2.3.1 and Matplotlib are dev/example dependencies, never runtime decoder imports.
+Root STATUS records final full pytest/lint/build/examples and platform evidence.
+
 ## M6-B update — 2026-11-08
 
 Added 105 tests; all 263 M1–M6-A tests remain unchanged. test_decoder_views checks
