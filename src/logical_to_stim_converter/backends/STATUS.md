@@ -1,5 +1,26 @@
 # STATUS — Backends
 
+## M3 update — 2026-11-07
+
+M3: surface_code.py now verifies transversal H, CNOT, and physical X/Y/Z.
+H is a physical data-H layer plus a binary orientation change; the clockwise
+code template is metadata, with fixed physical sites and no implicit SWAP. The
+next SE flips bases/CX directions at the same ancillas and physical edge layers.
+CNOT uses canonical-coordinate pairing in each current frame, with all four
+orientation pairs supported at equal distance. Stim conjugation supplies complete
+signed check/logical flows; ChunkReflow restores the canonical check basis and
+proves the intended logical action modulo checks. Syndrome-dependent H representative
+corrections are exposed as symbolic check products. Different distances, invalid
+orientations, unsupported local geometry, and overlapping operands are rejected.
+Physical Pauli Y combines X/Z with Y on the intersection, up to global phase.
+
+Evidence: the extended 173-test suite, Ruff, and both examples; exact final
+commands/results are in root STATUS. Dependencies remain pinned to Stim 1.15.0
+and stimflow commit ffe0d043598ed5df0851a3e6b4920359a23fafbd. External
+source trees are unchanged.
+
+## Prior memory implementation record
+
 **2026-11-07: RotatedSurfaceCodeBackend memory path implemented and verified.**
 
 `surface_code.py` constructs a verified stimflow StabilizerCode, signed transversal

@@ -69,7 +69,14 @@ class NoiseModel:
         if not isinstance(self.default, NoiseParameters):
             raise ValueError("default must be NoiseParameters")
         for operation, override in self.operation_overrides.items():
-            if operation not in ("LogicalInit", "SyndromeExtraction", "LogicalMeasure"):
+            if operation not in (
+                "LogicalInit",
+                "SyndromeExtraction",
+                "LogicalMeasure",
+                "TransversalH",
+                "TransversalCNOT",
+                "LogicalPauli",
+            ):
                 raise ValueError(f"Unknown memory operation {operation!r}")
             if not isinstance(override, NoiseOverride):
                 raise ValueError("Operation overrides must be NoiseOverride objects")

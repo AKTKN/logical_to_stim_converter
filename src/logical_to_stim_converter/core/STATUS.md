@@ -1,5 +1,25 @@
 # STATUS — Core
 
+## M3 update — 2026-11-07
+
+M3: code_frame.py adds fixed-site coordinate frames and signed Stim Pauli
+conjugation. OperationContext and tuple-based ModuleFragment identities support
+ordered multi-block operands, separate physical target/interface support, code
+orientations, actions, and provenance; scalar memory accessors/build remain.
+CompilerContext stages updates atomically, tracks affine PauliFrame/ParityExpression
+values and check-sector keys, validates logical determinism via Stim, and exports
+code-frame/readout metadata. DetectorInfo adds all supporting blocks; ObservableInfo
+adds canonical readout indices, frame correction, and expected ideal value.
+Logical/physical IDs stay separate. Teleportation/relocation/decoder corrections
+remain deferred.
+
+Evidence: the extended 173-test suite, Ruff, and both examples; exact final
+commands/results are in root STATUS. Dependencies remain pinned to Stim 1.15.0
+and stimflow commit ffe0d043598ed5df0851a3e6b4920359a23fafbd. External
+source trees are unchanged.
+
+## Prior memory implementation record
+
 **2026-11-07: memory foundation implemented and locally verified.**
 
 - `code_spec.py`: immutable binary CSS matrices, GF(2) rank checks, stabilizer/logical

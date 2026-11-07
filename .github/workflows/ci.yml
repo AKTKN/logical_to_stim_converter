@@ -1,4 +1,4 @@
-name: memory-core-checks
+name: logical-circuit-checks
 
 on:
   push:
@@ -29,3 +29,5 @@ jobs:
         run: python -m build
       - name: Two-patch example
         run: python examples/two_patch_memory.py
+      - name: Encoded Bell round trip
+        run: python examples/two_patch_bell_roundtrip.py

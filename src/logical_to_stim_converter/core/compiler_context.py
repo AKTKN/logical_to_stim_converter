@@ -1,9 +1,13 @@
 """Per-compilation lifecycle, symbolic records, frames, and physical-time metadata."""
 
+import copy
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from types import MappingProxyType
+
+import numpy as np
+import stim
 
 from .logical_block import GlobalSiteId, LogicalBlock
 
@@ -20,6 +24,39 @@ class MeasurementKey:
     local_id: str
     kind: str
     round_index: int | None = None
+
+
+@dataclass(frozen=True)
+class ParityExpression:
+    """Affine GF(2) value over symbolic measurement keys, never guessed shot values."""
+
+    terms: tuple[MeasurementKey, ...] = ()
+    constant: bool = False
+
+    def __post_init__(self):
+        if type(self.constant) not in (bool, int) or self.constant not in (0, 1):
+            raise ValueError("A parity constant must be a binary value")
+        parity = set()
+        for term in self.terms:
+            if not isinstance(term, MeasurementKey):
+                raise ValueError("Parity terms must be symbolic MeasurementKey values")
+            parity.symmetric_difference_update((term,))
+        object.__setattr__(self, "terms", tuple(sorted(parity, key=repr)))
+        object.__setattr__(self, "constant", bool(self.constant))
+
+    def __xor__(self, other):
+        if isinstance(other, (bool, int)):
+            other = ParityExpression(constant=other)
+        if not isinstance(other, ParityExpression):
+            return NotImplemented
+        return ParityExpression(self.terms + other.terms, self.constant ^ other.constant)
+
+    def evaluate(self, measurements, key_to_index):
+        samples = np.asarray(measurements, dtype=np.bool_)
+        result = np.full(samples.shape[:-1], self.constant, dtype=np.bool_)
+        for key in self.terms:
+            result ^= samples[..., key_to_index[key]]
+        return result
 
 
 @dataclass(frozen=True)
@@ -40,6 +77,15 @@ class DetectorInfo:
     measurement_keys: tuple[MeasurementKey, ...]
     block_id: str
     check_id: str
+    supporting_block_ids: tuple[str, ...] = ()
+
+    @property
+    def anchor_block_id(self):
+        return self.block_id
+
+    @property
+    def anchor_check_id(self):
+        return self.check_id
 
 
 @dataclass(frozen=True)
@@ -49,20 +95,48 @@ class ObservableInfo:
     block_id: str
     basis: str
     measurement_indices: tuple[int, ...]
+    readout_measurement_indices: tuple[int, ...] = ()
+    frame_correction: ParityExpression = ParityExpression()
+    expected_value: int = 0
 
 
 @dataclass(frozen=True)
 class PauliFrame:
-    """Memory preserves logical frame; preparation syndromes are retained, not corrected.
+    """Affine logical X/Z correction, with preserved preparation-sector provenance.
 
-    Empty logical terms denote no assumed logical Pauli correction. The first
-    conjugate-basis check outcomes label the random initial stabilizer sector.
-    No decoder-dependent physical or logical correction is inferred from them.
+    Corrections account for virtual Pauli updates and the syndrome dependence of
+    a code-frame representative change. They are not decoder predictions.
     """
 
     x_terms: tuple[MeasurementKey, ...] = ()
     z_terms: tuple[MeasurementKey, ...] = ()
     preparation_syndromes: tuple[MeasurementKey, ...] = ()
+    x_constant: bool = False
+    z_constant: bool = False
+
+    def __post_init__(self):
+        x, z = (
+            ParityExpression(self.x_terms, self.x_constant),
+            ParityExpression(self.z_terms, self.z_constant),
+        )
+        object.__setattr__(self, "x_terms", x.terms)
+        object.__setattr__(self, "z_terms", z.terms)
+        object.__setattr__(self, "x_constant", x.constant)
+        object.__setattr__(self, "z_constant", z.constant)
+        object.__setattr__(self, "preparation_syndromes", tuple(self.preparation_syndromes))
+
+    @property
+    def x(self):
+        return ParityExpression(self.x_terms, self.x_constant)
+
+    @property
+    def z(self):
+        return ParityExpression(self.z_terms, self.z_constant)
+
+    def with_parities(self, x, z):
+        return replace(
+            self, x_terms=x.terms, z_terms=z.terms, x_constant=x.constant, z_constant=z.constant
+        )
 
 
 @dataclass(frozen=True)
@@ -113,6 +187,15 @@ class CompilerContext:
             logical: i for i, logical in enumerate(sorted(self.logical_to_block))
         }
         self.frames = {logical: PauliFrame() for logical in self.logical_to_block}
+        self.orientations = dict.fromkeys(self.logical_to_block, 0)
+        self.syndromes: dict[tuple[str, str], ParityExpression] = {}
+        self.round_counts: dict[tuple[str, str], int] = {}
+        self.measurement_bases = {}
+        self.expected_outputs = {}
+        self.readout_frames = {}
+        self.readout_orientations = {}
+        self.logical_state = stim.TableauSimulator()
+        self.logical_state.set_num_qubits(len(self.logical_to_block))
         self.measurements: tuple[MeasurementInfo, ...] = ()
         self.detectors: tuple[DetectorInfo, ...] = ()
         self.layers: tuple[TimeLayer, ...] = ()
@@ -139,3 +222,121 @@ class CompilerContext:
                 self.status[block.block_id] = BlockStatus.MEASURED
         else:
             raise ValueError(f"Unsupported memory operation {operation_type!r}")
+
+    def copy(self):
+        result = copy.copy(self)
+        for name, value in vars(self).items():
+            if isinstance(value, dict):
+                setattr(result, name, dict(value))
+        result.logical_state = self.logical_state.copy()
+        return result
+
+    def propagate_frames(self, action, logical_ids, corrections=None):
+        if action == "H":
+            logical = logical_ids[0]
+            old = self.frames[logical]
+            x_extra, z_extra = corrections or (ParityExpression(), ParityExpression())
+            self.frames[logical] = old.with_parities(old.z ^ x_extra, old.x ^ z_extra)
+        elif action == "CX":
+            c, t = logical_ids
+            fc, ft = self.frames[c], self.frames[t]
+            self.frames[c] = fc.with_parities(fc.x, fc.z ^ ft.z)
+            self.frames[t] = ft.with_parities(ft.x ^ fc.x, ft.z)
+        else:
+            raise ValueError("Unknown Clifford frame action")
+
+    def advanced(self, operation, fragment, backend):
+        """Validate/build before returning a new atomic operation state."""
+        trial = self.copy()
+        logical_ids = fragment.logical_ids
+        blocks = [trial.block_for(q) for q in logical_ids]
+        kind = operation.operation_type
+        expected = BlockStatus.UNINITIALIZED if kind == "LogicalInit" else BlockStatus.ACTIVE
+        if any(trial.status[b.block_id] != expected for b in blocks):
+            raise ValueError(f"{kind} operands must be {expected.value}")
+        indices = [trial.observable_ids[q] for q in logical_ids]
+        if kind == "LogicalInit":
+            for logical, block, index in zip(logical_ids, blocks, indices, strict=True):
+                trial.status[block.block_id] = BlockStatus.ACTIVE
+                trial.prepared_basis[logical] = operation.basis
+                trial.logical_state.reset(index)
+                if operation.basis == "X":
+                    trial.logical_state.h(index)
+        elif kind == "TransversalH":
+            logical, block = logical_ids[0], blocks[0]
+            correction = backend.hadamard_corrections(block, logical, trial.orientations[logical])
+            expressions = {}
+            for axis in "XZ":
+                value = ParityExpression()
+                for check in correction[axis]:
+                    value ^= trial.syndromes[(block.block_id, check)]
+                expressions[axis] = value
+            trial.propagate_frames("H", logical_ids, (expressions["Z"], expressions["X"]))
+            trial.orientations[logical] ^= 1
+            trial.logical_state.h(indices[0])
+        elif kind == "TransversalCNOT":
+            chunk, reflow = fragment.components
+            source_values = {}
+            for logical, block, orientation in zip(
+                logical_ids, blocks, fragment.orientations_before, strict=True
+            ):
+                code = backend.stabilizer_code(block, logical, orientation)
+                check_at = {block.position(c.ancilla): c.check_id for c in block.layout.checks}
+                for tile in code.tiles:
+                    original = tile.to_pauli_map()
+                    flow = next(f for f in chunk.flows if f.start == original)
+                    source_values[flow.end] = trial.syndromes[
+                        (block.block_id, check_at[tile.measure_qubit])
+                    ]
+            for logical, block, orientation in zip(
+                logical_ids, blocks, fragment.orientations_after, strict=True
+            ):
+                code = backend.stabilizer_code(block, logical, orientation)
+                check_at = {block.position(c.ancilla): c.check_id for c in block.layout.checks}
+                for tile in code.tiles:
+                    expression = ParityExpression()
+                    for source in reflow.out2in[tile.to_pauli_map()]:
+                        expression ^= source_values[source]
+                    trial.syndromes[(block.block_id, check_at[tile.measure_qubit])] = expression
+            trial.propagate_frames("CX", logical_ids)
+            trial.logical_state.cx(*indices)
+        elif kind == "LogicalPauli":
+            for logical, index in zip(logical_ids, indices, strict=True):
+                getattr(trial.logical_state, operation.pauli.lower())(index)
+                if operation.mode == "frame":
+                    frame = trial.frames[logical]
+                    x = frame.x ^ (operation.pauli in ("X", "Y"))
+                    z = frame.z ^ (operation.pauli in ("Z", "Y"))
+                    trial.frames[logical] = frame.with_parities(x, z)
+        elif kind == "LogicalMeasure":
+            for logical, block, index in zip(logical_ids, blocks, indices, strict=True):
+                pauli = stim.PauliString(len(trial.observable_ids))
+                pauli[index] = operation.basis
+                expectation = trial.logical_state.peek_observable_expectation(pauli)
+                if expectation == 0:
+                    raise ValueError("Requested logical measurement is nondeterministic")
+                trial.expected_outputs[logical] = int(expectation == -1)
+                trial.measurement_bases[logical] = operation.basis
+                trial.readout_frames[logical] = trial.frames[logical]
+                trial.readout_orientations[logical] = trial.orientations[logical]
+                trial.status[block.block_id] = BlockStatus.MEASURED
+        elif kind != "SyndromeExtraction":
+            raise ValueError(f"Unsupported operation {kind}")
+        trial.record_syndromes(fragment)
+        return trial
+
+    def record_syndromes(self, fragment):
+        site_at = {position: site for site, position in self.site_positions.items()}
+        for chunk in fragment.chunks():
+            i2q = {i: q for q, i in chunk.q2i.items()}
+            for instruction in chunk.circuit:
+                if instruction.name not in ("M", "MX"):
+                    continue
+                for target in instruction.targets_copy():
+                    block_id, local = site_at[i2q[target.value]]
+                    if local not in self.blocks[block_id].layout.ancilla_ids:
+                        continue
+                    round_index = self.round_counts.get((block_id, local), 0)
+                    key = MeasurementKey(block_id, local, "syndrome", round_index)
+                    self.round_counts[(block_id, local)] = round_index + 1
+                    self.syndromes[(block_id, local)] = ParityExpression((key,))

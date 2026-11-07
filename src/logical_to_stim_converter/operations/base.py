@@ -1,11 +1,12 @@
 """Common interface for code-independent logical operation objects."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 from ..core.code_backend import CodeBackend
 from ..core.logical_block import LogicalBlock
-from ..core.module_fragment import ModuleFragment
+from ..core.module_fragment import ModuleFragment, OperationContext
 from ..noise.model import NoiseOverride
 
 
@@ -35,8 +36,49 @@ class OperationModule(ABC):
     def operation_type(self) -> str:
         return type(self).__name__
 
-    @abstractmethod
+    @property
+    def coupled(self) -> bool:
+        return False
+
     def build(
-        self, backend: CodeBackend, block: LogicalBlock, logical_id: str, module_id: str
+        self,
+        backend: CodeBackend,
+        operands: Mapping[str, LogicalBlock] | LogicalBlock,
+        context: OperationContext | str,
+        module_id: str | None = None,
     ) -> ModuleFragment:
-        """Build one target's ideal physical fragment; do not insert noise."""
+        """Ordered operand API, plus the original single-block build compatibility form.
+
+        The compiler desugars independent multi-target operations into concurrent
+        single-block fragments; coupled operations receive all ordered operands.
+        """
+        if isinstance(operands, LogicalBlock):
+            operands = {context: operands}
+            context = OperationContext(module_id, {context: 0})
+        if not isinstance(context, OperationContext):
+            raise ValueError("build requires an OperationContext")
+        if (self.coupled and tuple(operands) != self.targets) or (
+            not self.coupled and (len(operands) != 1 or next(iter(operands)) not in self.targets)
+        ):
+            raise ValueError("Incorrect ordered operands for operation")
+        positions = [
+            block.position(q) for block in operands.values() for q in block.layout.qubit_ids
+        ]
+        if len(set(positions)) != len(positions):
+            raise ValueError("Operation operands overlap physical sites")
+        fragment = self._build(backend, operands, context)
+        if (
+            fragment.logical_ids != tuple(operands)
+            or fragment.block_ids != tuple(block.block_id for block in operands.values())
+            or fragment.module_id != context.module_id
+            or not fragment.interface_positions <= set(positions)
+        ):
+            raise ValueError("Fragment identity or physical scope disagrees with its operands")
+        fragment.verify()
+        return fragment
+
+    @abstractmethod
+    def _build(
+        self, backend: CodeBackend, operands: Mapping[str, LogicalBlock], context: OperationContext
+    ) -> ModuleFragment:
+        """Build verified ideal physical components without noise or state mutation."""

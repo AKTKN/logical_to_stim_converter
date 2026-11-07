@@ -19,4 +19,6 @@ Mathematical code description, physical patches, backend interface, compiler sta
 - `compiler_context.py` — **CompilerContext**: Per-compilation registries for block availability, logical locations, measurement keys, time layers and symbolic frame rules.
 - `module_fragment.py` — **ModuleFragment**: Wrapper around stimflow components plus semantic input/output, block transition, frame and measurement metadata.
 
-The memory-core models and contracts are implemented; consult STATUS for validations. No general Clifford/teleportation frame or relocation behavior is implemented. Update this folder's `STATUS.md` and root status after changes.
+The memory-core models and contracts are implemented; consult STATUS for validations. H/CNOT/Pauli affine frames are implemented; teleportation, adaptive frames, and relocation remain deferred. Update this folder's `STATUS.md` and root status after changes.
+
+M3: `code_frame.py` maps canonical data coordinates to fixed physical sites and uses signed Stim conjugation. Keep current code orientation in CompilerContext, never mutate physical block identities. ModuleFragment has one ordered tuple representation of its logical/physical operands.

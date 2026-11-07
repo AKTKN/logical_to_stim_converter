@@ -26,7 +26,11 @@ def moments(circuit: stim.Circuit) -> list[list[stim.CircuitInstruction]]:
 
 
 def parallel_chunk(
-    parts: Iterable[tuple[sf.Chunk, ModuleFragment]], interface: sf.ChunkInterface
+    parts: Iterable[tuple[sf.Chunk, ModuleFragment]],
+    interface: sf.ChunkInterface,
+    *,
+    extra_flows=(),
+    managed_ports=frozenset(),
 ) -> sf.Chunk:
     parts = list(parts)
     occupied: set[complex] = set()
@@ -35,8 +39,16 @@ def parallel_chunk(
             raise ValueError("Parallel chunks overlap physical sites")
         occupied.update(chunk.q2i)
     # Pass through only untouched blocks, never a missing flow on an operated block.
-    passive = [p for p in interface.ports | interface.discards if not occupied & p.keys()]
-    coords = occupied | {q for p in passive for q in p.keys()}
+    passive = [
+        p
+        for p in interface.ports | interface.discards
+        if not occupied & p.keys() and p not in managed_ports
+    ]
+    coords = (
+        occupied
+        | {q for p in passive for q in p.keys()}
+        | {q for flow in extra_flows for p in (flow.start, flow.end) for q in p.keys()}
+    )
     q2i = {q: i for i, q in enumerate(sf.sorted_complex(coords))}
     layers = [moments(c.circuit) for c, _ in parts]
     measurement_maps: list[list[int]] = [[] for _ in parts]
@@ -51,7 +63,19 @@ def parallel_chunk(
             for instruction in layers[part_index][layer_index]:
                 if instruction.name == "QUBIT_COORDS":
                     continue
-                if instruction.name not in ("R", "RX", "RY", "M", "MX", "MY", "CX"):
+                if instruction.name not in (
+                    "R",
+                    "RX",
+                    "RY",
+                    "M",
+                    "MX",
+                    "MY",
+                    "CX",
+                    "H",
+                    "X",
+                    "Y",
+                    "Z",
+                ):
                     raise ValueError(f"Unexpected memory-chunk instruction {instruction.name}")
                 targets = [q2i[i2q[t.value]] for t in instruction.targets_copy()]
                 if len(set(targets)) != len(targets) or used & set(targets):
@@ -67,7 +91,7 @@ def parallel_chunk(
                 )
         if layer_index < max(map(len, layers)) - 1:
             out.append("TICK")
-    flows = []
+    flows = list(extra_flows)
     for (chunk, _), mapping in zip(parts, measurement_maps, strict=True):
         for flow in chunk.flows:
             flows.append(

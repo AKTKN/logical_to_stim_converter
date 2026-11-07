@@ -15,13 +15,18 @@ class LogicalMeasure(OperationModule):
         super().__post_init__()
         validate_basis(self.basis)
 
-    def build(self, backend, block, logical_id, module_id) -> ModuleFragment:
+    def _build(self, backend, operands, context) -> ModuleFragment:
+        logical_id, block = next(iter(operands.items()))
+        module_id = context.module_id
+        orientation = context.orientations.get(logical_id, 0)
         result = ModuleFragment(
             module_id,
             self.operation_type,
             logical_id,
             block.block_id,
-            (backend.measurement(block, logical_id, self.basis),),
+            (backend.measurement(block, logical_id, self.basis, orientation),),
+            orientations_before=(orientation,),
+            orientations_after=(orientation,),
             noise=self.noise,
             frame_transition="terminate",
         )

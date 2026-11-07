@@ -20,7 +20,10 @@ class LogicalInit(OperationModule):
         validate_basis(self.basis)
         positive_int(self.rounds, "rounds")
 
-    def build(self, backend, block, logical_id, module_id) -> ModuleFragment:
+    def _build(self, backend, operands, context) -> ModuleFragment:
+        logical_id, block = next(iter(operands.items()))
+        module_id = context.module_id
+        orientation = context.orientations.get(logical_id, 0)
         result = ModuleFragment(
             module_id,
             self.operation_type,
@@ -28,8 +31,13 @@ class LogicalInit(OperationModule):
             block.block_id,
             (
                 backend.initialization(block, logical_id, self.basis),
-                sf.ChunkLoop([backend.syndrome_round(block, logical_id)], repetitions=self.rounds),
+                sf.ChunkLoop(
+                    [backend.syndrome_round(block, logical_id, orientation)],
+                    repetitions=self.rounds,
+                ),
             ),
+            orientations_before=(orientation,),
+            orientations_after=(orientation,),
             noise=self.noise,
             frame_transition="initialize",
         )

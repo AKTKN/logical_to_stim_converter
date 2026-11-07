@@ -1,5 +1,27 @@
 # STATUS — Compiler
 
+## M3 update — 2026-11-07
+
+M3: _logical.py retains a complete known logical-state generator basis
+across interacting blocks, using public Stim conjugation and stimflow reflows.
+CNOT check correlations are preserved. Local readout is rebased only when its
+intended logical outcome is deterministic; final affine output gets an independent
+signed Stim flow proof. _parallel.py supports H/X/Y/Z and reflow steps without
+extra duration. _metadata.py exports semantic check anchors, all contributing
+blocks, validated causal provenance, affine observable correction, and raw readout
+indices. CompiledCircuit.interpreted_measurements(raw) includes symbolic terms
+and constants; code orientations and physical indices are exported independently.
+Component-time logical basis tracking handles readout parallel to another block's H.
+No general scheduler, random individual Bell readout, decoder, or teleportation
+is introduced.
+
+Evidence: the extended 173-test suite, Ruff, and both examples; exact final
+commands/results are in root STATUS. Dependencies remain pinned to Stim 1.15.0
+and stimflow commit ffe0d043598ed5df0851a3e6b4920359a23fafbd. External
+source trees are unchanged.
+
+## Prior memory implementation record
+
 **2026-11-07: minimal synchronous memory compiler/artifact implemented.**
 
 - `circuit_compiler.py`: explicit parallel operation layers, fresh context per

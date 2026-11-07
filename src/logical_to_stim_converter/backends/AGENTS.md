@@ -15,4 +15,4 @@ Code-family-specific physical implementation adapters.
 - `surface_code.py` — **RotatedSurfaceCodeBackend**: Verified ideal memory chunks using stimflow and the pinned surface-sim geometry/schedule convention.
 - `color_code.py` — planned **ColorCodeBackend**: Future backend for color codes; deliberately not an initial implementation milestone.
 
-RotatedSurfaceCodeBackend implements reset/SE/destructive-readout memory chunks. The color-code module and transversal/Knill backend support remain unimplemented. Update this folder's `STATUS.md` and root status after changes.
+RotatedSurfaceCodeBackend implements memory and H/CNOT/Pauli chunks with code orientation. Color-code and Knill backend support remain unimplemented. Update this folder's `STATUS.md` and root status after changes.

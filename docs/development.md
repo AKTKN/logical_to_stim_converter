@@ -15,6 +15,7 @@ python -m pytest
 python -m ruff check src tests
 python -m build
 python examples/two_patch_memory.py
+python examples/two_patch_bell_roundtrip.py
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -39,7 +40,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and the example. Local verification results/platforms are recorded in STATUS;
+and both memory/Bell examples. Local verification results/platforms are recorded in STATUS;
 CI configuration alone is not evidence that those remote jobs ran.
 
 `surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
@@ -71,3 +72,18 @@ metadata regression, run the applicable checks, and update affected status files
 No decoder, parser, generic Clifford operation, or scheduling optimization should
 be added as an incidental extension. Commit and push at the maintainer's direction
 after review and verification. No project license has been chosen.
+
+
+## M3 regression requirements
+
+Keep the existing memory tests. Add backend-level signed H/CNOT/Pauli proofs at
+both distances and all four CNOT orientation pairs, corruption tests, independent
+logical truth tables, affine frame tests, cross-block parity and exact noise tests.
+The Bell example must independently inspect physical intermediate XX/ZZ and local
+expectations, then reconstruct raw final outputs. A gate followed by its own
+inverse alone is insufficient evidence of the intended Clifford action.
+
+The pinned dependencies are unchanged for M3. ChunkReflow and Stim signed Pauli
+conjugation/tableau APIs are used directly. No local external source import is
+required. Commit/push only at explicit maintainer direction; the user authorized
+both after this milestone's implementation and verification.

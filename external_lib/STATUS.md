@@ -61,3 +61,16 @@ Update this file whenever a local library is cloned/updated or integration behav
 - CI installs the pinned VCS dependency directly; no external_lib path is required.
   The earlier untested source-install notes above describe the acquisition stage.
   Hex/lomatching remain untouched references; all four source working trees stay clean.
+
+
+## M3 compatibility verification — 2026-11-07
+
+No revision changes: Stim wheel 1.15.0 and stimflow at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd` support the M3 public APIs used here.
+Verified signed PauliString.after/before conjugation, logical TableauSimulator
+state checks, ChunkReflow.from_auto_rewrite and stable-generator transitions,
+ChunkInterface ports, ChunkCompiler metadata callbacks, correlated generator
+composition, and physical gate noise. These are used through public adapters;
+no upstream source or private method is modified. New Bell tests prove actual
+physical intermediate and final state properties. Surface-sim remains a source
+geometry/schedule reference; Hex/lomatching remain unintegrated.

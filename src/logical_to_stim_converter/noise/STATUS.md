@@ -1,5 +1,24 @@
 # STATUS — Noise
 
+## M3 update — 2026-11-07
+
+M3: NoiseModel operation selectors accept TransversalH, TransversalCNOT,
+and LogicalPauli. The existing injector works with generalized physical-time
+provenance: one CNOT module owns both blocks but each physical pair receives one
+noise rule. H and physically executed Pauli gates use one-qubit Clifford noise.
+Virtual Paulis have no physical tick, idle exposure, or gate faults. Exact channel,
+probability, target, and layer counts pass for mixed concurrent operations;
+zero-noise equality and record-index preservation remain. A CNOT-only noise model
+produces correlated detector effects across the two blocks. No decoder-dependent
+noise or composite stage selector was added.
+
+Evidence: the extended 173-test suite, Ruff, and both examples; exact final
+commands/results are in root STATUS. Dependencies remain pinned to Stim 1.15.0
+and stimflow commit ffe0d043598ed5df0851a3e6b4920359a23fafbd. External
+source trees are unchanged.
+
+## Prior memory implementation record
+
 **2026-11-07: memory noise model/injector implemented and verified.**
 
 `model.py` implements immutable global NoiseParameters, partial NoiseOverride,

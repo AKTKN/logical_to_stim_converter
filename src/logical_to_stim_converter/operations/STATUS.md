@@ -1,5 +1,23 @@
 # STATUS — Operations
 
+## M3 update — 2026-11-07
+
+M3: TransversalH, TransversalCNOT(control,target), and LogicalPauli(X/Y/Z,
+physical/frame) are implemented. OperationModule.build accepts ordered operands
+and immutable OperationContext, retaining the original single-block build form.
+A CNOT is one two-block fragment; independent multi-target memory work remains
+concurrent single-block fragments for compatibility. Physical and frame actions,
+orientation changes, and noise provenance are explicit. Virtual Paulis emit no
+physical step. BellStatePrep/KnillEC classes remain unimplemented; the Bell example
+uses primitives directly, as required.
+
+Evidence: the extended 173-test suite, Ruff, and both examples; exact final
+commands/results are in root STATUS. Dependencies remain pinned to Stim 1.15.0
+and stimflow commit ffe0d043598ed5df0851a3e6b4920359a23fafbd. External
+source trees are unchanged.
+
+## Prior memory implementation record
+
 **2026-11-07: three memory primitives implemented and verified.**
 
 - `base.py`: abstract OperationModule with validated logical target IDs,

@@ -2,9 +2,57 @@
 
 **As of:** 2026-11-07  
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `MEMORY_CORE_IMPLEMENTED` (locally verified)
+**Overall state:** `M3_CLIFFORD_IMPLEMENTED` (locally verified)
 
-## Implemented and verified
+## M3 implemented and verified
+
+- Multi-block OperationContext/ModuleFragment interfaces, one shared ordered CNOT
+  fragment, scalar memory compatibility, atomic state updates, and overlap rejection.
+- Physical transversal H with a binary code frame, all four equal-distance CNOT
+  orientation combinations, and physical/virtual logical X/Y/Z.
+- Signed physical check/logical flows, verified CNOT check reflows, and joint
+  logical-state flow ports that preserve Bell correlations.
+- Affine symbolic frames, syndrome-dependent H representative changes, final
+  interpreted measurement bits, and signed proofs of observable parity/sign.
+- Cross-block detector anchors/support/provenance and H/CNOT/Pauli noise overrides,
+  with exact once-only gate/idle faults and zero-duration virtual operations.
+- `examples/two_patch_bell_roundtrip.py`: independently verified intermediate XX=ZZ=+1,
+  individual logical X/Z expectations zero, and final raw logical Z outputs (0,0).
+  Distance 3 with R=3: **34 qubits, 64 detectors, 2 observables, 30 layers**;
+  **16 detectors** use records from both blocks. Noisy DEM and seeded samples pass.
+
+### M3 verification (2026-11-07)
+
+Baseline local/remote commit at start: `d6a023c12ea223d7766da1600aa0fb0b91b8bf84`.
+Dependency pins are unchanged: Stim **1.15.0**, stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`. The source-of-truth memory suite
+continues to pass. Final checks in the existing Linux/WSL2 Python 3.12.7 environment:
+
+- `python -m pytest`: **173 passed in 144.89 s** (including all 79 memory regressions).
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- Both `examples/two_patch_memory.py` and `examples/two_patch_bell_roundtrip.py`: passed.
+- `python -m pip check`: no broken requirements.
+- Built-wheel import from an isolated target: Bell round trip, virtual frame
+  interpretation, and noisy DEM passed without importing this source checkout.
+- Archive inspection excludes local briefs, environments, and external source;
+  all four upstream source working trees remain clean.
+
+CI retains Ubuntu/Windows Python 3.11/3.12 and now runs both examples. At local
+verification time M3 remote jobs had not started; post-push results are separate.
+The package pins and dependency versions from the memory environment below remain.
+
+M3 tests include d=3/5 backend action proofs and corruption failures; all four
+CNOT orientation pairs; raw truth tables and Pauli signs; twelve deterministic
+random Clifford programs checked against a logical Stim oracle; affine frame and
+partial-readout timing; exact multi-block faults; required/corrupted reflows; Bell
+round trips at (d,R)=(3,1),(3,3),(5,1),(5,5), physical intermediate Bell stabilizers,
+and invalid detector/frame/readout regressions. The original 79 memory tests remain.
+
+The user explicitly authorized commit and push after implementation/verification.
+Local briefs, environments, artifacts, and external source clones remain excluded.
+
+## Memory-foundation implementation and prior verification
 
 - Immutable CSS CodeSpec with algebra/rank/logical-basis validation and odd-distance
   square rotated-surface factory; validated PhysicalLayout and stable LogicalBlock.
@@ -22,7 +70,7 @@
 - Runnable `examples/two_patch_memory.py`; installable source distribution/wheel;
   GitHub-independent pinned dependency installation; CI definition updated.
 
-## Verification evidence (2026-11-07)
+## Prior memory-core verification evidence (2026-11-07)
 
 Local virtual environment: Linux/WSL2 x86_64, Python 3.12.7, Stim 1.15.0,
 stimflow 1.17.dev0 at Stim commit
@@ -61,26 +109,34 @@ from these local verification results.
 | M0 | Install/build/import and development workflow verified locally |
 | M1 | CSS/layout/block models and memory backend contract implemented/verified |
 | M2 | Three primitives and concurrent memory composition implemented/verified |
-| M3 | Transversal CNOT/H and logical Paulis not implemented |
-| M4 | Memory noise and synchronous physical time verified; stages/composites deferred |
-| M5 | BellStatePrep/KnillEC, relocation and general frame rules not implemented |
+| M3 | H/CNOT/physical and virtual Paulis, affine frames, cross-block detectors, Bell round trip verified |
+| M4 | Memory/Clifford noise and synchronous timing verified; stages/composites deferred |
+| M5 | Dedicated BellStatePrep/KnillEC, relocation and teleportation/adaptive frames deferred |
 | M6 | Memory raw metadata implemented; decoder adapters/knill_bench integration deferred |
 | Deferred | Text parser/CLI, other code families, scheduling optimization |
 
-Current memory restrictions: one logical slot per block, same preparation/readout
-basis, every registered block initialized and measured once, explicit logical
-barriers, expanded output rounds (linear memory/circuit size). Waiting active
+Current restrictions: one logical slot per block, deterministic individual final
+X/Z readouts under the intended Clifford circuit, every registered block initialized
+and measured once, explicit logical barriers, expanded output rounds (linear memory/circuit size). Waiting active
 blocks use global idle defaults. First conjugate-basis syndromes label the random
 preparation sector; no decoder-dependent correction or canonical stabilizer-sector
-preparation is claimed. No general code-distance solver, Clifford/frame propagation,
-decoder algorithm, logical error-rate benchmark, or Knill implementation exists.
+preparation is claimed. No general code-distance solver, S/other logical Clifford
+gates, decoder algorithm, logical error-rate benchmark, adaptive physical operation,
+or Knill implementation exists.
 
 Surface-sim revision `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
 geometry/schedule reference only. Hex/lomatching remain unintegrated. A project
-license has not been selected. Next: review this local memory implementation,
-then separately scope transversal-operation and frame contracts.
+license has not been selected. Next: review M3, then separately scope teleportation,
+nondeterministic measurement contracts, and decoder-facing integration.
 
 ## Changelog
+
+- **2026-11-07** — Implemented the M3 brief locally, preserving the memory API and
+  tests. Added ordered multi-block operations, binary H code frames, affine frames,
+  verified check reflow/known-state flow composition, correlated detector provenance,
+  new noise selectors, Clifford/Bell physics tests, and the Bell example. Updated
+  architecture, development instructions, public API, CI, and affected ledgers.
+  Code and test evidence above; commit/push authorized by the user.
 
 - **2026-11-07** — Prepared the verified memory-core changes for commit and push
   following explicit maintainer authorization. Corrected the local implementation

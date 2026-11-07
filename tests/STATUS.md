@@ -1,5 +1,34 @@
 # STATUS — Tests
 
+## M3 update — 2026-11-07
+
+Final suite: **173 passed in 144.89 s**, including all 79 original memory tests.
+Ruff, source/wheel build, both examples, and an isolated built-wheel Bell/frame/DEM
+check passed. See root STATUS for commands and platform evidence.
+
+- `test_clifford_backend.py`: all four CNOT orientation pairs at d=3/5; independent
+  physical pair/support conventions; full check/logical flows; H-conjugated SE;
+  H²/CNOT²; physical X/Y/Z action; wrong direction/pair/missing gate/orientation,
+  required reflow, and corrupted generator-product failures.
+- `test_clifford_compiler.py`: all CNOT logical basis truth-table inputs at d=3/5
+  and every orientation pair, raw/affine readout signs, H then SE/H², virtual and
+  physical Paulis, affine measurement-key rules, independent logical-tableau oracle
+  comparisons for twelve random deterministic-output circuits, partial-readout/H
+  concurrency, ordered/shared fragment identity, atomic failure, overlap/inactive
+  rejection, and corrupted frame propagation caught by signed physical proof.
+- `test_bell_roundtrip.py`: (d,R)=(3,1),(3,3),(5,1),(5,5), ideal/noisy DEMs, physical
+  intermediate XX=ZZ=+1 and zero local X/Z expectation, raw final Z outcomes (0,0),
+  exact correlated detector parities/provenance, reproducible noisy samples,
+  CNOT-only correlated faults, and a syntactically valid corrupted record parity.
+- `test_clifford_noise.py`: exact layer/channel/probability/target counts for mixed
+  concurrent H/CNOT/Pauli operations, one shared CNOT provenance, once-only gate
+  noise, idle on both participants, virtual zero time/noise, and zero-noise equality.
+
+No decoder/LER, Knill, parser, or general Clifford/teleportation tests are claimed.
+The Ubuntu/Windows Python 3.11/3.12 CI matrix is preserved and runs both examples.
+
+## Prior memory test record
+
 **2026-11-07: 79 tests passed in the local Python 3.12.7 environment.**
 
 - `test_code_layout.py`: d=3/5 CSS ranks/commutation/logical pairing and immutability,
