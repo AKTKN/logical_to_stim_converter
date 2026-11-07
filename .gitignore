@@ -1,0 +1,51 @@
+# Python artifacts / caches
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+build/
+dist/
+site/
+
+# Local environments / settings
+.venv/
+venv/
+env/
+.conda/
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local measurements / results / logs
+output/
+outputs/
+results/
+runs/
+logs/
+*.log
+*.parquet
+*.h5
+*.hdf5
+*.prof
+*.pstats
+
+# Read-only local library reference clones; do not vendor accidentally.
+/external_lib/*
+!/external_lib/README.md
+!/external_lib/AGENTS.md
+!/external_lib/STATUS.md

@@ -1,0 +1,52 @@
+# AGENTS.md — Repository instructions for Codex and maintainers
+
+This file applies to the entire repository. Read the nearest nested `AGENTS.md` and `STATUS.md` before editing files in that directory.
+
+## Purpose and current reality
+
+Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the repository is a scaffold. No operation, compiler, noise engine, or decoding interface is implemented.** Do not claim functionality from names or docstrings.
+
+## Source-of-truth map
+
+- `README.md`: user-facing project overview and setup instructions.
+- `STATUS.md`: global milestones, actual implementation/verification status, and chronological changes.
+- `docs/architecture.md`: current design contracts, boundaries, invariants, and unresolved decisions.
+- `src/logical_to_stim_converter/core/`: `CodeSpec`, `PhysicalLayout`, `LogicalBlock`, `CodeBackend`, `CompilerContext`, `ModuleFragment`.
+- `.../operations/`: `OperationModule` abstract base, logical primitives, composite Bell/Knill operations.
+- `.../backends/`: code-family physical implementations and optional adapters to existing generators.
+- `.../noise/`: operation-aware policy; built on `stimflow` noise rules; avoids duplicate injection.
+- `.../compiler/`: module assembly, flow validation, circuit metadata, compiled artifact.
+- `.../decoding/`: decoder-facing formats only; no decoder algorithm in the initial scope.
+- `tests/`: scaffold smoke test initially; add physics, flow, and noise tests with implementations.
+- `external_lib/`: local **reference** copies. Not tracked by Git by default. Do not edit upstream source unless explicitly directed.
+
+## Mandatory architecture principles
+
+1. Separate logical identity, physical block identity, local qubit key, and Stim global qubit index. Teleportation changes the logical-to-physical location, not the identity of the logical qubit.
+2. Keep `CodeSpec` mathematical, independent of `PhysicalLayout`, hardware scheduling, and noise. Put code-specific physical circuits behind `CodeBackend`.
+3. Implement logical primitives as subclasses of `OperationModule`; use an adapter/wrapper to hold `stimflow.Chunk`/`ChunkLoop`/`ChunkReflow` and supplementary logical metadata. Prefer composition over reimplementing flow composition or subclassing unstable stimflow internals.
+4. Verify ideal stabilizer and logical flows first. Then insert noise according to composed physical time layers; an individual physical fault location must not receive noise twice because it appears inside a composite module.
+5. Do not wire a specific decoder into `KnillEC`, `LogicalMeasure`, or the physical backend. Preserve raw measurements and decoder-independent observables so local and joint decoding can use the same physical samples.
+6. Maintain measurement-record and observable IDs symbolically until global assembly; do not rely on brittle hard-coded `rec[-k]` offsets in module contracts.
+7. Parallel logical operations require a coherent global `TICK`/idle schedule. `stimflow.ChunkCompiler.append` alone should not be assumed to encode simultaneous operations.
+8. Check whether logical H/CNOT actually realizes the intended logical Clifford on the selected code and logical basis; do not assume all CSS codes share the same H geometry.
+9. Preserve compatibility with Python 3.11+ and Windows development. Make `knill_bench` depend on this package, never the reverse.
+10. The Stim-like logical text parser is deferred. Do not implement a grammar or CLI unless requested.
+
+## Workflow for each coding task
+
+1. Read root and folder `STATUS.md`; identify the requested milestone and dependencies.
+2. Inspect the actual pinned upstream APIs before copying integration code. Record versions/commits and any behavioral assumptions in status or docs.
+3. Make the smallest scoped change. Do not silently expand into parser, scheduling optimization, decoder switching, or non-Clifford support.
+4. Add a focused test that can fail on an incorrect physical flow, frame, detector, mapping, or noise rule. Do not replace physics checks with mere import tests once functionality exists.
+5. Run applicable checks: `python -m pytest`, `python -m ruff check src tests`, plus relevant Stim/flow validation.
+6. Update the affected folder's `STATUS.md` and root `STATUS.md` (what changed, evidence/tests, unimplemented/blocked items, date). Update `AGENTS.md` if architecture/responsibility changes and `README.md` if user-visible instructions change.
+7. In the completion report, separate verified behavior, implemented but unverified behavior, and remaining plans. Do not call a stub implemented.
+
+## Repository safety
+
+- Never modify or commit `external_lib` copies by default. Consult `external_lib/README.md` for pinned-revision and import guidance.
+- Avoid committing `.venv/`, artifacts, sampled data, secrets, large caches, or non-redistributable external code.
+- Avoid mutable global state for per-shot Pauli frames, sampled data, or compilation contexts.
+- Preserve deterministic ordering and seeded reproducibility of generated circuits/metadata.
+- No license is selected; do not add one without maintainer instruction.
