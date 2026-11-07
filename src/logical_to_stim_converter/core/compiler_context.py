@@ -80,6 +80,9 @@ class DetectorInfo:
     check_id: str
     supporting_block_ids: tuple[str, ...] = ()
     stage_id: str | None = None
+    source_stage_ids: tuple[str | None, ...] = ()
+    crosses_decoder_boundary: bool = False
+    anchor_module_id: str = ""
 
     @property
     def anchor_block_id(self):

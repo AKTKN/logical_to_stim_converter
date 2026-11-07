@@ -1,7 +1,10 @@
 # Deferred decoder and DEM work
 
-M5 (2026-11-07) exports physical preparations, classical Bell readouts, stable
-record/parity mappings, stage boundaries, relocations, and unresolved corrections.
+M6-A (2026-11-08) exports the canonical full detector circuit, exact global
+record/parity mappings, causal preparation ancestry, stage-boundary candidates,
+relocations and unresolved corrections. Explicit legacy stage views preserve
+physics and noise. Noisy hypotheses can be propagated without asserting strict
+noiseless final-sector equations; the strict proof remains separately available.
 These tracked requirements remain future work; no GitHub issue creation is claimed.
 
 - State-preparation decoding: infer physical sector corrections from noisy
@@ -15,8 +18,8 @@ These tracked requirements remain future work; no GitHub issue creation is claim
 - Validated independent preparation DEM generation; window placement, stage DEM
   slicing, and preservation of inter-stage correlated error mechanisms. Removing
   cross-stage circuit annotations alone does not establish independent DEMs.
-- Noisy preparation-sector estimation and decoder-dependent logical error-rate
-  benchmarking. The test-only final-sector PyMatching helper is inadequate here.
+- Noisy preparation-sector estimation, general batch correction adapters, and
+  decoder-dependent logical error-rate benchmarking. The test-only final-sector PyMatching helper is inadequate here.
 - Adaptive SE, postselection, retries, physical block reuse, and scheduling
   optimization. Current Knill circuits are fixed single-round Clifford programs.
 

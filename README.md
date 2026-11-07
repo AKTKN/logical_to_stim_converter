@@ -1,6 +1,6 @@
 # logical_to_stim_converter
 
-**Status (2026-11-07): verified memory, H/CNOT/Pauli, and single-round Knill teleportation.**
+**Status (2026-11-08): verified memory, Clifford/Knill circuits, and M6-A global provenance.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -304,21 +304,65 @@ logical_bits = evaluation.logical_outputs
 bell_values = evaluation.bell_measurements
 ```
 
-The evaluator checks syndrome equations and the prepared logical eigenvalue,
-propagates the physical vectors through actual H/CX pairings, interprets each
-measurement once, then inserts the Bell byproduct into the output frame.
+The default `validation="noiseless"` checks final raw syndrome equations and the
+prepared logical eigenvalue, preserving the M5 test contract. The explicit
+`validate_noiseless_preparation_corrections(raw_samples, corrections)` method
+performs this proof without replay. For externally inferred noisy corrections, use
+`evaluate_frames(raw_samples, corrections, validation="hypothesis")`: it checks
+identity, orientation, physical support, source boundary, and logical commutation
+metadata, without requiring a hypothesis to reproduce potentially faulty final
+checks or preserve the prepared logical eigenvalue. Acceptance does not establish
+decoder correctness. Both modes propagate physical vectors through actual H/CX
+pairings, interpret each measurement once, then insert the Bell byproduct into the
+output frame. `interpreted_measurements` accepts the same validation option.
 It returns corrected records, Bell values, logical outputs, and residual open
 physical frames. `interpreted_measurements` on a Knill result requires
 `preparation_corrections=corrections`; it never assumes unresolved vectors vanish.
 The primary physical circuit contains no adaptive correction gates.
 
-Preparation and teleportation have separate detector regions. The compiler first
-verifies the complete physical flow history, then excludes cross-stage detector
-annotations under an explicit boundary policy. `suppressed_detectors` retains
-those verified relations and their raw-record provenance. Preparation detectors
-stay local; Bell check syndromes are raw parity metadata when they depend on a
-preparation sector. M3 cross-block detectors remain available outside these
-explicit boundaries. This policy does not create independently decoded stage DEMs.
+### M6-A canonical circuit and metadata migration
+
+`ideal_circuit`, `noisy_circuit`, `circuit`, and `detectors` now refer to the
+**complete physical detector circuit**, including valid cross-stage relations.
+Quantum gates, noise locations, raw record order, qubit indices, and observable
+semantics are preserved. Individual random Bell bits remain raw records.
+For the d=3 Knill example the open circuit has **52 detectors** (M5: 44);
+after two SE rounds, H and readout it has **72** (M5: 56).
+
+- `measurements[i]` describes global raw record `i`, including its `MeasurementKey`,
+  block/local site, round, logical identity, basis, module, layer and stage.
+  `measurement_index_by_key` provides the immutable reverse mapping.
+- `detectors[i]` describes global detector `i`: exact raw parity indices/keys,
+  physical coordinates `(x, y, t)`, check/block anchor, `anchor_module_id`, and
+  `supporting_block_ids`. `stage_id` is the primary anchor stage;
+  `source_stage_ids` is the stable ordered set of **all** source stages (including
+  `None` for ordinary un-staged records). `crosses_decoder_boundary` marks a
+  proposed stage boundary, without removing the physical detector.
+- `observables[i]` retains global observable ID and full parity, canonical data
+  readout support, affine frame and intended value. `readouts` includes random
+  readouts with no deterministic observable ID.
+- `detector_boundary_candidates` identifies present global detectors crossing a
+  proposed boundary, with `global_index`, raw parity and `source_stage_ids`.
+  The M5 name `suppressed_detectors` remains a read-only compatibility alias;
+  its entries are no longer absent from the canonical circuit.
+- `stage_separated_circuit(noisy=False)` explicitly derives the old annotation
+  view. Set `noisy=True` for the identical physical noisy circuit with the same
+  detector selection. `stage_separated_detector_indices[local_id]` maps view IDs
+  back to canonical global IDs. These views do not create independent stage DEMs.
+- `preparation_dependencies[logical_id]` identifies the causal preparation modules
+  for each initialized, currently bound logical identity. `block_preparation_dependencies`
+  retains physical-block history, including retired blocks; `ancestry_events`
+  records typed primitive/relocation edges. CNOT unions its actual operand
+  histories; relocation transfers the relevant input/resource histories to the
+  survivor. Independent spectators and parallel gadgets stay separate. Physical
+  output-frame source syndromes agree with those histories, independently of
+  per-shot correction values.
+- `validate_metadata()` checks canonical record/annotation indices, stages,
+  coordinates, and ancestry edges against physical fragments and relocations.
+
+These metadata types are public package exports. Global detector IDs and raw
+record indices remain unchanged when deriving a view. General offline DEM
+projection and decoder-specific region selection are deferred to M6-B.
 
 Run `python examples/knill_ec_single_round.py` for decoder-independent ideal/noisy
 circuit generation and metadata. The required tests use **PyMatching 2.3.1** only

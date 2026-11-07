@@ -23,5 +23,10 @@ handles semantic relocation. Random readout consumes only measurement-destroyed
 ports and retains signed conditional outputs. Open export retains the verified
 frontier, with no magical terminal measurements. `_frames.py` propagates externally
 resolved physical vectors; it must not select corrections or import a decoder.
-Compose all physical flows before applying the explicit detector-region policy.
-Retain suppressed cross-stage parity provenance and validate every emitted region.
+M6-A: preserve the complete flow-derived detector circuit in the principal
+ideal/noisy properties. Stage separation is an explicitly requested derived view,
+with global detector IDs retained in metadata. `_provenance.py` checks exact raw
+record/annotation mappings and causal event edges; validate these at compilation.
+`_teleport.py` joins preparation ancestry at actual physical interactions and
+relocation only. Frame replay accepts well-formed noisy hypotheses independently
+from the explicit strict noiseless sector/eigenvalue validator.

@@ -1,5 +1,17 @@
 # STATUS — Package root
 
+## M6-A update — 2026-11-08
+
+Public exports now include global measurement/detector/observable metadata,
+DetectorBoundaryCandidate, PreparationDependencyEvent, PreparationInfo,
+LogicalReadout, BellMeasurementResult and RelocationRecord. Compiled artifacts
+retain canonical full circuits, immutable semantic record mappings, causal
+preparation histories, explicit legacy stage views and their global detector IDs.
+Strict noiseless frame proof is separate from well-formed noisy hypothesis replay.
+The read-only suppressed_detectors alias now identifies present boundary candidates.
+Migration and exact verification are documented in README and root STATUS.
+No runtime decoder or knill_bench dependency was added.
+
 ## M5 update — 2026-11-07
 
 Public exports now include CompositeOperation, BellStatePrep, KnillEC, and

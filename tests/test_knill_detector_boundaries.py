@@ -1,4 +1,4 @@
-"""Verified physical relations are distinct from emitted decoder regions."""
+"""Canonical physical relations and the explicit legacy annotation view."""
 
 from dataclasses import replace
 
@@ -27,25 +27,30 @@ def test_knill_stage_boundaries_and_raw_bell_syndromes(d):
     result.noisy_circuit.detector_error_model()
     raw = result.ideal_circuit.compile_sampler(seed=6).sample(100)
     assert len(result.detectors) == result.ideal_circuit.num_detectors
-    validate_detector_regions(result.detectors, result.measurements)
+    result.validate_metadata()
+    local_detectors = tuple(result.detectors[i] for i in result.stage_separated_detector_indices)
+    validate_detector_regions(local_detectors, result.measurements)
     prep_modules = {p.module_id for p in result.preparations
                     if p.logical_id in ("A", "B")}
     prep_record_indices = {m.index for m in result.measurements if m.module_id in prep_modules}
     for detector in result.detectors:
         assert not np.bitwise_xor.reduce(raw[:, detector.measurement_indices], axis=1).any()
         records = [result.measurements[i] for i in detector.measurement_indices]
+        assert set(detector.source_stage_ids) == {m.stage_id for m in records}
+        if detector.crosses_decoder_boundary:
+            continue
         assert {m.stage_id for m in records} == {detector.stage_id}
         if detector.stage_id and "resource_prep" in detector.stage_id:
             assert len({m.module_id for m in records}) == 1
             assert len(detector.supporting_block_ids) == 1
         if detector.stage_id and "teleportation" in detector.stage_id:
             assert not prep_record_indices.intersection(detector.measurement_indices)
-    assert result.suppressed_detectors
-    # The excluded global relations were valid physical flows. Put one back:
+    assert result.detector_boundary_candidates == result.suppressed_detectors
+    # Relations excluded only from the derived view are valid physical flows. Put one back:
     # Stim accepts it, while the explicit decoder-boundary validator rejects it.
-    suppressed = next(s for s in result.suppressed_detectors
+    suppressed = next(s for s in result.detector_boundary_candidates
                       if any(stage and "teleportation" in stage for stage in s.stage_ids))
-    probe = result.ideal_circuit.copy()
+    probe = result.stage_separated_circuit()
     probe.append("DETECTOR", [stim.target_rec(i - probe.num_measurements)
                               for i in suppressed.measurement_indices])
     probe.detector_error_model()

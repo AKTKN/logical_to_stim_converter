@@ -25,21 +25,22 @@ from ..core.module_fragment import ModuleFragment, OperationContext
 from ..core.protocol import (
     BellMeasurementResult,
     CompositeInfo,
+    DetectorBoundaryCandidate,
     LogicalReadout,
+    PreparationDependencyEvent,
     PreparationInfo,
     RelocationRecord,
-    SuppressedDetector,
 )
 from ..noise.injector import NoiseInjector
 from ..noise.model import NoiseModel
 from ..operations.base import OperationModule
 from ._logical import LogicalFlowTracker, detector_metadata, prepare_part
 from ._metadata import (
+    detector_boundary_candidates,
     extract_metadata,
     finalize_observables,
     protocol_metadata,
-    separate_detector_regions,
-    validate_detector_regions,
+    stage_separated_circuit,
 )
 from ._parallel import parallel_chunk
 from ._plan import plan_program
@@ -65,9 +66,12 @@ class CompiledCircuit:
     bell_measurements: tuple[BellMeasurementResult, ...] = ()
     relocation_history: tuple[RelocationRecord, ...] = ()
     composites: tuple[CompositeInfo, ...] = ()
-    suppressed_detectors: tuple[SuppressedDetector, ...] = ()
+    detector_boundary_candidates: tuple[DetectorBoundaryCandidate, ...] = ()
     open_logical_outputs: Mapping[str, str] = field(default_factory=dict)
     open_interface: sf.ChunkInterface | None = None
+    preparation_dependencies: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    block_preparation_dependencies: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    ancestry_events: tuple[PreparationDependencyEvent, ...] = ()
     _evaluation_steps: tuple = field(default=(), repr=False, compare=False)
     _compiler: object = field(default=None, repr=False, compare=False)
     _program: tuple = field(default=(), repr=False, compare=False)
@@ -81,6 +85,8 @@ class CompiledCircuit:
             "block_status",
             "orientations",
             "open_logical_outputs",
+            "preparation_dependencies",
+            "block_preparation_dependencies",
         ):
             object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
 
@@ -88,9 +94,42 @@ class CompiledCircuit:
     def circuit(self) -> stim.Circuit:
         return self.noisy_circuit if self.noisy_circuit is not None else self.ideal_circuit
 
-    def interpreted_measurements(self, measurements, *, preparation_corrections=None):
+    @property
+    def measurement_index_by_key(self):
+        """Stable semantic-to-global raw record mapping (also for random readouts)."""
+        return MappingProxyType({m.key: m.index for m in self.measurements})
+
+    @property
+    def suppressed_detectors(self):
+        """M5 compatibility alias: these detectors are present in the full circuit."""
+        return self.detector_boundary_candidates
+
+    def stage_separated_circuit(self, *, noisy=False):
+        """Return an explicit legacy annotation view with identical physics/noise.
+
+        Use stage_separated_detector_indices to map its local detectors to global
+        IDs. This is not an independently decoded stage DEM.
+        """
+        circuit = self.noisy_circuit if noisy else self.ideal_circuit
+        if circuit is None:
+            raise ValueError("No noisy circuit was requested")
+        return stage_separated_circuit(circuit, self.detectors)[0]
+
+    @property
+    def stage_separated_detector_indices(self):
+        return tuple(d.index for d in self.detectors if not d.crosses_decoder_boundary)
+
+    def validate_metadata(self):
+        """Check global record/annotation mappings and causal event edges."""
+        from ._provenance import validate_metadata
+
+        validate_metadata(self)
+
+    def interpreted_measurements(self, measurements, *, preparation_corrections=None,
+                                 validation="noiseless"):
         if preparation_corrections is not None:
-            return self.evaluate_frames(measurements, preparation_corrections).logical_outputs
+            return self.evaluate_frames(
+                measurements, preparation_corrections, validation=validation).logical_outputs
         if self.bell_measurements:
             raise ValueError("Preparation corrections are unresolved; supply physical frames")
         samples = np.asarray(measurements, dtype=np.bool_)
@@ -106,10 +145,23 @@ class CompiledCircuit:
             result[:, observable.index] = value
         return result
 
-    def evaluate_frames(self, measurements, preparation_corrections):
+    def evaluate_frames(self, measurements, preparation_corrections, *, validation="noiseless"):
+        """Replay external frames once without modifying samples or circuits.
+
+        'noiseless' (M5 default) proves final raw sectors and the prepared logical
+        eigenvalue. 'hypothesis' checks shape/identity/symplectic metadata only;
+        decoder-selected noisy hypotheses need not reproduce faulty raw checks.
+        Neither mode chooses a correction or proves noisy decoder success.
+        """
         from ._frames import evaluate_frames
 
-        return evaluate_frames(self, measurements, preparation_corrections)
+        return evaluate_frames(self, measurements, preparation_corrections, validation=validation)
+
+    def validate_noiseless_preparation_corrections(self, measurements, preparation_corrections):
+        """Explicit strict sector/eigenvalue proof, independent of frame replay."""
+        from ._frames import correction_vectors
+
+        correction_vectors(self, measurements, preparation_corrections, validation="noiseless")
 
     def append(self, operations, *, noise_model=None):
         """Recompile a continuation with the same verified physical prefix.
@@ -190,6 +242,7 @@ class CircuitCompiler:
                         stage=planned.stage or ("post_teleportation" if protocol.bells else None),
                     )
                     trial = trial.advanced(op, fragment, self.backend)
+                    protocol.record_fragment(fragment)
                     fragments.append(fragment)
             context = trial
             tracker.context = context
@@ -248,11 +301,16 @@ class CircuitCompiler:
         # This checks deterministic detectors and observables independently of Chunk flows.
         ideal.detector_error_model()
         fragment_tuple = tuple(all_fragments)
-        ideal, suppressed = separate_detector_regions(ideal, fragment_tuple)
         physical_map, observables = extract_metadata(ideal, context, fragment_tuple, self.backend)
         observables = finalize_observables(ideal, context, observables)
-        validate_detector_regions(context.detectors, context.measurements)
         preparations, readouts = protocol_metadata(context, fragment_tuple, self.backend)
+        by_prep = {p.module_id: p for p in preparations}
+        dependencies = {q: protocol.block_dependencies[b]
+                        for q, b in context.logical_to_block.items()
+                        if b in protocol.block_dependencies}
+        context.frames = {q: replace(f, preparation_syndromes=tuple(
+            k for p in dependencies.get(q, ()) for k in by_prep[p].gauge_measurements))
+            for q, f in context.frames.items()}
         bells = protocol.finalize(preparations, readouts)
         fragment_tuple = tuple(
             replace(
@@ -273,7 +331,7 @@ class CircuitCompiler:
                 fragments=fragment_tuple,
             )
             noisy.detector_error_model()
-        return CompiledCircuit(
+        result = CompiledCircuit(
             ideal,
             noisy,
             physical_map,
@@ -287,8 +345,15 @@ class CircuitCompiler:
             fragment_tuple,
             context.orientations,
             preparations, readouts, bells, tuple(protocol.relocations),
-            tuple(protocol.composites), suppressed,
+            tuple(protocol.composites), detector_boundary_candidates(context.detectors),
             {q: b for q, b in context.logical_to_block.items()
              if context.status[b] == BlockStatus.ACTIVE},
-            frontier, tuple(evaluation_steps), self, program, noise_model,
+            frontier,
+            preparation_dependencies=dependencies,
+            block_preparation_dependencies=protocol.block_dependencies,
+            ancestry_events=tuple(protocol.ancestry_events),
+            _evaluation_steps=tuple(evaluation_steps), _compiler=self,
+            _program=program, _noise_model=noise_model,
         )
+        result.validate_metadata()
+        return result

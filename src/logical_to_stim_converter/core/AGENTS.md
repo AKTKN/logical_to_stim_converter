@@ -27,3 +27,8 @@ M5: `protocol.py` owns preparation histories, physical correction-resolution
 contracts, random readouts, Bell results, stages, and relocation records. Keep
 nonlinear correction selection outside affine logical frames. Physical supports
 use stable data IDs. None supports mean unresolved; empty supports mean identity.
+
+M6-A: protocol.py also owns typed PreparationDependencyEvent edges and
+DetectorBoundaryCandidate provenance. DetectorInfo.index is always global;
+stage_id names its anchor stage, source_stage_ids preserves all source stages.
+Ancestry is causal source metadata, never a replacement for symplectic values.

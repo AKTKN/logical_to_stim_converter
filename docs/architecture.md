@@ -1,7 +1,8 @@
 # Architecture and implemented circuit contracts
 
-**2026-11-07:** Rotated-surface memory, M3 H/CNOT/Pauli, and M5 Bell/Knill
-teleportation paths are implemented. See [repository status](../STATUS.md).
+**2026-11-08:** Rotated-surface memory, M3 H/CNOT/Pauli, M5 Bell/Knill
+teleportation, and M6-A global detector/provenance contracts are implemented.
+See [repository status](../STATUS.md).
 
 ## Implemented pipeline
 
@@ -244,10 +245,18 @@ commutation contribution. None supports mean unresolved; empty supports mean
 a selected identity. The package does not select corrections.
 
 An external correction result enters through `PreparationInfo.resolve` and
-`CompiledCircuit.evaluate_frames`. Evaluation verifies H_X z=s_X, H_Z x=s_Z
-against actual semantic raw records and checks preservation of the prepared
-logical eigenvalue. It replays binary Pauli vectors through the actual woven
-physical instruction pairings, including H, CX, resets, and ancilla readout.
+`CompiledCircuit.evaluate_frames`. The backwards-compatible default
+`validation="noiseless"` verifies H_X z=s_X, H_Z x=s_Z against actual semantic
+raw records and checks preservation of the prepared logical eigenvalue.
+`validate_noiseless_preparation_corrections` makes that proof explicit without
+frame replay. `validation="hypothesis"` instead accepts noisy externally selected
+physical frames after checking binary shape, identity, orientation, source
+boundary, known data IDs and logical commutation metadata. It does not compare
+to a raw-sector oracle or assume decoder success; a faulty final check need not
+agree with the hypothesis. Logical eigenvalue preservation is a noiseless proof,
+not a general restriction on decoder hypotheses. Both modes replay binary Pauli
+vectors through the actual woven physical instruction pairings, including H, CX,
+resets, and ancilla readout.
 Measurement anticommutation flips are applied once. Virtual logical Paulis are
 inserted at their explicit zero-duration evaluation boundary. Bell X/Z parities
 are computed from the interpreted records, and their X^mZ Z^mX byproduct enters
@@ -268,24 +277,68 @@ syndromes from metadata. It performs no temporal or circuit-level inference.
 Tests compare frame-only physical expectations with a separate simulator that
 actually applies corrections and executes compatible projective measurements.
 
-## Physical flow verification and detector boundary policy
+## Canonical global detectors and explicit annotation views (M6-A)
 
-Hex reference commit `5de58f2f80791054411ad3c0885a4fe3671ed56a` separates
-state-preparation modules/corrections from the Bell measurement correction map.
-This implementation preserves that modular boundary without importing Hex.
+All global check and conditional logical flows compose with pinned stimflow before
+noise insertion. The principal ideal/noisy circuits retain every deterministic
+flow-derived detector, including cross-block and cross-stage relations; both pass
+Stim DEM validation. No physical measurement is added to close an open artifact.
+Random Bell singles and sector-valued one-shot Bell checks remain raw metadata.
 
-All global check and conditional logical flows compose first, including valid
-cross-stage history; the full circuit passes ordinary Stim DEM validation.
-An explicit annotation policy then keeps a detector only when its source records
-share a region. Knill resource A/B preparation stages are distinct even during
-parallel reset/SE. Teleportation and subsequent stages are explicit. Excluded
-cross-stage relations remain in `SuppressedDetector` with raw indices/stage IDs.
-No raw record, physical gate, or required conditional output flow is removed.
-The final stage validator rejects crossing annotations, and the resulting ideal
-and noisy circuits both pass DEM construction.
+`DetectorInfo.index` is the zero-based canonical global detector ID. It retains
+exact global raw-record parity, semantic keys, supporting blocks and `(x, y, t)`
+coordinates. Flow anchor flags carry the latest semantic check's module/block/
+check IDs through composition into an instruction tag, without extra coordinate
+dimensions. `stage_id` comes from that anchor's module; `source_stage_ids` retains
+all record stages, ordered with None first then lexically. More than one source
+stage marks `crosses_decoder_boundary`; it does not invalidate the physical parity.
+Measurements and observables likewise retain canonical IDs and full raw parities.
+`measurement_index_by_key` reverses the stable semantic record mapping.
 
-One-shot Bell check parities depending on preparation sectors are exported as
-raw readout syndrome metadata. There need not be teleportation-local detectors.
-When all stages are absent, existing M3 cross-block detectors are retained.
-This circuit-annotation boundary does not slice DEM mechanisms or establish
-independent stage fault models. See [deferred work](deferred_work.md).
+`stage_separated_circuit(noisy=...)` returns an explicit legacy annotation view;
+only cross-stage DETECTOR instructions are omitted. Physical gates, quantum
+measurements, noise, coordinates and observable annotations are identical.
+`stage_separated_detector_indices` maps its detector IDs to global IDs.
+`detector_boundary_candidates` stores each crossing global detector's ID, parity
+and stages. The M5 `suppressed_detectors` name is a read-only alias to these present
+relations. The private `separate_detector_regions` helper remains available for
+explicit legacy calls; compilation never calls it or the stage-only validator.
+This migration intentionally increases Knill detector counts. M3 un-staged
+correlations remain unchanged. This view neither slices faults nor establishes
+independent stage DEMs; general projection belongs to M6-B.
+
+`validate_metadata` checks the annotation reader against the canonical circuit,
+physical site/record order, fragment modules and stages, exact detector/observable
+indices, coordinates and boundary candidates. It also checks causal event edges.
+
+## Causal preparation ancestry
+
+Each LogicalInit creates a PreparationInfo event with stable module, logical and
+physical block identities, stage, basis, full check histories and physical frame.
+ProtocolAssembly tracks histories per physical block while primitive fragments
+are built. Local operations retain their operand history. A physical transversal
+CNOT conservatively unions the two actual operand histories onto both outputs;
+it does not bring in unrelated earlier or parallel preparations. A destructive
+readout records consumption without creating a new preparation source. Historical
+block ancestry remains available for auditing; measured blocks cannot be reused.
+
+Knill relocation unions the data and relevant resource histories onto the surviving
+physical block and persistent logical identity. Resource logical identities leave
+the binding map, while their preparation events remain legitimate historical
+sources. Reference/input interaction history survives; independent spectators and
+parallel gadgets never enter this union. Pre-existing resources and repeated
+relocations follow the same event rule.
+
+PreparationDependencyEvent records primitive and relocation input/output block
+edges and resulting preparation-module dependencies. Final
+`preparation_dependencies` covers initialized, currently bound logical identities
+(including measured outputs); `block_preparation_dependencies` retains physical history.
+Bell results snapshot dependencies at their own relocation boundary. Unresolved
+and evaluated physical frames list precisely those source preparations' final
+syndrome keys; affine frame provenance lists their gauge keys. Final open frames
+use the final causal history, not all preparations in the program. Per-shot Pauli
+supports continue through the existing physical symplectic replay independently
+of these source lists. Ancestry never supplies a correction value.
+
+No runtime decoder, adaptive branch, independent stage DEM or batch decoder
+adapter is introduced. See [deferred work](deferred_work.md).

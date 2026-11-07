@@ -104,3 +104,16 @@ frame propagation. Exercise all random Bell branches, rotated pairing, subsequen
 gates, open artifacts, relocation, stage-boundary rejection, and exact once-only
 gate/idle fault locations. No noisy recovery or LER claim follows from the
 noiseless final-sector helper. Deferred tasks are in `docs/deferred_work.md`.
+
+## M6-A regression requirements
+
+Retain every M1–M5 physics test. The intentional annotation migration affects
+only the explicit Knill region tests: principal circuits now retain global
+cross-stage detectors; boundary rejection applies to the derived legacy view.
+Preserve CompilerContext's existing affine Pauli rules independently of the new
+causal ancestry graph. Add d=3/5 full-detector raw-parity reconstruction and
+Stim order checks, spectator/parallel isolation, actual CNOT/reference ancestry,
+pre-existing resources, repeated relocation, open continuation, noisy hypotheses
+and negative metadata/edge/sign tests. Compare all physical/noise instructions
+between canonical and derived views. Pinned public FlowMetadata tags carry IDs;
+keep detector coordinates at three dimensions. No external source is modified.

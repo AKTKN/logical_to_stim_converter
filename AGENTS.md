@@ -32,6 +32,10 @@ Build an independent `logical_to_stim_converter` package that compiles logical o
 8. Check whether logical H/CNOT actually realizes the intended logical Clifford on the selected code and logical basis; do not assume all CSS codes share the same H geometry.
 9. Preserve compatibility with Python 3.11+ and Windows development. Make `knill_bench` depend on this package, never the reverse.
 10. The Stim-like logical text parser is deferred. Do not implement a grammar or CLI unless requested.
+11. Canonical ideal/noisy circuits retain every verified global detector. Stage
+    separation is an explicit derived annotation view; metadata keeps global IDs.
+    Join preparation ancestry only through actual operand interactions/relocation.
+    Keep noisy frame hypotheses separate from strict noiseless-sector proofs.
 
 ## Workflow for each coding task
 

@@ -91,7 +91,8 @@ def extract_metadata(
                     coords = tuple(detector_coords[len(detectors)])
                     if not instruction.tag.startswith("check:"):
                         raise ValueError("Detector has no validated semantic check anchor")
-                    block_id, check_id = json.loads(instruction.tag.removeprefix("check:"))
+                    block_id, check_id, module_id = json.loads(
+                        instruction.tag.removeprefix("check:"))
                     if block_id not in context.blocks:
                         raise ValueError("Unknown detector anchor block")
                     context.blocks[block_id].layout.check_for_ancilla(check_id)
@@ -108,7 +109,10 @@ def extract_metadata(
                             block_id,
                             check_id,
                             support,
-                            next(iter({measurements[i].stage_id for i in indices}), None),
+                            by_module[module_id].stage,
+                            ordered_stages(measurements[i].stage_id for i in indices),
+                            len({measurements[i].stage_id for i in indices}) > 1,
+                            module_id,
                         )
                     )
                 else:
@@ -198,33 +202,52 @@ def protocol_metadata(context, fragments, backend):
     return tuple(preparations), tuple(readouts)
 
 
-def separate_detector_regions(circuit, fragments):
-    """Apply an explicit boundary policy to already verified global relations.
+def ordered_stages(stages):
+    """Stable source ordering, including the ordinary un-staged region."""
+    return tuple(sorted(set(stages), key=lambda s: (s is not None, s or "")))
 
-    Keep all physical flows during composition. Only the decoder annotations
-    crossing explicit stage boundaries are excluded, with their parity and
-    provenance retained for auditing. Ordinary un-staged M3 correlations remain.
+
+def stage_separated_circuit(circuit, detectors):
+    """Derive the legacy annotation view without changing physical instructions.
+
+    The returned circuit has local detector numbering. The retained global IDs
+    are returned separately. No independent stage DEM or fault slicing is implied.
     """
-    stages = {f.module_id: f.stage for f in fragments}
-    records = []
     result = stim.Circuit()
-    suppressed = []
+    retained = []
     detector_index = 0
     for inst in circuit:
-        if stim.gate_data(inst.name).produces_measurements:
-            records.extend([stages[inst.tag]] * len(inst.targets_copy()))
         if inst.name == "DETECTOR":
-            indices = tuple(len(records) + t.value for t in inst.targets_copy())
-            regions = {records[i] for i in indices}
-            if len(regions) > 1 and regions != {None}:
-                suppressed.append(SuppressedDetector(
-                    detector_index, indices, tuple(sorted(regions, key=str))))
-            else:
+            if not detectors[detector_index].crosses_decoder_boundary:
                 result.append(inst)
+                retained.append(detector_index)
             detector_index += 1
         else:
             result.append(inst)
-    return result, tuple(suppressed)
+    return result, tuple(retained)
+
+
+def detector_boundary_candidates(detectors):
+    return tuple(SuppressedDetector(d.index, d.measurement_indices, d.source_stage_ids)
+                 for d in detectors if d.crosses_decoder_boundary)
+
+
+def separate_detector_regions(circuit, fragments):
+    """M5 compatibility helper: explicitly derive a view; never used by compile."""
+    stages = {f.module_id: f.stage for f in fragments}
+    records = []
+    detectors = []
+    for inst in circuit:
+        if stim.gate_data(inst.name).produces_measurements:
+            records.extend([stages[inst.tag]] * inst.num_measurements)
+        if inst.name == "DETECTOR":
+            indices = tuple(sorted({len(records) + t.value for t in inst.targets_copy()}))
+            source_stages = ordered_stages(records[i] for i in indices)
+            detectors.append(DetectorInfo(
+                len(detectors), (), indices, (), "", "", source_stage_ids=source_stages,
+                crosses_decoder_boundary=len(source_stages) > 1))
+    view, _ = stage_separated_circuit(circuit, detectors)
+    return view, detector_boundary_candidates(detectors)
 
 
 def validate_detector_regions(detectors, measurements):

@@ -1,5 +1,30 @@
 # STATUS — Tests
 
+## M6-A update — 2026-11-08
+
+Added 42 tests; all 221 M1–M5 regressions are retained. Only the two explicit
+Knill annotation-policy cases change their contract to canonical global detectors
+and an explicit stage-separated derived view. Original M3 tests remain unchanged.
+
+- test_causal_preparation_dependencies.py: spectator exclusion, parallel-gadget
+  isolation and registration-order invariance, actual CNOT dependencies, d=3/5
+  reference entanglement on physical tableaux, pre-existing resources, extra SE,
+  repeated relocation, corrupted ancestry edges/snapshots, and correction-value
+  isolation independently from metadata sources.
+- test_global_detector_provenance.py: d=3/5 full detector recovery, independent
+  Stim instruction parity/order reading, 256-shot raw parity reconstruction and
+  m2d agreement, all random Bell branches, full ideal/noisy DEMs, unchanged physical
+  instructions/noise locations/coordinates/records in the legacy view, explicit
+  global/view detector mapping, open continuation, and negative index/stage tests.
+- test_frame_validation_modes.py: strict noiseless equations/eigenvalue proof,
+  a final check-result fault accepted as a hypothesis, actual noisy raw samples,
+  deliberately wrong logical hypotheses, immutable samples/circuits, repeatable
+  once-only replay, and malformed/unresolved/source/support/sign rejection.
+
+Focused suite: 44 passed (including the two migrated boundary cases). Full final
+test/lint/build/example evidence is recorded in root STATUS. No stochastic LER or
+production decoding result is asserted.
+
 ## M5 update — 2026-11-07
 
 Added 48 physics/metadata/noise tests; all 173 original tests are retained.

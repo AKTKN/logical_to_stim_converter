@@ -1,8 +1,97 @@
 # STATUS — Repository-wide development ledger
 
-**As of:** 2026-11-07  
+**As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M5_KNILL_IMPLEMENTED` (local physics verification)
+**Overall state:** `M6_A_IMPLEMENTED` (local physics verification)
+
+## M6-A implemented and verified — 2026-11-08
+
+Baseline local/remote commit: `16e0c8772d6ae450491748ddf0757e3503708d9f`.
+
+- Canonical ideal/noisy circuits now retain every deterministic global flow-derived
+  detector. Knill stage separation is an explicit non-mutating annotation view;
+  quantum gates, physical/noise locations, raw records, coordinates and observables
+  are preserved. Random Bell bits remain classical records.
+- DetectorInfo retains global indices, exact raw parities/keys, semantic
+  check/block/module anchors, primary anchor stage, all ordered source stages and
+  proposed-boundary markers. Boundary candidates refer to present global
+  detectors. The read-only M5 suppressed_detectors alias remains available.
+- Public stage_separated_circuit and stage_separated_detector_indices provide
+  the legacy view and its local-to-global detector mapping. measurement_index_by_key
+  reverses raw semantic IDs. validate_metadata checks exact circuit metadata and
+  typed ancestry edges against physical fragments and relocation boundaries.
+- Preparation sources are tracked per physical block at actual operations.
+  CNOT conservatively joins its operands' histories; Knill transfers input/resource
+  histories to the survivor. Spectators and independent parallel gadgets remain
+  isolated. Pre-existing resources, reference entanglement, extra SE, subsequent
+  H/Paulis/CNOT, and repeated relocation preserve appropriate ancestry. Retired
+  identities leave active bindings; their preparation events remain historical
+  sources. Per-shot symplectic correction values are independent of source lists.
+- Physical and final affine output-frame provenance uses causal sources. Existing
+  CompilerContext affine frame algebra and its original regression contract remain
+  unchanged. Bell results snapshot ancestry at each relocation, so later
+  preparations cannot leak backward into earlier output-frame metadata.
+- Frame evaluation keeps strict M5 noiseless validation as the default. The
+  explicit validate_noiseless_preparation_corrections method checks final raw CSS
+  equations and the prepared logical eigenvalue without frame replay. Opt-in
+  validation="hypothesis" accepts noisy externally selected corrections after
+  shape/identity/orientation/source/support/logical-commutation validation,
+  without treating faulty final checks as truth. No decoder is selected, no
+  unresolved frame is guessed, and samples/circuits are never rewritten in place.
+- README, architecture, development instructions, example, AGENTS and affected
+  component ledgers document the canonical-detector/API migration and limits.
+
+### M6-A evidence
+
+Unchanged pins: Stim **1.15.0**, stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`. Inspected the installed
+ChunkCompiler metadata callback/detector insertion and public FlowMetadata API;
+VCS installation metadata confirms the pinned commit. Semantic IDs use instruction
+tags, leaving detector coordinates as (x,y,t). No upstream source changed.
+
+Final local Linux/WSL2 Python 3.12.7 checks:
+
+- `python -m pytest`: **263 passed in 169.48 s**; all 221 M1–M5 regressions
+  retained, with only the two explicit Knill annotation-policy cases migrated.
+- Focused causal/global/frame/boundary suite: **44 passed in 25.17 s**.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- All three existing examples passed; ideal/noisy memory, Bell and Knill DEMs
+  validate, with seeded ideal detector samples identically zero.
+- Isolated built-wheel import with decoder/test/reference imports blocked:
+  memory, Knill, canonical/legacy DEMs, causal ancestry and noisy hypotheses passed.
+  Wheel/source archives exclude local briefs, environments and external clones;
+  the source archive retains the new tests.
+- `python -m pip check`: no broken requirements. `git diff --check` passed;
+  all four external source working trees remain clean.
+
+New tests independently reconstruct every global detector parity/order at d=3/5
+from raw Stim records over 256 shots and compare to Stim's m2d conversion. They
+verify all Bell branches, full/legacy physical and fault-location equality,
+registration-order invariance, open continuation, causal isolation and physical
+reference entanglement. Negative stage/index/edge/sign tests fail as intended.
+Noiseless selected correction execution/tableau proofs and exact once-only noise
+regressions from M5 remain intact. Noisy-hypothesis tests include a final-check
+measurement-result fault, actual noisy samples, deliberately wrong logical
+hypotheses, malformed sources/supports/signs, and immutable repeatable replay.
+
+The d=3 Knill example now has **52** open global detectors (legacy view: **44**),
+including **8** cross-stage candidates. After two SE rounds, H and Z readout it
+has **51 qubits, 99 measurements, 72 global detectors, 1 observable**, and **946**
+DEM error mechanisms under the example noise model (legacy view: **56 detectors**).
+At d=5 the analogous open artifact has **252** global detectors, **228** legacy
+view detectors and **24** boundary candidates. These count changes are deliberate
+annotation recovery, with identical physical sampling circuits.
+
+Implemented but unverified: no additional M6-A behavior is claimed. Local checks
+do not establish Windows coverage; post-push CI results are separate.
+Remaining work: general noise-preserving DEM projection and decoder views (M6-B),
+ordinary/Knill memory decoding demonstrations (M6-C/D), batch correction adapters,
+noisy sector inference and LER. Ancestry conservatively retains histories after
+actual interactions, including operations that later undo entanglement. The
+legacy view does not establish independent stage fault models. Production decoders,
+adaptive operations and block reuse remain deferred. Commit/push is explicitly
+authorized by the user after verification; local briefs/artifacts remain excluded.
 
 ## M5 implemented and verified — 2026-11-07
 
@@ -197,7 +286,8 @@ from these local verification results.
 | M3 | H/CNOT/physical and virtual Paulis, affine frames, cross-block detectors, Bell round trip verified |
 | M4 | Primitive/composite Clifford noise and synchronous timing verified; stage selectors deferred |
 | M5 | BellStatePrep/KnillEC, random readout, open outputs, relocation, physical frame evaluation verified |
-| M6 | Memory raw metadata implemented; decoder adapters/knill_bench integration deferred |
+| M6-A | Canonical global detectors, causal preparation ancestry, exact metadata and frame-validation modes verified |
+| M6-B/C/D | Offline DEM views, decoder demonstrations and knill_bench integration deferred |
 | Deferred | Text parser/CLI, other code families, scheduling optimization |
 
 Current restrictions: one logical slot per block, no physical block reuse,
@@ -215,6 +305,11 @@ is imported. A project license has not been selected. Future work is explicitly
 tracked in docs/deferred_work.md; knill_bench remains a downstream runner.
 
 ## Changelog
+
+- **2026-11-08** — Implemented M6-A canonical global detectors, causal preparation
+  provenance, global metadata validation, explicit legacy stage views, and separate
+  noisy-hypothesis/noiseless-proof modes. Added 42 tests; final 263-test suite,
+  lint, build and all examples passed. See evidence and migration above.
 
 - **2026-11-07** — Implemented M5 Bell/Knill composites, random readout and
   conditional flows, explicit open-output artifacts, logical relocation, external

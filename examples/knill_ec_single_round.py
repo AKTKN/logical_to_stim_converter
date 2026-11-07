@@ -27,10 +27,14 @@ def main():
     print("Physical site -> Stim index:", dict(opened.physical_qubit_map))
     print("Preparation stages:", [(p.block_id, p.stage_id, p.rounds)
                                    for p in opened.preparations])
-    print("Detector regions:", sorted({str(d.stage_id) for d in opened.detectors}))
-    print("Verified cross-stage relations retained as metadata:", len(opened.suppressed_detectors))
+    print("Detector anchor stages:", sorted({str(d.stage_id) for d in opened.detectors}))
+    print("Canonical global detectors:", len(opened.detectors))
+    print("Cross-stage decoder-boundary candidates:", len(opened.detector_boundary_candidates))
+    print("Explicit legacy stage-view detectors:",
+          opened.stage_separated_circuit().num_detectors)
+    print("Causal preparation dependencies:", dict(opened.preparation_dependencies))
     bell, = opened.bell_measurements
-    records = {m.key: m.index for m in opened.measurements}
+    records = opened.measurement_index_by_key
     print("Bell X raw records:", [records[k] for k in bell.raw_x_records])
     print("Bell Z raw records:", [records[k] for k in bell.raw_z_records])
     print("Symbolic teleportation byproduct:", bell.raw_byproduct)

@@ -1,5 +1,36 @@
 # STATUS — Compiler
 
+## M6-A update — 2026-11-08
+
+Principal ideal/noisy circuits and detector metadata retain the full verified
+physical detector history. Compilation no longer calls separate_detector_regions;
+that compatibility helper and stage_separated_circuit explicitly derive views.
+Boundary candidates retain canonical indices/parities/stages and the view exports
+local-to-global detector IDs. Physical instructions, noise and raw records agree
+exactly. Tags retain check/block/module anchors without extra coordinate dimensions.
+_provenance.py validates global mappings and actual primitive/relocation ancestry
+edges at compilation and through the public validate_metadata method.
+
+ProtocolAssembly tracks per-block preparation sources at actual operand
+interactions. Bell results snapshot relevant input/resource histories; final
+physical and affine frame provenance follows final causal sources. Independent
+spectators/parallel gadgets stay isolated, including interleaved resources and
+repeated relocations. Physical per-shot propagation remains separate from sources.
+
+Frame replay preserves strict M5 validation by default and accepts explicitly
+selected noisy hypotheses after shape/identity/support/commutation checks.
+validate_noiseless_preparation_corrections separately checks the final raw sector
+and prepared eigenvalue without replay. Hypothesis acceptance is not decoder truth.
+
+Focused verification: 44 causal/global/frame/boundary checks passed at d=3/5;
+all three examples and the initial build passed. Root STATUS records final full
+verification. Pins remain Stim 1.15.0 and stimflow 1.17.dev0 at
+ffe0d043598ed5df0851a3e6b4920359a23fafbd. Inspected installed FlowMetadata,
+ChunkCompiler metadata callback/detector insertion and VCS install provenance;
+its public tag preserves anchors, with default (x,y,t) coordinates. No upstream
+code or pin changed. General DEM projection, batch decoder adapters, noisy
+sector inference and LER remain deferred to M6-B/C/D and downstream consumers.
+
 ## M5 update — 2026-11-07
 
 _plan.py expands composites while preserving parallel layers/identity/stages.

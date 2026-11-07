@@ -19,8 +19,8 @@ def detector_metadata(flow):
     anchors = [f for f in flow.flags if isinstance(f, tuple) and f[0] == "anchor"]
     if not anchors:
         raise ValueError("Completed detector flow has no semantic check anchor")
-    _, _, block, check = max(anchors)
-    return sf.FlowMetadata(tag="check:" + json.dumps((block, check), separators=(",", ":")))
+    _, _, block, check, module = max(anchors)
+    return sf.FlowMetadata(tag="check:" + json.dumps((block, check, module), separators=(",", ":")))
 
 
 def check_maps(backend, block, logical, orientation):
@@ -51,7 +51,7 @@ def prepare_part(chunk, fragment, backend, blocks, sequence):
         if fragment.operation_type in ("LogicalInit", "SyndromeExtraction", "LogicalMeasure"):
             key = flow.start if flow.start else flow.end
             block, check = lookup[key]
-            flags |= {("anchor", sequence, block, check)}
+            flags |= {("anchor", sequence, block, check, fragment.module_id)}
         flows.append(flow.with_edits(flags=flags))
     return chunk.with_edits(
         flows=flows,

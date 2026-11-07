@@ -83,7 +83,7 @@ class PreparationInfo:
                          for c in self.checks if c.basis == basis], dtype=np.uint8)
 
     def resolve(self, x, z):
-        """Wrap externally selected binary vectors; validate against a shot at evaluation."""
+        """Wrap an external hypothesis; this does not prove its syndrome or correctness."""
         vectors = []
         for vector in (x, z):
             a = np.asarray(vector)
@@ -160,10 +160,40 @@ class CompositeInfo:
 
 
 @dataclass(frozen=True)
-class SuppressedDetector:
-    """A verified global relation excluded by the explicit decoder-region policy."""
+class PreparationDependencyEvent:
+    """A causal edge at a primitive operation or semantic relocation boundary.
+
+    Preparation modules are historical sources, not live logical identities.
+    Only actual operand histories are joined. Consumed blocks have no outputs.
+    """
+
+    event_id: str
+    operation_type: str
+    input_block_ids: tuple[str, ...]
+    output_block_ids: tuple[str, ...]
+    preparation_dependencies: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DetectorBoundaryCandidate:
+    """A present global detector omitted only from an explicit stage view.
+
+    Field names retain M5 compatibility. They always refer to canonical indices.
+    """
 
     original_index: int
     measurement_indices: tuple[int, ...]
     stage_ids: tuple[str | None, ...]
     reason: str = "cross_stage_boundary"
+
+    @property
+    def global_index(self):
+        return self.original_index
+
+    @property
+    def source_stage_ids(self):
+        return self.stage_ids
+
+
+# M5 import compatibility; no detectors are suppressed in the canonical circuit.
+SuppressedDetector = DetectorBoundaryCandidate

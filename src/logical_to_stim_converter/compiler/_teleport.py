@@ -9,6 +9,7 @@ from ..core.protocol import (
     BellMeasurementResult,
     CompositeInfo,
     PhysicalPauliFrame,
+    PreparationDependencyEvent,
     RelocationRecord,
 )
 from ..operations.bell_preparation import BellStatePrep
@@ -22,6 +23,19 @@ class ProtocolAssembly:
         self.composites = []
         self.relocations = []
         self.bells = []
+        self.block_dependencies = {}
+        self.ancestry_events = []
+
+    def record_fragment(self, fragment):
+        """Join histories only across an actual physical operation's operands."""
+        inputs = () if fragment.operation_type == "LogicalInit" else fragment.block_ids
+        outputs = () if fragment.operation_type == "LogicalMeasure" else fragment.block_ids
+        dependencies = ((fragment.module_id,) if not inputs else tuple(sorted({
+            p for b in inputs for p in self.block_dependencies[b]})))
+        for b in outputs:
+            self.block_dependencies[b] = dependencies
+        self.ancestry_events.append(PreparationDependencyEvent(
+            fragment.module_id, fragment.operation_type, inputs, outputs, dependencies))
 
     def begin(self, boundary, context):
         op = boundary.operation
@@ -74,14 +88,18 @@ class ProtocolAssembly:
                                    fd.preparation_syndromes + fa.preparation_syndromes
                                    + fb.preparation_syndromes)))
         orientation = context.orientations[b]
+        dependencies = tuple(sorted({p for block in (db, ab, bb)
+                                     for p in self.block_dependencies[block]}))
+        self.block_dependencies[bb] = dependencies
+        self.ancestry_events.append(PreparationDependencyEvent(
+            identity, "KnillEC", (db, ab, bb), (bb,), dependencies))
         draft = dict(composite_id=identity, logical_id=d, data_block_id=db,
                      first_resource_block_id=ab, output_block_id=bb,
                      x_readout=readouts[0].module_id, z_readout=readouts[1].module_id,
                      incoming_frame=incoming,
                      raw_byproduct=PauliFrame().with_parities(mz, mx),
                      output_orientation=orientation, logical_output_frame=output_frame,
-                     preparation_dependencies=tuple(f.module_id for f in fragments
-                                                    if f.operation_type == "LogicalInit"))
+                     preparation_dependencies=dependencies)
         self.bells.append(draft)
         self.relocations.append(RelocationRecord(identity, d, db, bb, (a, b)))
         # The semantic channel on the persistent input is identity. Undo only
@@ -103,12 +121,16 @@ class ProtocolAssembly:
 
     def finalize(self, preparations, readouts):
         by_module = {r.module_id: r for r in readouts}
+        preps = {p.module_id: p for p in preparations}
         return tuple(BellMeasurementResult(
             **{**draft, "x_readout": by_module[draft["x_readout"]],
-               "z_readout": by_module[draft["z_readout"]]},
+               "z_readout": by_module[draft["z_readout"]],
+               "logical_output_frame": replace(draft["logical_output_frame"],
+                   preparation_syndromes=tuple(k for p in draft["preparation_dependencies"]
+                                              for k in preps[p].gauge_measurements))},
             physical_output_frame=PhysicalPauliFrame(
                 draft["output_block_id"], draft["output_orientation"], draft["composite_id"],
                 draft["composite_id"] + "/teleportation",
-                tuple(k for p in preparations
-                      if p.module_id in draft["preparation_dependencies"]
-                      for k in p.unresolved_frame.source_syndromes))) for draft in self.bells)
+                tuple(k for p in draft["preparation_dependencies"]
+                      for k in preps[p].unresolved_frame.source_syndromes)))
+            for draft in self.bells)

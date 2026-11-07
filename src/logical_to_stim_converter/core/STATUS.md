@@ -1,5 +1,21 @@
 # STATUS — Core
 
+## M6-A update — 2026-11-08
+
+DetectorInfo now carries a stable global index, an explicit anchor module/stage,
+all ordered source stages, and a proposed-boundary marker. protocol.py adds typed
+PreparationDependencyEvent edges and DetectorBoundaryCandidate (with the M5
+SuppressedDetector import alias). PreparationInfo.resolve wraps a well-formed
+external hypothesis; exact final-sector/logical-eigenvalue truth is a separate
+strict validation mode. Physical commutation metadata is checked against support.
+Existing CompilerContext affine frame algebra/provenance behavior is retained.
+
+Verified by the focused causal/global/frame suite: independent spectators and
+parallel gadgets, actual CNOT and d=3/5 reference history, pre-existing resources,
+extra SE, repeated relocation, exact global record/stage attribution, malformed
+edges/records/stages/signs, and noisy hypotheses. Full checks are in root STATUS.
+No decoder, correction selector, adaptive operation or block reuse was introduced.
+
 ## M5 update — 2026-11-07
 
 `protocol.py` adds preparation/check histories, physical Pauli corrections with
