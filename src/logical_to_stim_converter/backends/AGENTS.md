@@ -12,7 +12,7 @@ Code-family-specific physical implementation adapters.
 
 ## Files and intended responsibilities
 
-- `surface_code.py` — planned **SurfaceCodeBackend**: Planned rotated surface-code layout and SE/Clifford/readout implementation, reusing surface-sim if verified.
+- `surface_code.py` — **RotatedSurfaceCodeBackend**: Verified ideal memory chunks using stimflow and the pinned surface-sim geometry/schedule convention.
 - `color_code.py` — planned **ColorCodeBackend**: Future backend for color codes; deliberately not an initial implementation milestone.
 
-All `.py` files in this folder are **docstring-only placeholders** as of 2026-11-07. Do not treat documented methods as implemented. Implement the minimum validated surface-code path first unless the user requests otherwise. Update this folder's `STATUS.md` after changes; update root status for completed milestones.
+RotatedSurfaceCodeBackend implements reset/SE/destructive-readout memory chunks. The color-code module and transversal/Knill backend support remain unimplemented. Update this folder's `STATUS.md` and root status after changes.

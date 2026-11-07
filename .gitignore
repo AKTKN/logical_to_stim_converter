@@ -49,3 +49,5 @@ logs/
 !/external_lib/README.md
 !/external_lib/AGENTS.md
 !/external_lib/STATUS.md
+
+/implementation_files/

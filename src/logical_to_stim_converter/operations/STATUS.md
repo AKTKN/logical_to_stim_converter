@@ -1,32 +1,23 @@
-# STATUS — `operations`
+# STATUS — Operations
 
-**2026-11-07 state:** `SCAFFOLDED`. All Python modules are placeholder docstrings. No domain functionality implemented.
+**2026-11-07: three memory primitives implemented and verified.**
 
-## Planned per-file work
+- `base.py`: abstract OperationModule with validated logical target IDs,
+  optional operation identity and instance noise override, and fragment build API.
+- `initialization.py`: LogicalInit(X/Z, explicit rounds >=1), with an upstream
+  transversal reset boundary followed by a verified ChunkLoop of SE rounds.
+- `syndrome_extraction.py`: positive round count, full stabilizer and both logical
+  Pauli flows, verified ChunkLoop representation and memory-frame preservation.
+- `measurement.py`: destructive same-basis memory readout with terminal parity
+  flows and lifecycle termination. Compiler assigns final observable IDs.
 
-- [ ] base.py: ABC and common build/validate contract; targets, operation ID, optional noise instance override.
-- [ ] initialization.py: Prepare |0_L> (Z) or |+_L> (X) using physical reset plus specified repeated SE rounds.
-- [ ] syndrome_extraction.py: Generate a configurable number of SE rounds and associated flow boundaries; prefer stimflow.ChunkLoop.
-- [ ] transversal.py: Physical transversal gates, verified logical/stabilizer transforms, code-specific layout/basis effects.
-- [ ] pauli.py: Logical Pauli operation, either physical gate realization or virtual logical Pauli-frame update.
-- [ ] measurement.py: Destructive X/Z readout and terminal flow/observable metadata; mark consumed block.
-- [ ] bell_preparation.py: Composite two-state preparation + H + transversal CNOT, or future alternative resource gadget.
-- [ ] knill_ec.py: Composite Bell measurement, logical relocation D->B and symbolic correction/bell measurement metadata; decoder-independent.
+Evidence: signed primitive-flow verification, independent ideal raw-record and
+observable parity checks, random preparation-syndrome rejection as detectors,
+parallel/mixed-basis memories, lifecycle and argument rejection, and override
+noise-location tests. See root STATUS for executed checks.
 
-## Acceptance criteria (not yet verified)
+Transversal, Pauli, Bell, and Knill modules remain unimplemented placeholders.
+Their docstrings were wrapped to resolve existing Ruff E501 findings. No decoder,
+postselection, grammar, or dedicated memory-experiment class was introduced.
 
-- [ ] Each primitive generates an ideal flow-verified fragment for supported code.
-- [ ] Both basis states initialize and read out correctly in an ideal memory test.
-- [ ] CNOT/H/Pauli flow actions match declared logical action.
-- [ ] KnillEC updates block locations, preserves raw measurement context, and does not select a decoder.
-
-## Implemented and verified
-
-- [x] Directory, `__init__.py`, placeholder source files, and local `AGENTS.md` / `STATUS.md` created.
-- [ ] Any operational code or physics correctness test.
-
-## Development history
-
-- 2026-11-07 — Initial scaffold only. No physics code or validated API.
-
-After each implementation task, record **date**, **files and contracts changed**, **checks/results**, **upstream versions**, **limitations**, and **next actions** here and in the repository root `STATUS.md`.
+History: 2026-11-07 scaffold -> memory primitives. Next: a separate Clifford task.

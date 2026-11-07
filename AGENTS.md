@@ -4,7 +4,7 @@ This file applies to the entire repository. Read the nearest nested `AGENTS.md` 
 
 ## Purpose and current reality
 
-Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the repository is a scaffold. No operation, compiler, noise engine, or decoding interface is implemented.** Do not claim functionality from names or docstrings.
+Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory foundation is implemented and locally verified.** Core CSS/layout/block models, the three memory primitives, concurrent physical-layer composition, metadata, and memory noise work. Other operations and decoder interfaces remain placeholders. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
 
 ## Source-of-truth map
 
@@ -17,7 +17,7 @@ Build an independent `logical_to_stim_converter` package that compiles logical o
 - `.../noise/`: operation-aware policy; built on `stimflow` noise rules; avoids duplicate injection.
 - `.../compiler/`: module assembly, flow validation, circuit metadata, compiled artifact.
 - `.../decoding/`: decoder-facing formats only; no decoder algorithm in the initial scope.
-- `tests/`: scaffold smoke test initially; add physics, flow, and noise tests with implementations.
+- `tests/`: signed-flow, algebra, geometry, distance, detector/observable parity, mapping, lifecycle, and exact noise-location tests for memory.
 - `external_lib/`: local **reference** copies. Not tracked by Git by default. Do not edit upstream source unless explicitly directed.
 
 ## Mandatory architecture principles

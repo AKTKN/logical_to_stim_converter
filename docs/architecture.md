@@ -1,65 +1,110 @@
-# Architecture notes — planned contracts
+# Architecture and implemented memory contracts
 
-**Status:** design document, not proof of implementation. Check [repository status](../STATUS.md).
+**2026-11-07:** The independent rotated-surface memory path is implemented. Broader
+logical compilation remains planned. See [repository status](../STATUS.md).
 
-## Conceptual pipeline
+## Implemented pipeline
 
-`logical operation` -> `OperationModule` subclass -> code-specific `CodeBackend` -> `ModuleFragment` carrying `stimflow` components and logical metadata -> `CircuitCompiler` -> ideal physical Stim circuit plus metadata -> `NoiseInjector` -> noisy Stim circuit. Sampling and decoder comparison are performed by the caller (`knill_bench`).
+`CodeSpec` + `PhysicalLayout` -> physical `LogicalBlock` instances -> Python
+`LogicalInit` / `SyndromeExtraction` / `LogicalMeasure` -> `ModuleFragment` chunks
+and loops -> physical-layer parallel adapter -> verified `stimflow.ChunkCompiler`
+-> ideal circuit and final metadata -> `NoiseInjector` -> optional noisy circuit.
+The caller samples the circuit and may later supply a decoder.
 
-## Stable separations to preserve
+## Identity and data separation
 
-1. **Mathematical code**: `CodeSpec` holds CSS check matrices, logical representatives, and parameters; no physical indices.
-2. **Patch template and instance**: `PhysicalLayout` holds local data/ancilla sites, check schedules, and coupling; `LogicalBlock` binds it to actual global physical sites.
-3. **Logical identity and location**: `CompilerContext` tracks `logical_qubit_id -> (block_id, logical_slot)` and per-block availability. Knill teleportation changes location; physical site identifiers do not move.
-4. **Operation vs. code implementation**: operation subclasses say *what* is requested; backends say *how* that code realizes it physically.
-5. **Physical flow vs. decoding**: `stimflow.Chunk` represents ideal Pauli flow through noisy-measurement-capable circuits; decoder-induced corrections and evaluation are separate symbolic/runtime data.
-6. **Time vs. module order**: logical operation layers do not equal Stim `TICK`s. Independent physical modules must align their layers to represent concurrent execution and correct idle noise.
+`CodeSpec` is immutable mathematical CSS data: binary H_X/H_Z, L_X/L_Z, GF(2)
+rank and symplectic-pairing validation, parameters, and string metadata. General
+code distance is declared, not solved. The square odd-distance factory defines
+[[d², 1, d]], with column-major data ordering, southern logical X, and western
+logical Z. `PhysicalLayout` independently constructs/validates that convention,
+with one ancilla per independent generator, connectivity, and N/Z CNOT order.
 
-## Planned classes and responsibilities
+`LogicalBlock` scopes local D/X/Z keys to a stable physical block. Its global site
+identity is `(block_id, local_key)`, and its geometry is an independent translated
+coordinate. Stim indices are another mapping entirely. `CompilerContext` records
+logical-ID-to-block bindings; current memory is one slot per block. Final exported
+indices are recovered from the assembled circuit's QUBIT_COORDS, because stimflow
+reorders qubits. Observable names are `(logical_id, basis)` until assembly; stable
+final observable IDs follow sorted logical IDs, independent of block registration.
 
-| Class | Responsibility | Must not own |
-|---|---|---|
-| `CodeSpec` | CSS algebra: `H_X`, `H_Z`, chosen `(L_X, L_Z)` and parameters. Validate commutation, rank, symplectic pairing. | Physical placement, gate noise, sampled frame. |
-| `PhysicalLayout` | Local data/ancilla sites, check-to-ancilla pairing, coupling graph, optional coordinates. | Global Stim indices. |
-| `LogicalBlock` | Stable physical-block instance, local-to-global site map. | Ownership of logical ID across teleportation. |
-| `CodeBackend` | Build ideal code-specific chunks: init/SE, transversal gates, destructive measurement. | Experiment runner, decoder selection. |
-| `OperationModule` | Abstract input/output block contract; compile using backend. | Fixed decoder, global measurement offsets. |
-| `ModuleFragment` | `stimflow.Chunk`/`ChunkLoop`/`ChunkReflow` plus block transition, frame rule, semantic measurement keys. | Duplicate stabilizer-flow implementation. |
-| `CompilerContext` | Physical/logical registries, block availability, sample-independent symbolic frame/measurement metadata. | Shot-wise decoder state. |
-| `CircuitCompiler` | Verify and assemble fragments, return compiled circuit plus mapping/observable metadata. | Physical code rules inside compiler. |
-| `NoiseModel` | Default physical noise + per-operation/stage/instance overrides. | A second simulation of the same fault. |
-| `NoiseInjector` | Apply noise to composed physical operations and globally active/idle qubits. | Reinterpret logical operation semantics. |
+## Physical and flow boundaries
 
-## Operation modules (requested initial scope)
+The backend builds resets, one six-layer SE cycle (ancilla reset, four CNOT
+layers, ancilla measurement), and destructive data readout with public stimflow
+APIs. X ancillas control data; Z ancillas are CNOT targets. The four directions
+are X: NW/SW/NE/SE; Z: NW/NE/SW/SE. Boundary interactions are skipped in place.
 
-- `LogicalInit(targets, basis in {X,Z}, rounds)`: physical basis reset plus repeated SE, initial stabilizer preparation, appropriate generated/unknown flows.
-- `SyndromeExtraction(targets, rounds)`: repeated, verifiable SE chunks with boundary/round detector pairing.
-- `TransversalCNOT(control, target)`: corresponding-physical-qubit pairing; verify logical and stabilizer action. Multi-logical-qubit blocks generally act on all encoded slots.
-- `TransversalH(target)`: H on physical data, plus any code-specific relabeling/geometry to produce the claimed logical H; reject unsupported backends.
-- `LogicalPauli(target, axis in {X,Y,Z}, mode in {physical,frame})`: distinguish executed physical gates from virtual Pauli-frame changes. Optional `LogicalX/Y/Z` convenience wrappers.
-- `LogicalMeasure(targets, basis in {X,Z})`: destructive readout, terminal detectors, logical observable, release/reset suitability.
-- `BellStatePrep(A,B)`: composite with two `LogicalInit`s, an H, and CNOT (or a substituted backend resource protocol); inputs can execute concurrently.
-- `KnillEC(D,A,B)`: consumes pre-prepared Bell resource, transversal Bell measurement, logical `D -> B` location transition, symbolic byproduct and decoder input. It must not hardwire a decoder.
+Every cycle declares signed incoming and outgoing measurement flows for all
+checks and signed preservation flows for both logical Paulis. Initialization and
+readout use upstream transversal boundary mechanisms with signed verification.
+Only same-basis initial checks are deterministic; opposite-basis outputs are
+explicitly discarded at the boundary. The first SE round establishes their raw
+syndrome sign references. Terminal same-basis checks close through data parity;
+conjugate checks/logicals are explicitly discarded at destructive readout.
 
-Memory experiments are assembled from `LogicalInit` + `SyndromeExtraction` + `LogicalMeasure`, not given a separate primitive class initially.
+The wrapper adds module/operation IDs, logical input/output identity, block/frame
+transition information, future stage provenance, and finalized measurement records.
+It does not implement another stabilizer-flow engine. A memory frame has no
+assumed logical correction; the first conjugate-basis syndrome keys are retained
+as preparation-sector information. No decoder-dependent Pauli correction is made.
 
-## Flow and detector contract
+## Parallel assembly and time
 
-A module supplies an ideal Pauli relation of the form `P_in -> (-1)^(alpha · m + c) P_out`, including stabilizer and logical flows. `stimflow.Chunk.verify()` should validate each primitive. `stimflow.ChunkCompiler` composes compatible ports and produces detector/observable annotations; `ChunkReflow` handles changes of generators/basis. The package should add *metadata*, not a duplicate flow engine.
+Each explicit list/tuple of operations is a logical parallel layer/barrier.
+Targets of a single operation are concurrent. Fragment loops are verified as
+`ChunkLoop` objects, then expanded for assembly. For each corresponding physical
+component, a small adapter aligns TICK-separated layers, remaps local measurements
+in the flows to the woven record order, and combines disjoint chunks. Components
+with fewer layers finish early; untouched live blocks receive identity flows.
+Those pass-through flows use `center=None` so stimflow does not average a support
+centroid into a boundary detector's location.
 
-Decoder-independent artifacts must retain stable physical identifiers, complete measurement records, detector/observable maps, and symbolic frame transformations. Local/joint decoders later operate on identical physical samples. A `stim.DetectorErrorModel` captures noise correlations; a stabilizer flow alone is not an error model.
+StimCircuitLoom was inspected: its matching-instruction-sequence requirement is
+unsuitable for generic mixed-basis boundary chunks. The adapter handles physical
+layer/measurement remapping only; stimflow composes the flows and emits every
+DETECTOR/OBSERVABLE_INCLUDE. Missing flows and collisions raise errors.
 
-## Noise architecture
+This is a simple synchronous schedule, not a scheduling optimizer. Explicit
+barriers are honored. Output circuits expand rounds instead of retaining REPEAT
+blocks, so circuit/metadata size grows linearly with rounds. Large-round compression
+and more general asynchronous scheduling remain future work.
 
-Use `stimflow.NoiseRule` and `stimflow.NoiseModel` wherever possible. Proposed selection precedence: operation instance > composite stage > operation type > global default. A more specific physical-gate rule *replaces* its inherited rule unless additive behavior is explicitly requested and tested. Never apply a composite's noise after independently applying its children's noise. Insert gate/measurement/reset noise and global idle noise exactly once after physical time-layer alignment. A read-only module/stage tag or external metadata may select the effective rule; verify how Stim and stimflow preserve tags before relying on them.
+## Metadata and lifecycle
 
-**Initial physics verification:** ideal circuit flow checks, detector determinism, target observable consistency, correct logical block migration after teleportation, DEM generation with physical noise, and explicit tests for coincident/idle qubits.
+Each compilation has fresh state. A block transitions uninitialized -> active ->
+measured and cannot be reused. All registered blocks must complete. Same-basis
+preparation/readout is required for deterministic memory observables; unsupported
+cross-basis readout is explicitly rejected.
 
-## Explicitly unresolved
+Compiled artifacts preserve ideal/noisy circuits, final physical indices, logical
+bindings, absolute raw measurement indices with semantic keys and module/layer
+provenance, detector parity records/check identity, observable parity records,
+frames, final block status, fragment metadata, and physical time layers. No module
+contracts contain hand-written rec[-k] offsets. The final metadata reader validates
+that detector records remain within their patch.
 
-- Exact public signatures and datatypes; how best to wrap/subclass stimflow objects.
-- Integration versions/commits and surface-sim/Hex adapters.
-- Parallel time-layer merger and exact idle noise semantics.
-- Symplectic frame-rule storage and decoder-independent metadata schema.
-- General support for code families without transversal H or with `k > 1`.
-- Text logical-circuit parser (see `future_logical_syntax.md`); no parser in initial milestones.
+## Noise
+
+`NoiseModel` resolves instance > primitive type > global defaults for each channel.
+An absent override inherits, while explicit zero replaces an inherited value.
+`NoiseParameters.to_stimflow()` provides upstream NoiseModel/NoiseRule definitions:
+anticommuting reset errors, one-/two-qubit Clifford depolarization, and reported-bit
+measurement flips. Physical instruction tags carry module provenance through
+assembly; default and overridden gate noise are applied only after ideal flow and
+DEM verification. Already noisy input is rejected by the injector.
+
+Global idle noise is computed once per physical layer on active unused sites.
+Blocks become eligible on the initialization layer and retire after the destructive
+measurement layer. Ancillas are included throughout that interval. A currently
+operated block uses that primitive's effective idle rule; a live waiting block uses
+the global default. Never-initialized and retired sites receive no idle errors.
+Full stage-specific/nested-composite noise selection is deferred; fragments already
+carry an optional stage field for a later additive interface extension.
+
+## Deferred boundaries
+
+No transversal H/CNOT, logical Pauli, Bell/Knill protocol, decoder algorithm or
+adapter, text grammar/CLI, other code-family backend, runtime per-shot frame,
+general logical relocation, or LER benchmark is implemented. `knill_bench` remains
+a downstream experiment runner. This package never imports it.

@@ -1,0 +1,7 @@
+include AGENTS.md STATUS.md
+recursive-include docs *.md
+recursive-include examples *.py
+recursive-include tests *.py *.md
+recursive-include src *.md
+include external_lib/README.md external_lib/AGENTS.md external_lib/STATUS.md
+global-exclude __pycache__ *.py[cod]

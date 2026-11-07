@@ -12,7 +12,7 @@ Context-sensitive noise settings and fault insertion via stimflow noise machiner
 
 ## Files and intended responsibilities
 
-- `model.py` — planned **NoiseModel**: Planned configuration wrapper: base physical gate/reset/measurement/idle rules and operation/stage/instance overrides.
-- `injector.py` — planned **NoiseInjector**: Planned mapping from globally tagged physical time layers to chosen stimflow noise rules and noisy Stim circuit.
+- `model.py` — **NoiseModel**: Planned configuration wrapper: base physical gate/reset/measurement/idle rules and operation/stage/instance overrides.
+- `injector.py` — **NoiseInjector**: Planned mapping from globally tagged physical time layers to chosen stimflow noise rules and noisy Stim circuit.
 
-All `.py` files in this folder are **docstring-only placeholders** as of 2026-11-07. Do not treat documented methods as implemented. Implement the minimum validated surface-code path first unless the user requests otherwise. Update this folder's `STATUS.md` after changes; update root status for completed milestones.
+The memory noise policy and injector are implemented. Gate rules use stimflow; global idle noise is calculated once from exported physical layers. Nested-composite/stage overrides remain deferred. Update this folder's `STATUS.md` and root status after changes.

@@ -1,4 +1,1 @@
-"""Reserved shared interface to decoder inputs/outputs; no decoder algorithm in this package initially.
-
-No domain functionality is implemented yet.
-"""
+"""Reserved decoder-facing interfaces; no decoder algorithm is implemented."""

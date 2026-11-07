@@ -21,3 +21,7 @@
 - 2026-11-07 — Initial scaffold only. No physics code or validated API.
 
 After each implementation task, record **date**, **files and contracts changed**, **checks/results**, **upstream versions**, **limitations**, and **next actions** here and in the repository root `STATUS.md`.
+
+- 2026-11-07 — Wrapped placeholder docstrings to remove existing Ruff E501
+  failures. No decoder interface or algorithm was implemented. Raw memory
+  records/detectors/observables are exported from the compiler artifact instead.

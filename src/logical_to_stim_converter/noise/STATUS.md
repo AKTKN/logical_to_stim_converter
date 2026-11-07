@@ -1,25 +1,28 @@
-# STATUS — `noise`
+# STATUS — Noise
 
-**2026-11-07 state:** `SCAFFOLDED`. All Python modules are placeholder docstrings. No domain functionality implemented.
+**2026-11-07: memory noise model/injector implemented and verified.**
 
-## Planned per-file work
+`model.py` implements immutable global NoiseParameters, partial NoiseOverride,
+and NoiseModel selection: instance > primitive type > global, per channel. None
+inherits; zero replaces inherited noise. The upstream NoiseModel/NoiseRule API
+provides anticommuting reset faults, one-/two-qubit Clifford depolarization, and
+measurement-result flips. Invalid probabilities are rejected.
 
-- [ ] model.py: Planned configuration wrapper: base physical gate/reset/measurement/idle rules and operation/stage/instance overrides.
-- [ ] injector.py: Planned mapping from globally tagged physical time layers to chosen stimflow noise rules and noisy Stim circuit.
+`injector.py` applies gate noise only after ideal flow verification and derives
+global idle faults once from composed physical layers and live blocks. Physical
+tags preserve operation provenance. Waiting live blocks use global idle defaults;
+currently operated blocks use their effective primitive rule. All block sites,
+including ancillas, are eligible from initialization through destructive readout.
+Uninitialized/retired sites are excluded. Already noisy input is rejected.
 
-## Acceptance criteria (not yet verified)
+Evidence: exact channel/target/probability counts for concurrent X/Z patches,
+operation and instance replacement (including zero), reset/result errors, one-qubit
+upstream rule, idle waiting/retirement, no reinjection, zero-noise equality,
+unchanged record/detector/observable targets, deterministic seeded smoke samples,
+and noisy DEM/fault-distance checks. See root STATUS for final commands/results.
 
-- [ ] Overriding SE CX noise does not change an unrelated standalone CNOT.
-- [ ] Composite Bell/Knill circuits do not double-apply noise to nested primitives.
-- [ ] Idle errors reflect globally active physical sites and simultaneous modules.
+Deferred: stage and nested-composite overrides, correlated custom noise models,
+and general scheduling. ModuleFragment's stage provenance is reserved for a later
+additive extension. No upstream source was changed.
 
-## Implemented and verified
-
-- [x] Directory, `__init__.py`, placeholder source files, and local `AGENTS.md` / `STATUS.md` created.
-- [ ] Any operational code or physics correctness test.
-
-## Development history
-
-- 2026-11-07 — Initial scaffold only. No physics code or validated API.
-
-After each implementation task, record **date**, **files and contracts changed**, **checks/results**, **upstream versions**, **limitations**, and **next actions** here and in the repository root `STATUS.md`.
+History: 2026-11-07 scaffold -> minimal circuit-level memory noise.

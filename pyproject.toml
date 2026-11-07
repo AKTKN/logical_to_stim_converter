@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "logical-to-stim-converter"
 version = "0.0.0"
-description = "Scaffold for compiling logical quantum operations into physical Stim circuits"
+description = "Verified rotated-surface memory circuits from logical operation objects"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
@@ -17,7 +17,8 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-  "stim>=1.15",
+  "stim==1.15.0",
+  "stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow",
   "numpy>=1.26",
   "scipy>=1.11",
 ]

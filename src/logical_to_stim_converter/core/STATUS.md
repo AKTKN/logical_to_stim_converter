@@ -1,29 +1,28 @@
-# STATUS — `core`
+# STATUS — Core
 
-**2026-11-07 state:** `SCAFFOLDED`. All Python modules are placeholder docstrings. No domain functionality implemented.
+**2026-11-07: memory foundation implemented and locally verified.**
 
-## Planned per-file work
+- `code_spec.py`: immutable binary CSS matrices, GF(2) rank checks, stabilizer/logical
+  commutation and pairing, odd-distance rotated-surface factory. General distance
+  remains a declared parameter; no general distance solver is claimed.
+- `physical_layout.py`: data/check identities, geometry, connectivity, explicit
+  mathematical-column mapping, independent check support validation, N/Z layers,
+  and same-layer collision rejection.
+- `logical_block.py`: stable block and global site identities, explicit placement,
+  local/global mapping, and separated equal-distance patch placement.
+- `code_backend.py`: abstract memory backend contract and basis validation.
+- `compiler_context.py`: per-compilation bindings/lifecycle, stable observable IDs,
+  symbolic measurement keys, memory frame, detector/time-layer metadata.
+- `module_fragment.py`: public stimflow chunk/loop wrapper with logical inputs and
+  outputs, lifecycle/frame transition, operation/provenance IDs, and final records.
 
-- [ ] code_spec.py: Immutable CSS code data, H_X/H_Z and logical representatives; verify ranks/commutation and chosen symplectic pairing. No physical indices.
-- [ ] physical_layout.py: Local data/check-ancilla identities, support, geometry/coupling and SE schedule metadata; no global Stim indices.
-- [ ] logical_block.py: One physical code-block instance: code/layout references and local-to-global physical site assignment; logical identity tracked elsewhere.
-- [ ] code_backend.py: Code-family-dependent ideal physical gadget/flow construction contract; reject unsupported transversal logical actions.
-- [ ] compiler_context.py: Per-compilation registries for block availability, logical locations, measurement keys, time layers and symbolic frame rules.
-- [ ] module_fragment.py: Wrapper around stimflow components plus semantic input/output, block transition, frame and measurement metadata.
+Evidence: code/layout, signed-flow, memory, and noise tests in `tests/`; see root
+STATUS for exact commands/results. Invalid algebra/layouts, collisions, identity
+confusion, and lifecycle misuse are rejected. Byte-backed matrices cannot be made
+writable. Two/three patches retain correct indices after stimflow reindexing.
 
-## Acceptance criteria (not yet verified)
+Deferred: general codes' physical backends, logical relocation, non-memory frame
+propagation, decoder-dependent corrections, and physical block reuse.
 
-- [ ] CSS consistency and selected logical basis verified for toy/surface examples.
-- [ ] Multiple blocks reuse one CodeSpec but map to distinct physical sites.
-- [ ] Knill-style block reassignment updates logical location without rewriting physical identity.
-
-## Implemented and verified
-
-- [x] Directory, `__init__.py`, placeholder source files, and local `AGENTS.md` / `STATUS.md` created.
-- [ ] Any operational code or physics correctness test.
-
-## Development history
-
-- 2026-11-07 — Initial scaffold only. No physics code or validated API.
-
-After each implementation task, record **date**, **files and contracts changed**, **checks/results**, **upstream versions**, **limitations**, and **next actions** here and in the repository root `STATUS.md`.
+History: 2026-11-07 began as docstring-only scaffolding; memory-core task adds the
+first implementation. Next: separately scoped transversal-operation contracts.

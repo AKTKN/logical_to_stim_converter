@@ -1,6 +1,98 @@
-"""Planned: NoiseModel.
+"""Memory noise settings: instance > operation type > global defaults."""
 
-Responsibilities: Planned configuration wrapper: base physical gate/reset/measurement/idle rules and operation/stage/instance overrides.
+import math
+from collections.abc import Mapping
+from dataclasses import dataclass, field, fields, replace
+from types import MappingProxyType
 
-STATUS: Placeholder only; no classes or functions are implemented here.
-"""
+import stimflow as sf
+
+
+@dataclass(frozen=True)
+class NoiseOverride:
+    """None inherits a channel; an explicit zero disables the inherited channel."""
+
+    reset: float | None = None
+    one_qubit: float | None = None
+    two_qubit: float | None = None
+    measurement: float | None = None
+    idle: float | None = None
+
+    def __post_init__(self) -> None:
+        for f in fields(self):
+            p = getattr(self, f.name)
+            if p is not None and (
+                not isinstance(p, (int, float))
+                or isinstance(p, bool)
+                or not math.isfinite(p)
+                or not 0 <= p <= 1
+            ):
+                raise ValueError(f"{f.name} must be a probability in [0, 1]")
+
+
+@dataclass(frozen=True)
+class NoiseParameters(NoiseOverride):
+    reset: float = 0
+    one_qubit: float = 0
+    two_qubit: float = 0
+    measurement: float = 0
+    idle: float = 0
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if any(getattr(self, f.name) is None for f in fields(self)):
+            raise ValueError("Global noise probabilities cannot be None")
+
+    def to_stimflow(self) -> sf.NoiseModel:
+        def after(gate, p):
+            return sf.NoiseRule(after={gate: p} if p else {})
+
+        return sf.NoiseModel(
+            gate_rules={
+                "R": after("X_ERROR", self.reset),
+                "RX": after("Z_ERROR", self.reset),
+                "RY": after("X_ERROR", self.reset),
+            },
+            any_clifford_1q_rule=after("DEPOLARIZE1", self.one_qubit),
+            any_clifford_2q_rule=after("DEPOLARIZE2", self.two_qubit),
+            any_measurement_rule=sf.NoiseRule(flip_result=self.measurement),
+            idle_depolarization=self.idle,
+        )
+
+
+@dataclass(frozen=True)
+class NoiseModel:
+    default: NoiseParameters = field(default_factory=NoiseParameters)
+    operation_overrides: Mapping[str, NoiseOverride] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.default, NoiseParameters):
+            raise ValueError("default must be NoiseParameters")
+        for operation, override in self.operation_overrides.items():
+            if operation not in ("LogicalInit", "SyndromeExtraction", "LogicalMeasure"):
+                raise ValueError(f"Unknown memory operation {operation!r}")
+            if not isinstance(override, NoiseOverride):
+                raise ValueError("Operation overrides must be NoiseOverride objects")
+        object.__setattr__(
+            self, "operation_overrides", MappingProxyType(dict(self.operation_overrides))
+        )
+
+    def resolve(
+        self, operation_type: str | None = None, instance: NoiseOverride | None = None
+    ) -> NoiseParameters:
+        result = self.default
+        for override in (self.operation_overrides.get(operation_type), instance):
+            if override is not None:
+                result = replace(
+                    result,
+                    **{
+                        f.name: getattr(override, f.name)
+                        for f in fields(override)
+                        if getattr(override, f.name) is not None
+                    },
+                )
+        return result
+
+    @classmethod
+    def uniform_depolarizing(cls, probability: float) -> "NoiseModel":
+        return cls(NoiseParameters(*(probability for _ in range(5))))

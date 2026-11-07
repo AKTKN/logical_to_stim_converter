@@ -2,42 +2,101 @@
 
 **As of:** 2026-11-07  
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `SCAFFOLDED` (no quantum operations or compiler implemented)
+**Overall state:** `MEMORY_CORE_IMPLEMENTED` (locally verified)
 
-## Implemented and checked
+## Implemented and verified
 
-- [x] Python `src/` package skeleton and package metadata (`pyproject.toml`).
-- [x] Root and per-package-directory `AGENTS.md` / `STATUS.md` documents.
-- [x] Baseline README, architecture/development documentation, and local reference-library policy.
-- [x] Minimal package-import smoke test and CI workflow definitions.
-- [ ] Any physical Stim circuit construction or logical operation.
-- [ ] Any stimflow integration, complete detector generation, or end-to-end simulation.
-- [ ] Any noise injector, parser, decoder, or Knill implementation.
+- Immutable CSS CodeSpec with algebra/rank/logical-basis validation and odd-distance
+  square rotated-surface factory; validated PhysicalLayout and stable LogicalBlock.
+- CodeBackend/RotatedSurfaceCodeBackend and signed memory initialization, N/Z
+  syndrome-extraction, and destructive-readout chunks using public stimflow APIs.
+- OperationModule, LogicalInit, SyndromeExtraction, LogicalMeasure, CompilerContext,
+  ModuleFragment, CircuitCompiler, and CompiledCircuit with explicit parallel layers.
+- One/two/three concurrent patches, mixed X/Z memory bases, unequal round counts,
+  waiting blocks, stable logical/physical identities, and final Stim index metadata.
+- Complete raw measurement, detector/observable parity, module/time-layer,
+  initialization-syndrome, frame, and lifecycle provenance for memory.
+- NoiseModel/NoiseParameters/NoiseOverride/NoiseInjector: circuit-level reset,
+  Clifford gate, result, and global idle rules with replacement precedence and
+  protection against reinjection. The ideal circuit is preserved.
+- Runnable `examples/two_patch_memory.py`; installable source distribution/wheel;
+  GitHub-independent pinned dependency installation; CI definition updated.
 
-## Planned implementation order (provisional)
+## Verification evidence (2026-11-07)
 
-| Milestone | Components | Acceptance evidence | Status |
-|---|---|---|---|
-| M0 | Scaffold, packaging, documentation | Editable-install/import/build smoke | Scaffolded |
-| M1 | `CodeSpec`, `PhysicalLayout`, `LogicalBlock`, `CodeBackend` | CSS algebra, validated rotated-surface patch/physical mapping | Not started |
-| M2 | `OperationModule`, `LogicalInit`, `SyndromeExtraction`, `LogicalMeasure` | Verified ideal memory-flow / deterministic detectors / terminal observables | Not started |
-| M3 | `TransversalCNOT`, `TransversalH`, logical Pauli modules | Physical gates match logical/stabilizer flows | Not started |
-| M4 | `NoiseModel`, `NoiseInjector`, global timing | Target-specific overrides, idle behavior, no double injection | Not started |
-| M5 | `BellStatePrep`, `KnillEC` | Verified resource/teleport flows, block relocation, frame correctness | Not started |
-| M6 | decoder-facing compiled artifact / `knill_bench` integration | Same samples for local and joint decoding | Not started |
-| Deferred | Stim-like text parser, other code families, runtime policies | Requirements and tests to be defined later | Deferred |
+Local virtual environment: Linux/WSL2 x86_64, Python 3.12.7, Stim 1.15.0,
+stimflow 1.17.dev0 at Stim commit
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`, NumPy 2.5.4,
+SciPy 1.18.1, pytest 9.2.0, Ruff 0.17.4, build 1.6.1.
 
-## Dependencies and architectural decisions pending verification
+- `python -m pip install -e ".[dev]"`: successful, using the declared pinned
+  GitHub stimflow source dependency without local-reference imports.
+- `python -m pytest`: **79 passed** in 33.48 s.
+- `python -m ruff check src tests`: **all checks passed**; the 22 pre-existing
+  docstring E501 findings are resolved (future-operation files remain placeholders).
+- `python -m build`: source distribution and wheel produced successfully;
+  inspected archive contents exclude external source clones and generated caches.
+- `python -m pip check`: no broken requirements. Imported the built wheel from
+  an isolated target outside the source checkout and verified mixed-basis memory,
+  logical IDs ordered differently from physical blocks, ideal sampling, and noisy DEM.
+- `python examples/two_patch_memory.py`: **34 qubits, 64 detectors, 2 observables,
+  26 physical layers**; ideal samples all zero, noisy DEM and seeded samples valid.
+- Physics checks include signed primitive flows, deliberately corrupted physical
+  gates/record parities/signs, nondeterministic first-syndrome detector rejection,
+  raw parity reconstruction, and independent noisy circuit-distance searches that
+  give distance **3 and 5** for both X/Z memory.
+- Exact structural checks cover final reindexing, registration-order invariance,
+  detector/check association, parallel depth, reset/result/gate/idle locations,
+  instance/type/global replacement, zero-noise equality, and lifecycle rejection.
 
-- Pin a specific `stim` and `stimflow` revision; `stimflow` has no guaranteed backwards compatibility.
-- Verify surface-sim physical generator/flow metadata behavior for chosen rotated surface-code layout.
-- Verify exact logical action of transversal H on chosen layout (including any coordinate transformation).
-- Decide how parallel fragments are combined into global time layers before idle noise insertion.
-- Decide minimal frame-rule and decoder-independent measurement/observable metadata schemas.
-- Define rules for propagating stage-level noise overrides through composite operations.
-- Select license and external dependency inclusion strategy before publishing.
+CI is configured for Ubuntu/Windows and Python 3.11/3.12. Those remote jobs have
+not been executed in this task; local results do not establish Windows coverage.
+All external source working trees remain unchanged. Remote CI results are separate
+from these local verification results.
+
+## Milestones and limits
+
+| Milestone | Current state |
+|---|---|
+| M0 | Install/build/import and development workflow verified locally |
+| M1 | CSS/layout/block models and memory backend contract implemented/verified |
+| M2 | Three primitives and concurrent memory composition implemented/verified |
+| M3 | Transversal CNOT/H and logical Paulis not implemented |
+| M4 | Memory noise and synchronous physical time verified; stages/composites deferred |
+| M5 | BellStatePrep/KnillEC, relocation and general frame rules not implemented |
+| M6 | Memory raw metadata implemented; decoder adapters/knill_bench integration deferred |
+| Deferred | Text parser/CLI, other code families, scheduling optimization |
+
+Current memory restrictions: one logical slot per block, same preparation/readout
+basis, every registered block initialized and measured once, explicit logical
+barriers, expanded output rounds (linear memory/circuit size). Waiting active
+blocks use global idle defaults. First conjugate-basis syndromes label the random
+preparation sector; no decoder-dependent correction or canonical stabilizer-sector
+preparation is claimed. No general code-distance solver, Clifford/frame propagation,
+decoder algorithm, logical error-rate benchmark, or Knill implementation exists.
+
+Surface-sim revision `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
+geometry/schedule reference only. Hex/lomatching remain unintegrated. A project
+license has not been selected. Next: review this local memory implementation,
+then separately scope transversal-operation and frame contracts.
 
 ## Changelog
+
+- **2026-11-07** — Prepared the verified memory-core changes for commit and push
+  following explicit maintainer authorization. Corrected the local implementation
+  brief's ignore rule to `/implementation_files/`; external source clones, local
+  briefs, virtual environments, and generated artifacts are excluded from the
+  commit. The 79-test, lint, build, and artifact verification results above apply.
+- **2026-11-07** — Implemented the memory-core brief across core, backend,
+  operations, compiler, noise, and public API; added physics/metadata/noise tests
+  and the two-patch example. Updated dependencies, packaging manifest, CI,
+  architecture/development/README, AGENTS, and affected folder ledgers.
+  Found and fixed passive-flow detector-coordinate drift during waiting-patch
+  testing by using no new flow center. Full verification and limitations above.
+  User's existing `.gitignore` edit and implementation brief are preserved.
+  Implementation was initially left local, uncommitted and unpushed for review,
+  as requested by the brief.
+
 
 - **2026-11-07** — Prepared the current scaffold for its initial GitHub upload:
   initialized local Git on `main` and created the private repository

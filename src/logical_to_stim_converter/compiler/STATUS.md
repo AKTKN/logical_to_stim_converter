@@ -1,25 +1,28 @@
-# STATUS — `compiler`
+# STATUS — Compiler
 
-**2026-11-07 state:** `SCAFFOLDED`. All Python modules are placeholder docstrings. No domain functionality implemented.
+**2026-11-07: minimal synchronous memory compiler/artifact implemented.**
 
-## Planned per-file work
+- `circuit_compiler.py`: explicit parallel operation layers, fresh context per
+  compilation, stable logical/observable identity, signed ChunkCompiler assembly,
+  final ideal DEM validation, optional noise injection and noisy DEM validation.
+- `_parallel.py`: disjoint TICK-layer composition, physical collision checks,
+  symbolic flow measurement remapping, and passive identity ports. Passive flows
+  explicitly use no new center to preserve check detector coordinates.
+- `_metadata.py`: final physical indices from assembled coordinates; absolute raw
+  record indices and semantic keys; detector/observable parities; preparation
+  syndrome keys; active physical-time layers and module provenance.
 
-- [ ] circuit_compiler.py: Planned fragment ordering, parallel-layer handling, assembled ideal/noisy Stim circuits and stable decoder-facing metadata.
+Evidence: one/two/three patches, d=3/5, X/Z and mixed bases, exact parities,
+observable uniqueness, registration-order invariance, local/final index changes,
+no cross-patch gates, unequal rounds, waiting and retired blocks, and mixed-phase
+parallel layers. Adding independent patches preserves synchronous physical depth.
+See root STATUS for exact final test results.
 
-## Acceptance criteria (not yet verified)
+StimCircuitLoom's matching-instruction requirement was inspected; mixed-basis
+boundaries use the small public-API layer adapter instead. ChunkLoop components
+are verified then expanded for exported per-layer/per-record metadata. Output
+size is linear in rounds. No general scheduling optimizer, REPEAT compression,
+decoder, Clifford assembly, or incomplete memory artifact is supported. Every
+registered one-slot block must complete matched-basis preparation/readout once.
 
-- [ ] Ideal init + SE + destructive measurement composes with deterministic detectors.
-- [ ] Independent SE on different blocks does not serialize inadvertently.
-- [ ] Qubit / measurement / observable mapping survives final stimflow reindexing.
-- [ ] Same compiled physical sample is reusable by multiple decoder strategies.
-
-## Implemented and verified
-
-- [x] Directory, `__init__.py`, placeholder source files, and local `AGENTS.md` / `STATUS.md` created.
-- [ ] Any operational code or physics correctness test.
-
-## Development history
-
-- 2026-11-07 — Initial scaffold only. No physics code or validated API.
-
-After each implementation task, record **date**, **files and contracts changed**, **checks/results**, **upstream versions**, **limitations**, and **next actions** here and in the repository root `STATUS.md`.
+History: 2026-11-07 scaffold -> first working memory compiler.

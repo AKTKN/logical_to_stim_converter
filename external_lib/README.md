@@ -4,7 +4,9 @@ This folder is reserved for user-supplied, locally cloned copies of reference im
 
 **Local workspace (2026-11-07):** All four repositories below have been cloned
 for source inspection. See [`STATUS.md`](STATUS.md) for exact commits and branches.
-They have not been installed or integrated into the package.
+The declared Stim/stimflow dependencies are now installed and validated for memory;
+the local source trees themselves remain read-only. Other libraries are references
+only. See STATUS for the exact source-versus-wheel version distinction.
 
 Suggested sources:
 

@@ -1,3 +1,8 @@
 # AGENTS.md — Python package root
 
-No public physics API is implemented yet. Preserve a clean `src/` layout; avoid importing optional unpinned `stimflow`, surface-sim, or Hex into package `__init__.py`. Public exports must be added only after corresponding classes and tests are ready. Source subdirectories carry their own `AGENTS.md` and `STATUS.md`. `knill_bench` may consume this package but this package must not import `knill_bench`.
+The public memory API is exported from `__init__.py`: code/layout/block models,
+backend/context/fragment contracts, three memory operations, compiler/artifact,
+and noise types. Stim/stimflow are pinned required dependencies. Surface-sim,
+Hex, lomatching, and knill_bench must not be imported here. Do not export future
+placeholder operations until implemented with physics tests. Preserve the `src/`
+layout and consult per-directory AGENTS/STATUS before changes.

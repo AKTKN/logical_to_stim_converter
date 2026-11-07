@@ -1,74 +1,73 @@
-# Development environment and workflow
+# Development environment and verification
 
-The repository contains placeholders, packaging, and a smoke test. The setup below installs a development environment; it does not create working QEC circuit generators.
+The memory-core implementation uses Python 3.11+ and a `src/` package layout.
+Create a local virtual environment and install the editable package:
 
-## Windows, PowerShell
-
-```powershell
-cd logical_to_stim_converter
-py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+```bash
+python -m venv .venv
+# Linux/macOS:
+source .venv/bin/activate
+# Windows PowerShell instead:
+# .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 python -m pytest
 python -m ruff check src tests
+python -m build
+python examples/two_patch_memory.py
 ```
 
-If PowerShell blocks script activation, use `cmd.exe` with `.venv\Scripts\activate.bat`, or invoke `.venv\Scripts\python.exe` directly. Do not weaken execution policy globally just to activate this environment.
+In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
+invoke `.venv\Scripts\python.exe` directly. A Conda environment with Python 3.11
+or 3.12 also works with the same installation commands; activation-policy changes
+are not required.
 
-## Conda alternative
+## Reproducible upstream integration
 
-```powershell
-conda create -n logical_to_stim python=3.11 -y
-conda activate logical_to_stim
-python -m pip install -e ".[dev]"
-python -m pytest
-python -m ruff check src tests
-```
+`pyproject.toml` pins these validated integration dependencies:
 
-For Linux/macOS, create and activate a normal `.venv`, then run the same `pip`, `pytest`, and `ruff` commands. Use Python 3.11+ but verify that your selected Python version is supported by installed Stim wheels.
+- `stim==1.15.0` (wheel).
+- `stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow`
+  (`stimflow.__version__ == "1.17.dev0"`).
 
-## Reference source in `external_lib`
+Git and network access to GitHub are required when pip installs the pinned source
+package. The stimflow source checkout itself reports a development Stim version;
+we deliberately use the separately pinned **1.15.0** Stim wheel. This combination
+is checked using the APIs actually used by this package, not a promise that every
+upstream stimflow feature is compatible. NumPy/SciPy and dev tooling retain bounded
+minimum versions; this is an integration pin, not a full transitive lockfile.
 
-Suggested local folders (the contents are **not** provided):
+CI installs directly from these declarations without relying on local paths. It
+is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
+and the example. Local verification results/platforms are recorded in STATUS;
+CI configuration alone is not evidence that those remote jobs ran.
 
-```text
-external_lib/
-  stim/           # optional full Stim repository; stimflow is at glue/stimflow
-  surface-sim/    # https://github.com/MarcSerraPeralta/surface-sim
-  Hex/            # https://github.com/AKTKN/Hex
-  lomatching/     # https://github.com/MarcSerraPeralta/lomatching
-```
+`surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
+reference for column-major data numbering, check geometry, and N/Z interaction
+ordering. The implementation uses its mathematical convention, with explicit
+small-distance support fixtures and independent Stim flow/fault checks. It does
+not import surface-sim. Hex/lomatching remain references only.
 
-The `.gitignore` excludes these folders from accidental commits. Add a source revision/commit to `external_lib/STATUS.md` when copied; do not assume an unpinned checkout stays compatible. For stimflow from a Stim checkout, inspect `external_lib/stim/glue/stimflow/setup.py` and its dependencies. It is not a regular declared PyPI dependency of this project. When you deliberately choose a revision, either install the local stimflow package (if its checked-out build configuration supports it) or add its `src` path to `PYTHONPATH` **in your local environment**. Do not put absolute Windows paths in project code.
+Optional local source checkouts are described in `external_lib/README.md` and
+`external_lib/STATUS.md`. Do not edit, vendor, or commit those copies. Package
+imports and tests must not depend on their presence or machine-specific paths.
 
-## Git upload from the local PC
+## Contracts to preserve
 
-```powershell
-git init
-git add .
-git status
-git commit -m "Initialize logical_to_stim_converter scaffold"
-git branch -M main
-# Create a remote repository first, then:
-git remote add origin <YOUR_REPOSITORY_URL>
-git push -u origin main
-```
+- Mathematical code matrices contain no physical indices or hardware/noise data.
+- Logical ID, block ID, local key, stable `(block_id, local_key)` site identity,
+  placement coordinate, and final Stim index are separate.
+- Use signed `Chunk.verify()` and `ChunkCompiler`; retain both logical Pauli flows.
+  Initialization/readout discard only the explicitly incompatible basis.
+- Align disjoint physical layers before computing global idle noise. The current
+  adapter expands loops to retain exact record/provenance and timing metadata.
+- Export final indices from assembled circuit coordinates, not from local chunks.
+- Preserve first conjugate-basis syndrome records without inventing a correction.
+- Noise rules replace inherited channels and apply once. Preserve the ideal circuit.
+- Public memory inputs use explicit parallel layers and same-basis memory readout.
 
-`external_lib` source contents should not appear in `git status` by default. If you intentionally want to version upstream sources, choose pinned submodules/subtrees or explicit vendor policy first.
-
-## Codex implementation cycle
-
-1. Read root `AGENTS.md`, global `STATUS.md`, `docs/architecture.md`, and the destination folder's `AGENTS.md` + `STATUS.md`.
-2. Implement **one narrowly specified milestone**; check pinned upstream APIs before adapter work.
-3. Add deterministic unit/physics/flow tests, run `pytest` and `ruff` (CI currently runs these on Ubuntu/Python 3.11).
-4. Update the affected folder's `STATUS.md` and global `STATUS.md` with exact files changed, behavior verified, and remaining limitations.
-5. Review changes and commit them. Keep scientific claims conditional until validated on actual Stim circuits.
-
-## Packaging notes
-
-- Distribution name: `logical-to-stim-converter`.
-- Python import: `logical_to_stim_converter`.
-- Present version: `0.0.0` (scaffold; **not production-ready**).
-- Runtime dependency declarations provide Stim/NumPy/SciPy groundwork only; do not imply that integrations are implemented.
-- No license has yet been chosen.
+For every implementation task, read AGENTS/STATUS, add a focused physics or
+metadata regression, run the applicable checks, and update affected status files.
+No decoder, parser, generic Clifford operation, or scheduling optimization should
+be added as an incidental extension. Commit and push at the maintainer's direction
+after review and verification. No project license has been chosen.

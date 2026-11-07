@@ -1,4 +1,1 @@
-"""Code-family-specific physical implementation adapters.
-
-No domain functionality is implemented yet.
-"""
+"""Code-family backends; rotated-surface memory is implemented."""
