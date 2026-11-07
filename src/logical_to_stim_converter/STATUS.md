@@ -1,5 +1,15 @@
 # STATUS — Package root
 
+## M5 update — 2026-11-07
+
+Public exports now include CompositeOperation, BellStatePrep, KnillEC, and
+PhysicalPauliFrame. Existing memory/Clifford APIs are preserved. CompiledCircuit
+exports preparations/readouts/Bell results, detector stages and excluded relations,
+relocation history, current/open mappings, and open flow interfaces. External
+physical corrections enter evaluate_frames; no production decoder is imported.
+PyMatching 2.3.1 belongs only to the development extra and required CI tests.
+See root STATUS for exact executed verification and remaining limits.
+
 **2026-11-07:** The top-level public memory/Clifford API exports CodeSpec, PhysicalLayout,
 LogicalBlock, CodeBackend, CompilerContext, ModuleFragment,
 RotatedSurfaceCodeBackend, OperationModule, LogicalInit, SyndromeExtraction,

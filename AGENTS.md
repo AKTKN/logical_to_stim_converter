@@ -4,7 +4,7 @@ This file applies to the entire repository. Read the nearest nested `AGENTS.md` 
 
 ## Purpose and current reality
 
-Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Dedicated Bell/Knill classes, other code families, and decoder interfaces remain placeholders. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
+Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Bell/Knill composites, random readouts, open outputs, Knill relocation, and externally resolved physical preparation frames now work. Other code families and production decoder interfaces remain placeholders. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
 
 ## Source-of-truth map
 

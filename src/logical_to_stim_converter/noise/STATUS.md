@@ -1,5 +1,20 @@
 # STATUS — Noise
 
+## M5 verification — 2026-11-07
+
+The existing injector requires no second composite noise path. Every physical
+instruction keeps its primitive module tag; shared CNOT modules own both blocks
+and each pair receives one fault. Composite instance overrides are inherited by
+children; primitive type/global resolution remains intact. Waiting input/output
+blocks, active ancillas, measured/retired blocks, and zero-duration virtual gates
+retain the global schedule convention.
+
+New d=3/5 Knill tests compare exact gate/reset/result/idle channels, targets,
+probabilities, and layers, including primitive-equivalent noisy circuits, both
+resource and Bell CNOTs, metadata preservation, seeded reproducibility, and DEM
+validity. Root STATUS records final results. Stage-specific noise selectors and
+custom correlated models remain deferred; stage provenance is now populated.
+
 ## M3 update — 2026-11-07
 
 M3: NoiseModel operation selectors accept TransversalH, TransversalCNOT,

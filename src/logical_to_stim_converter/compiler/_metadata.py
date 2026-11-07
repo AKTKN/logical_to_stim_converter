@@ -15,6 +15,7 @@ from ..core.compiler_context import (
     TimeLayer,
 )
 from ..core.module_fragment import ModuleFragment
+from ..core.protocol import CheckHistory, LogicalReadout, PreparationInfo, SuppressedDetector
 from ._parallel import moments
 
 ANNOTATIONS = {"QUBIT_COORDS", "DETECTOR", "OBSERVABLE_INCLUDE", "SHIFT_COORDS"}
@@ -27,7 +28,6 @@ def extract_metadata(
     position_to_index = {complex(*coords[:2]): i for i, coords in final_coords.items()}
     physical_map = {site: position_to_index[pos] for site, pos in context.site_positions.items()}
     index_to_site = {i: site for site, i in physical_map.items()}
-    logical_for_block = {block: logical for logical, block in context.logical_to_block.items()}
     by_module = {f.module_id: f for f in fragments}
     measurements = []
     detectors = []
@@ -61,7 +61,8 @@ def extract_metadata(
                 for target in instruction.targets_copy():
                     block_id, local_id = index_to_site[target.value]
                     block = context.blocks[block_id]
-                    logical_id = logical_for_block[block_id]
+                    fragment = by_module[instruction.tag]
+                    logical_id = fragment.logical_ids[fragment.block_ids.index(block_id)]
                     basis = "X" if instruction.name == "MX" else "Z"
                     if local_id in block.layout.ancilla_ids:
                         kind = "syndrome"
@@ -72,7 +73,8 @@ def extract_metadata(
                     key = MeasurementKey(block_id, local_id, kind, round_index)
                     measurements.append(
                         MeasurementInfo(
-                            key, len(measurements), logical_id, basis, instruction.tag, layer_index
+                            key, len(measurements), logical_id, basis, instruction.tag, layer_index,
+                            fragment.stage,
                         )
                     )
                     if (
@@ -106,6 +108,7 @@ def extract_metadata(
                             block_id,
                             check_id,
                             support,
+                            next(iter({measurements[i].stage_id for i in indices}), None),
                         )
                     )
                 else:
@@ -115,8 +118,8 @@ def extract_metadata(
         )
         active -= retiring
     observable_info = []
-    for logical, index in sorted(context.observable_ids.items(), key=lambda item: item[1]):
-        block_id = context.logical_to_block[logical]
+    for logical, index in sorted(context.output_ids.items(), key=lambda item: item[1]):
+        block_id = context.readout_blocks[logical]
         if index not in observables:
             raise ValueError(f"Missing logical observable for {logical!r}")
         frame = context.readout_frames[logical]
@@ -152,11 +155,83 @@ def extract_metadata(
     context.layers = tuple(layers)
     context.frames = {
         logical: replace(
-            context.frames[logical], preparation_syndromes=tuple(preparation_syndromes[logical])
+            context.frames[logical], preparation_syndromes=tuple(dict.fromkeys(
+                context.frames[logical].preparation_syndromes
+                + tuple(preparation_syndromes[logical])))
         )
         for logical in context.logical_to_block
     }
     return physical_map, tuple(observable_info)
+
+
+def protocol_metadata(context, fragments, backend):
+    preparations, readouts = [], []
+    for f in fragments:
+        if f.operation_type not in ("LogicalInit", "LogicalMeasure"):
+            continue
+        block = context.blocks[f.block_id]
+        orientation = f.orientations_before[0]
+        data = block.layout.data_ids
+        at = {block.position(q): q for q in data}
+        logical_supports = [tuple(at[q] for q in backend.logical_pauli(
+            block, f.logical_id, axis, orientation)) for axis in "XZ"]
+        records = [m for m in context.measurements if m.module_id == f.module_id]
+        checks = tuple(CheckHistory(
+            c.check_id, ("Z" if c.basis == "X" else "X") if orientation else c.basis,
+            c.support, tuple(m.key for m in records if m.key.local_id == c.ancilla))
+            for c in block.layout.checks)
+        if f.operation_type == "LogicalInit":
+            preparations.append(PreparationInfo(
+                f.module_id, f.block_id, f.logical_id, f.stage,
+                context.prepared_basis[f.logical_id], orientation, data, checks,
+                *logical_supports))
+        else:
+            from ..core.compiler_context import ParityExpression
+
+            basis = records[0].basis
+            by_local = {m.key.local_id: m.key for m in records}
+            readouts.append(LogicalReadout(
+                f.module_id, f.logical_id, f.block_id, basis, orientation,
+                f.readout_mode, f.stage, tuple(by_local[q] for q in data),
+                ParityExpression(tuple(by_local[q] for q in logical_supports[basis == "Z"])),
+                checks))
+    return tuple(preparations), tuple(readouts)
+
+
+def separate_detector_regions(circuit, fragments):
+    """Apply an explicit boundary policy to already verified global relations.
+
+    Keep all physical flows during composition. Only the decoder annotations
+    crossing explicit stage boundaries are excluded, with their parity and
+    provenance retained for auditing. Ordinary un-staged M3 correlations remain.
+    """
+    stages = {f.module_id: f.stage for f in fragments}
+    records = []
+    result = stim.Circuit()
+    suppressed = []
+    detector_index = 0
+    for inst in circuit:
+        if stim.gate_data(inst.name).produces_measurements:
+            records.extend([stages[inst.tag]] * len(inst.targets_copy()))
+        if inst.name == "DETECTOR":
+            indices = tuple(len(records) + t.value for t in inst.targets_copy())
+            regions = {records[i] for i in indices}
+            if len(regions) > 1 and regions != {None}:
+                suppressed.append(SuppressedDetector(
+                    detector_index, indices, tuple(sorted(regions, key=str))))
+            else:
+                result.append(inst)
+            detector_index += 1
+        else:
+            result.append(inst)
+    return result, tuple(suppressed)
+
+
+def validate_detector_regions(detectors, measurements):
+    for detector in detectors:
+        stages = {measurements[i].stage_id for i in detector.measurement_indices}
+        if len(stages) > 1 or (stages and detector.stage_id not in stages):
+            raise ValueError("Detector crosses an explicit stage boundary")
 
 
 def finalize_observables(circuit, context, observables):

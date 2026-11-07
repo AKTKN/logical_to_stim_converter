@@ -38,6 +38,8 @@ class ModuleFragment:
     orientations_before: tuple[int, ...] = ()
     orientations_after: tuple[int, ...] = ()
     logical_action: str = "I"
+    readout_mode: str = "deterministic"
+    composite_ids: tuple[str, ...] = ()
 
     def __post_init__(self):
         # Scalar construction remains accepted for the original one-block wrappers.

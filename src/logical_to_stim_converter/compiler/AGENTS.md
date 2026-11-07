@@ -17,3 +17,11 @@ Assemble ideal logical operation fragments into physical Stim circuits and metad
 The memory/Clifford compiler and private logical-port, parallel, and metadata adapters are implemented. Preserve explicit logical barriers and reject physical collisions or unmatched flows. Update this folder's `STATUS.md` and root status after changes.
 
 M3: preserve all check correlations through ChunkReflow and transport a complete known logical-state port basis in `_logical.py`. Frame-corrected readout requires a signed physical Stim proof. A detector anchor is not its decoder scope: validate and export every contributing block.
+
+M5: `_plan.py` retains composite child identity and parallel stages; `_teleport.py`
+handles semantic relocation. Random readout consumes only measurement-destroyed
+ports and retains signed conditional outputs. Open export retains the verified
+frontier, with no magical terminal measurements. `_frames.py` propagates externally
+resolved physical vectors; it must not select corrections or import a decoder.
+Compose all physical flows before applying the explicit detector-region policy.
+Retain suppressed cross-stage parity provenance and validate every emitted region.

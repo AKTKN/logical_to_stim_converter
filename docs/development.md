@@ -12,10 +12,11 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 python -m pytest
-python -m ruff check src tests
+python -m ruff check src tests examples
 python -m build
 python examples/two_patch_memory.py
 python examples/two_patch_bell_roundtrip.py
+python examples/knill_ec_single_round.py
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -40,7 +41,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and both memory/Bell examples. Local verification results/platforms are recorded in STATUS;
+and all three memory/Bell/Knill examples. Local verification results/platforms are recorded in STATUS;
 CI configuration alone is not evidence that those remote jobs ran.
 
 `surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
@@ -87,3 +88,19 @@ The pinned dependencies are unchanged for M3. ChunkReflow and Stim signed Pauli
 conjugation/tableau APIs are used directly. No local external source import is
 required. Commit/push only at explicit maintainer direction; the user authorized
 both after this milestone's implementation and verification.
+
+## M5 regression requirements
+
+The development extra pins **PyMatching 2.3.1**; tests import it unconditionally.
+It is absent from mandatory runtime dependencies and production imports. CI runs
+the full physics suite and all three examples on Ubuntu/Windows Python 3.11/3.12.
+The Knill example generates circuits without any decoder.
+
+Keep the 173 M1–M3 regressions. M5 tests must resolve nonzero preparation sectors
+from actual semantic records, check the CSS equations, inspect physical Bell and
+teleported-state expectations at d=3/5, and preserve encoded reference entanglement.
+The explicit-correction reference simulator must remain separate from binary
+frame propagation. Exercise all random Bell branches, rotated pairing, subsequent
+gates, open artifacts, relocation, stage-boundary rejection, and exact once-only
+gate/idle fault locations. No noisy recovery or LER claim follows from the
+noiseless final-sector helper. Deferred tasks are in `docs/deferred_work.md`.

@@ -1,5 +1,20 @@
 # STATUS — Core
 
+## M5 update — 2026-11-07
+
+`protocol.py` adds preparation/check histories, physical Pauli corrections with
+explicit resolution status, semantic random readouts, Bell results/dependencies,
+composite contracts, detector suppression provenance, and relocation records.
+Physical vectors are separate from affine logical frames. Context retains
+historical readout blocks/modes, source gauge keys, and stable logical simulator
+slots while current logical-to-block ownership changes during Knill teleportation.
+ModuleFragment retains stage/composite IDs and readout mode.
+
+Verified: d=3/5 nonzero preparation sectors, CSS correction equations, all four
+input states, encoded reference entanglement, rotated-code pairings, relocation,
+continued gates, and negative correction/mapping/orientation tests. Full check
+counts/results are in root STATUS. No correction selector or production decoder.
+
 ## M3 update — 2026-11-07
 
 M3: code_frame.py adds fixed-site coordinate frames and signed Stim Pauli

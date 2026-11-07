@@ -22,7 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
       - name: Lint
-        run: python -m ruff check src tests
+        run: python -m ruff check src tests examples
       - name: Physics, mapping, lifecycle, and noise tests
         run: python -m pytest
       - name: Build source distribution and wheel
@@ -31,3 +31,5 @@ jobs:
         run: python examples/two_patch_memory.py
       - name: Encoded Bell round trip
         run: python examples/two_patch_bell_roundtrip.py
+      - name: Knill EC single round (decoder independent)
+        run: python examples/knill_ec_single_round.py

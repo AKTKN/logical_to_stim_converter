@@ -1,5 +1,13 @@
 # STATUS — Backends
 
+## M5 verification — 2026-11-07
+
+The unchanged signed memory/Clifford backend primitives now support BellStatePrep
+and KnillEC through composition. No dedicated Knill physical implementation or
+upstream source modification was added. Required d=3/5 resource/teleportation
+physics and all orientation pairings are verified by the new tests; root STATUS
+records final evidence. Other code families remain deferred.
+
 ## M3 update — 2026-11-07
 
 M3: surface_code.py now verifies transversal H, CNOT, and physical X/Y/Z.

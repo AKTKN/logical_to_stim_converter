@@ -1,5 +1,33 @@
 # STATUS — Compiler
 
+## M5 update — 2026-11-07
+
+_plan.py expands composites while preserving parallel layers/identity/stages.
+_teleport.py verifies resource contracts and transfers persistent logical identity
+D to physical B, retaining history and retiring resource identities. _logical.py
+retains signed conditional quantum outputs through random destructive readout.
+Physical measurement discards consume only the destroyed logical generators.
+
+Open artifacts retain cur_end_interface and export through a zero-operation
+projection on a copied compiler; no MPP/artificial readout closes the circuit.
+append recompiles the physical prefix plus continuation with full verification.
+Default closed-memory completion checks remain compatible.
+
+_metadata.py builds stage-local preparation/readout matrices and histories. All
+physical flows and the unfiltered circuit are verified first; an explicit detector
+policy suppresses cross-stage annotations while retaining their raw parity and
+provenance. Emitted regions and ideal/noisy DEMs validate. Ordinary M3 correlations
+remain unchanged. _frames.py validates externally resolved physical corrections,
+propagates actual physical H/CX pairings, interprets measurement flips once, and
+tracks Bell byproducts/residual frames without modifying the primary circuit.
+
+Verified physics, boundary rejection, continuations, and exact fault tests are
+recorded in root STATUS. Pins remain Stim 1.15.0/stimflow ffe0d043598ed5df0851a3e6b4920359a23fafbd.
+Pinned ChunkReflow requires square generator changes; its nonsquare diagnostic
+is defective. Supported square reflows and Chunk measurement/export boundaries
+avoid this path without modifying upstream. Production decoding, incremental
+compilation caching, independently sliced stage DEMs, and noisy recovery deferred.
+
 ## M3 update — 2026-11-07
 
 M3: _logical.py retains a complete known logical-state generator basis

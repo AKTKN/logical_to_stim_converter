@@ -43,7 +43,8 @@ def prepare_part(chunk, fragment, backend, blocks, sequence):
         )
     for flow in chunk.flows:
         if flow.obs_name is not None:
-            if fragment.operation_type == "LogicalMeasure":
+            if (fragment.operation_type == "LogicalMeasure"
+                    and fragment.readout_mode == "deterministic"):
                 flows.append(flow)
             continue
         flags = flow.flags
@@ -64,6 +65,9 @@ class LogicalFlowTracker:
         self.backend = backend
         self.context = context
         self.ports = set()
+        self.pending_readout = []
+        self.measurement_flows = []
+        self.discarded_readout_ports = set()
         self.active = set()
         self.orientations = dict.fromkeys(context.logical_to_block, 0)
         # Follow physical component time, rather than the already-staged end of a
@@ -75,7 +79,8 @@ class LogicalFlowTracker:
 
     def lift(self, logical_pauli):
         result = sf.PauliMap()
-        for logical, index in self.context.observable_ids.items():
+        for logical in sorted(self.active):
+            index = self.context.observable_ids[logical]
             if logical_pauli[index]:
                 block = self.context.block_for(logical)
                 basis = "_XYZ"[logical_pauli[index]]
@@ -87,6 +92,10 @@ class LogicalFlowTracker:
     def before_readout(self, compiler, fragments):
         selected = {f.logical_id for f in fragments if f.operation_type == "LogicalMeasure"}
         if not selected:
+            return
+        if any(f.readout_mode == "random" for f in fragments
+               if f.operation_type == "LogicalMeasure"):
+            self._random_readout(compiler, fragments, selected)
             return
         remaining = self.active - selected
         old = compiler.cur_end_interface()
@@ -121,8 +130,75 @@ class LogicalFlowTracker:
         self.ports = set(remaining_ports)
         self.active -= selected
 
+    def _random_readout(self, compiler, fragments, selected):
+        """Project a known joint state without declaring random bits deterministic.
+
+        Rebase the surviving commuting state generators with public reflows.
+        Their physical measurement-mediated flows are solved and signed by Stim
+        in the parallel adapter. Generators destroyed by measurement are consumed
+        explicitly; all surviving conditional quantum information is retained.
+        """
+        old = compiler.cur_end_interface()
+        if old.discards:
+            raise ValueError("Readout encountered unresolved stabilizer initialization ports")
+        measured = []
+        named = []
+        for f in fragments:
+            if f.operation_type != "LogicalMeasure":
+                continue
+            q = f.logical_id
+            basis = self.context.measurement_bases[q]
+            measured.append(self.backend.logical_pauli(
+                self.context.blocks[f.block_id], q, basis, self.orientations[q]))
+            if f.readout_mode == "deterministic":
+                named.append(measured[-1].with_obs_name((q, basis)))
+            p = stim.PauliString(len(self.context.observable_ids))
+            p[self.context.observable_ids[q]] = basis
+            expectation = self.logical_state.peek_observable_expectation(p)
+            self.logical_state.postselect_observable(p, desired_value=expectation == -1)
+            self.logical_state.reset(self.context.observable_ids[q])
+        remaining = self.active - selected
+        remaining_indices = {self.context.observable_ids[q] for q in remaining}
+        ends = []
+        for p in self.logical_state.canonical_stabilizers():
+            support = {i for i in range(len(p)) if p[i]}
+            if support and support <= remaining_indices:
+                ends.append(self.lift(p))
+        if len(ends) != len(remaining):
+            raise ValueError("Incomplete conditional state after destructive measurement")
+        solve = sf.ChunkReflow.from_auto_rewrite(
+            inputs=sorted(old.ports) + measured, out2in={p: "auto" for p in ends})
+        out2in = {p: [p] for q in sorted(self.active) for p in check_maps(
+            self.backend, self.context.block_for(q), q, self.orientations[q])}
+        pending = []
+        for end, factors in solve.out2in.items():
+            start = sf.PauliMap()
+            for p in factors:
+                if p not in measured:
+                    start *= p
+            out2in[start] = "auto"
+            pending.append((start, end))
+        out2in.update({p: "auto" for p in named})
+        required = set(out2in)
+        # Pinned ChunkReflow requires a square, invertible generator change.
+        # Complete the basis, then consume the measurement-destroyed generators
+        # as explicit discarded inputs of the physical measurement chunk.
+        for p in sorted(old.ports):
+            try:
+                sf.ChunkReflow.from_auto_rewrite(inputs=list(out2in), out2in={p: "auto"})
+            except ValueError:
+                out2in[p] = "auto"
+        reflow = sf.ChunkReflow.from_auto_rewrite(inputs=sorted(old.ports), out2in=out2in)
+        reflow.verify(expected_in=old)
+        compiler.append(reflow)
+        self.discarded_readout_ports = set(out2in) - required
+        self.pending_readout = pending
+        self.ports = set(ends)
+        self.active = remaining
+
     def through(self, parts):
-        managed = set(self.ports)
+        managed = (set(self.ports) | {p for p, _ in self.pending_readout}
+                   | self.discarded_readout_ports)
         unitary = stim.Circuit()
         for chunk, fragment in parts:
             if fragment.operation_type in ("TransversalH", "TransversalCNOT", "LogicalPauli"):
@@ -142,10 +218,17 @@ class LogicalFlowTracker:
                     getattr(self.logical_state, fragment.logical_action.lower())(*indices)
         flows = []
         new_ports = set()
+        pending_ends = {p for _, p in self.pending_readout}
         for start in sorted(self.ports):
             end, sign = transformed_pauli(start, unitary, self.q2i)
-            flows.append(sf.Flow(start=start, end=end, sign=sign, center=None))
+            if start not in pending_ends:
+                flows.append(sf.Flow(start=start, end=end, sign=sign, center=None))
             new_ports.add(end)
+        self.measurement_flows = [
+            (start, transformed_pauli(end, unitary, self.q2i)[0])
+            for start, end in self.pending_readout
+        ]
+        self.pending_readout = []
         for chunk, fragment in parts:
             if fragment.operation_type == "LogicalInit" and chunk.circuit.num_measurements == 0:
                 logical = fragment.logical_id

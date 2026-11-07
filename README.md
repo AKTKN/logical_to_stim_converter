@@ -1,6 +1,6 @@
 # logical_to_stim_converter
 
-**Status (2026-11-07): verified memory and multi-block H/CNOT/Pauli circuits.**
+**Status (2026-11-07): verified memory, H/CNOT/Pauli, and single-round Knill teleportation.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -9,7 +9,7 @@ physical layouts, signed stabilizer/logical flows, concurrent syndrome extractio
 destructive readout, decoder-independent metadata, and circuit-level noise.
 
 The package is independent of `knill_bench`. Sampling and later decoder/experiment
-comparison belong to the caller. No decoder or logical error-rate benchmark is
+comparison belong to the caller. No production decoder or logical error-rate benchmark is
 implemented here.
 
 ## Installation
@@ -25,7 +25,7 @@ source .venv/bin/activate
 # .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 python -m pytest
-python -m ruff check src tests
+python -m ruff check src tests examples
 python -m build
 ```
 
@@ -147,18 +147,19 @@ round counts, signed flows, corrupted-gate/flow rejection, exact measurement
 parities, circuit distance, final mappings, lifecycle rules, and exact noise sites.
 See [STATUS.md](STATUS.md) for executed checks and platform coverage.
 
-Current restrictions: one logical slot per block; every registered block initialized
-and destructively measured once; individual final X/Z readouts must be deterministic
-under the intended logical circuit. H may change the valid readout basis. An
-entangled Bell state's random individual readouts are rejected instead of being
-labelled deterministic observables.
+Current restrictions: one logical slot per block; physical blocks cannot be reused.
+Readouts default to deterministic X/Z under the intended logical circuit. Use
+`LogicalMeasure(..., mode="random")` for a random classical outcome without a
+deterministic observable. Use `compile(..., allow_open_outputs=True)` to retain
+active outputs or unused registered blocks. The default closed-memory check is
+preserved for compatibility. H may change the valid readout basis.
 Repeated rounds are represented as `ChunkLoop` in fragments, then expanded to
 export explicit physical layers and per-record metadata. There is no large-round
 compression or general scheduling optimizer.
 
-Dedicated Bell/Knill operations, other code families, S/other logical Clifford
-gates, a text parser/CLI, decoder adapters, relocation, and adaptive operations remain
-unimplemented. `surface-sim` is a pinned geometry/schedule reference, not a runtime
+Other code families, S/other logical Clifford gates, a text parser/CLI, production
+decoder adapters, physical block reuse, and adaptive operations remain unimplemented.
+`surface-sim` is a pinned geometry/schedule reference, not a runtime
 dependency; Hex and lomatching are not integrated. External copies remain ignored
 by Git. No license has been selected.
 
@@ -247,3 +248,82 @@ OperationContext(module_id, orientations))`; operand order is significant for CN
 The original `build(backend, block, logical_id, module_id)` form remains supported
 for single-block memory use. Lifecycle/frame updates are staged atomically, and
 parallel operations on overlapping operands are rejected even for virtual gates.
+
+## Bell resources and Knill EC
+
+```python
+from logical_to_stim_converter import BellStatePrep, KnillEC
+
+blocks = [LogicalBlock.placed(q, code, patch_index=i) for i, q in enumerate("DAB")]
+compiler = CircuitCompiler(blocks)
+opened = compiler.compile([
+    LogicalInit("D", "X", rounds=1),
+    KnillEC(data="D", first_resource="A", output_resource="B"),
+], allow_open_outputs=True)
+assert opened.open_logical_outputs == {"D": "B"}
+assert opened.logical_to_block == {"D": "B"}
+
+# Address the persistent logical identity D after its relocation to physical B.
+closed = opened.append([SyndromeExtraction("D", rounds=2), LogicalMeasure("D", "X")])
+closed.ideal_circuit.detector_error_model()
+```
+
+`BellStatePrep("A", "B", rounds=None)` prepares A in X and B in Z concurrently,
+with exactly `code.d` complete SE rounds each by default, then applies CNOT A→B.
+`KnillEC` builds that resource, applies CNOT D→A, destructively measures X(D)
+and Z(A), and transfers the identity D to B. A and the old D block retire;
+the A/B resource identities leave the location mapping. `relocation_history`
+preserves that transition. To consume an existing verified Bell resource, pass
+`prepare_resource=False`. `rounds` overrides the resource preparation duration.
+
+Composites expand into the same primitive operations used by ordinary programs.
+Fragments retain primitive noise selection, child operation IDs, composite IDs,
+and stage provenance. No parent injects a second noise rule. Independent composites
+and spectator work can run in parallel. Open artifacts preserve their verified
+`open_interface`; export adds no MPP or terminal data readout. `append` recompiles
+the complete prefix and continuation with flow verification.
+
+`preparations` exports each check's complete record history, final syndrome,
+gauge keys, physical data ordering, and an unresolved `PhysicalPauliFrame`.
+`readouts` and `bell_measurements` export raw data keys, local check matrices,
+logical parities, frame dependencies, and symbolic byproducts. Bell outcomes are
+random classical values, with no deterministic observable assigned to them.
+`bell_measurements[i].physical_output_frame` remains unresolved until corrections
+are supplied. The symbolic affine `logical_output_frame` and final `frames`
+also remain available for auditing the ideal transport relations.
+
+Physical preparation corrections require external selection. A frame uses X/Z
+supports in stable physical data IDs and carries its preparation boundary and
+source syndrome keys. Supply one resolved frame per shot and preparation module:
+
+```python
+# corrections[module_id] is a sequence of prep.resolve(x_vector, z_vector).
+# The vectors are externally selected; the runtime package contains no decoder.
+evaluation = closed.evaluate_frames(raw_samples, corrections)
+logical_bits = evaluation.logical_outputs
+bell_values = evaluation.bell_measurements
+```
+
+The evaluator checks syndrome equations and the prepared logical eigenvalue,
+propagates the physical vectors through actual H/CX pairings, interprets each
+measurement once, then inserts the Bell byproduct into the output frame.
+It returns corrected records, Bell values, logical outputs, and residual open
+physical frames. `interpreted_measurements` on a Knill result requires
+`preparation_corrections=corrections`; it never assumes unresolved vectors vanish.
+The primary physical circuit contains no adaptive correction gates.
+
+Preparation and teleportation have separate detector regions. The compiler first
+verifies the complete physical flow history, then excludes cross-stage detector
+annotations under an explicit boundary policy. `suppressed_detectors` retains
+those verified relations and their raw-record provenance. Preparation detectors
+stay local; Bell check syndromes are raw parity metadata when they depend on a
+preparation sector. M3 cross-block detectors remain available outside these
+explicit boundaries. This policy does not create independently decoded stage DEMs.
+
+Run `python examples/knill_ec_single_round.py` for decoder-independent ideal/noisy
+circuit generation and metadata. The required tests use **PyMatching 2.3.1** only
+from `tests/helpers/preparation_matching.py`, installed by `.[dev]`. They resolve
+noiseless final preparation sectors and independently verify state recovery and
+reference entanglement on physical Stim tableaux. This helper does not infer
+circuit-level faults or establish noisy logical error rates. Future decoder and
+DEM work is tracked in [deferred work](docs/deferred_work.md).

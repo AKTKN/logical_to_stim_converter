@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "logical-to-stim-converter"
 version = "0.0.0"
-description = "Verified rotated-surface memory circuits from logical operation objects"
+description = "Verified rotated-surface Clifford and Knill circuits from logical operations"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -25,6 +25,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "pymatching==2.3.1",
   "pytest>=8",
   "ruff>=0.9",
   "build>=1.2",

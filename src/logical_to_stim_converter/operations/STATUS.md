@@ -1,5 +1,21 @@
 # STATUS — Operations
 
+## M5 update — 2026-11-07
+
+BellStatePrep and KnillEC now implement CompositeOperation expansion into staged
+verified primitives. Resource X/Z resets plus exactly d SE rounds run concurrently
+by default; rounds may be overridden. Knill supports an existing Bell resource,
+random X(D)/Z(A) readout, and a compiler relocation/frame contract. No physical
+H/CNOT/SE/measurement implementation is duplicated. Child IDs, stage/parent IDs,
+primitive type noise, and optional inherited instance overrides survive expansion.
+LogicalMeasure defaults to deterministic and adds explicit mode="random".
+
+Verified primitive-equivalent physical circuits, Bell physical XX/ZZ and random
+singles, complete teleportation and random branches, explicit-correction tableau
+references, parallel composites/spectators, exact once-only noise, and preserved
+M1–M3 APIs. Root STATUS records final evidence. Decoder selection, adaptive
+operations, and noisy logical-state recovery remain deferred.
+
 ## M3 update — 2026-11-07
 
 M3: TransversalH, TransversalCNOT(control,target), and LogicalPauli(X/Y/Z,

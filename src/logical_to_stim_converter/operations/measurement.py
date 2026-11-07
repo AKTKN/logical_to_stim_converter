@@ -10,10 +10,13 @@ from .base import OperationModule
 @dataclass(frozen=True)
 class LogicalMeasure(OperationModule):
     basis: str
+    mode: str = "deterministic"
 
     def __post_init__(self) -> None:
         super().__post_init__()
         validate_basis(self.basis)
+        if self.mode not in ("deterministic", "random"):
+            raise ValueError("Measurement mode must be deterministic or random")
 
     def _build(self, backend, operands, context) -> ModuleFragment:
         logical_id, block = next(iter(operands.items()))
@@ -29,6 +32,7 @@ class LogicalMeasure(OperationModule):
             orientations_after=(orientation,),
             noise=self.noise,
             frame_transition="terminate",
+            readout_mode=self.mode,
         )
         result.verify()
         return result

@@ -67,6 +67,7 @@ class MeasurementInfo:
     basis: str
     module_id: str
     time_layer: int
+    stage_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,7 @@ class DetectorInfo:
     block_id: str
     check_id: str
     supporting_block_ids: tuple[str, ...] = ()
+    stage_id: str | None = None
 
     @property
     def anchor_block_id(self):
@@ -194,6 +196,9 @@ class CompilerContext:
         self.expected_outputs = {}
         self.readout_frames = {}
         self.readout_orientations = {}
+        self.readout_blocks = {}
+        self.readout_modes = {}
+        self.output_ids = {}
         self.logical_state = stim.TableauSimulator()
         self.logical_state.set_num_qubits(len(self.logical_to_block))
         self.measurements: tuple[MeasurementInfo, ...] = ()
@@ -313,12 +318,15 @@ class CompilerContext:
                 pauli = stim.PauliString(len(trial.observable_ids))
                 pauli[index] = operation.basis
                 expectation = trial.logical_state.peek_observable_expectation(pauli)
-                if expectation == 0:
+                if expectation == 0 and operation.mode == "deterministic":
                     raise ValueError("Requested logical measurement is nondeterministic")
-                trial.expected_outputs[logical] = int(expectation == -1)
+                trial.expected_outputs[logical] = (
+                    int(expectation == -1) if expectation else None)
                 trial.measurement_bases[logical] = operation.basis
                 trial.readout_frames[logical] = trial.frames[logical]
                 trial.readout_orientations[logical] = trial.orientations[logical]
+                trial.readout_blocks[logical] = block.block_id
+                trial.readout_modes[logical] = operation.mode
                 trial.status[block.block_id] = BlockStatus.MEASURED
         elif kind != "SyndromeExtraction":
             raise ValueError(f"Unsupported operation {kind}")
@@ -340,3 +348,9 @@ class CompilerContext:
                     key = MeasurementKey(block_id, local, "syndrome", round_index)
                     self.round_counts[(block_id, local)] = round_index + 1
                     self.syndromes[(block_id, local)] = ParityExpression((key,))
+                    if (fragment.operation_type == "LogicalInit" and round_index == 0
+                            and ("X" if instruction.name == "MX" else "Z")
+                            != self.prepared_basis[fragment.logical_id]):
+                        frame = self.frames[fragment.logical_id]
+                        self.frames[fragment.logical_id] = replace(frame,
+                            preparation_syndromes=frame.preparation_syndromes + (key,))

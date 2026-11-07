@@ -2,6 +2,15 @@
 
 **2026-11-07 state:** `SCAFFOLDED`. All Python modules are placeholder docstrings. No domain functionality implemented.
 
+M5 keeps this production-decoder namespace unimplemented. Physical correction
+result/propagation contracts live in core/protocol.py and compiler/_frames.py;
+selection remains external. The required PyMatching helper is test-only, operates
+on noiseless final preparation sectors, and performs no circuit-level inference.
+Future state-preparation, ordinary SE, and Bell-measurement decoder work, gauge
+matching/PAL/IRS, stage DEM/window validation, cross-stage fault correlations,
+noisy sector estimation, LER studies, and adaptive retry policies are tracked in
+docs/deferred_work.md. No GitHub issue creation is claimed.
+
 ## Planned per-file work
 
 - [ ] interfaces.py: Future local/joint scope, observable prediction and optional correction/soft output schemas; intentionally deferred.

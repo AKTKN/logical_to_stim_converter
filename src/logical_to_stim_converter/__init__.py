@@ -1,4 +1,4 @@
-"""Verified memory circuits for independent rotated-surface logical patches."""
+"""Verified rotated-surface memory, Clifford, and Knill teleportation circuits."""
 
 from .backends.surface_code import RotatedSurfaceCodeBackend
 from .compiler.circuit_compiler import CircuitCompiler, CompiledCircuit
@@ -8,10 +8,14 @@ from .core.compiler_context import CompilerContext, ParityExpression, PauliFrame
 from .core.logical_block import LogicalBlock
 from .core.module_fragment import ModuleFragment, OperationContext
 from .core.physical_layout import PhysicalLayout
+from .core.protocol import PhysicalPauliFrame
 from .noise.injector import NoiseInjector
 from .noise.model import NoiseModel, NoiseOverride, NoiseParameters
 from .operations.base import OperationModule
+from .operations.bell_preparation import BellStatePrep
+from .operations.composite import CompositeOperation
 from .operations.initialization import LogicalInit
+from .operations.knill_ec import KnillEC
 from .operations.measurement import LogicalMeasure
 from .operations.pauli import LogicalPauli
 from .operations.syndrome_extraction import SyndromeExtraction
@@ -41,4 +45,8 @@ __all__ = [
     "OperationContext",
     "ParityExpression",
     "PauliFrame",
+    "PhysicalPauliFrame",
+    "CompositeOperation",
+    "BellStatePrep",
+    "KnillEC",
 ]

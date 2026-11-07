@@ -1,5 +1,32 @@
 # STATUS — Tests
 
+## M5 update — 2026-11-07
+
+Added 48 physics/metadata/noise tests; all 173 original tests are retained.
+- test_knill_state_preparation.py: d=3/5 X/Z d-round preparation sectors across
+  seeds; actual semantic histories/check order; gauge/temporal detectors; CSS
+  equations and explicit corrected tableau checks; seven vector/matrix/order/
+  mapping/orientation/omission failures.
+- test_bell_state_preparation.py: d=3/5 default/overridden rounds, parallel timing,
+  primitive-equivalent circuits, child/stage identity, physical corrected XX/ZZ,
+  random singles, and separate explicit-correction simulation.
+- test_knill_teleportation.py: four input states at both distances, all four Bell
+  branches, explicit physical correction references, encoded reference-data
+  entanglement, open export/continuation, H/SE/physical and virtual Paulis, all
+  resource orientations, CNOT after relocation, other live patches, parallel
+  composites, random readout/H timing, and wrong byproduct/orientation failures.
+- test_knill_detector_boundaries.py: stage-local detector records, retained raw
+  Bell checks, valid excluded global relations, boundary rejection, and ideal/
+  noisy DEM construction.
+- test_knill_noise.py: exact physical reset/result/gate/idle faults, two shared
+  CNOTs, no duplicate/virtual faults, primitive equivalence, and seeded sampling.
+
+helpers/preparation_matching.py imports PyMatching 2.3.1 unconditionally and
+resolves final noiseless sectors only. helpers/knill_physics.py independently
+probes physical tableaux and actually executes selected corrections on a separate
+simulator. There is no temporal/circuit-level decoder or noisy recovery claim.
+Root STATUS records exact final test/lint/build/example and CI evidence.
+
 ## M3 update — 2026-11-07
 
 Final suite: **173 passed in 144.89 s**, including all 79 original memory tests.

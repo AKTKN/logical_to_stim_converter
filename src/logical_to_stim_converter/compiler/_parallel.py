@@ -31,6 +31,8 @@ def parallel_chunk(
     *,
     extra_flows=(),
     managed_ports=frozenset(),
+    measurement_flows=(),
+    discarded_readout_ports=(),
 ) -> sf.Chunk:
     parts = list(parts)
     occupied: set[complex] = set()
@@ -48,6 +50,7 @@ def parallel_chunk(
         occupied
         | {q for p in passive for q in p.keys()}
         | {q for flow in extra_flows for p in (flow.start, flow.end) for q in p.keys()}
+        | {q for pair in measurement_flows for p in pair for q in p.keys()}
     )
     q2i = {q: i for i, q in enumerate(sf.sorted_complex(coords))}
     layers = [moments(c.circuit) for c, _ in parts]
@@ -92,6 +95,21 @@ def parallel_chunk(
         if layer_index < max(map(len, layers)) - 1:
             out.append("TICK")
     flows = list(extra_flows)
+    for start, end in measurement_flows:
+        pin = start.to_stim_pauli_string(q2i)
+        pout = end.to_stim_pauli_string(q2i)
+        relation = stim.Flow(input=pin, output=pout)
+        records = out.solve_flow_measurements([relation])[0]
+        if records is None:
+            raise ValueError("Conditional logical flow is not realized by physical readout")
+        relation = stim.Flow(input=pin, output=pout, measurements=records)
+        negative = not out.has_flow(relation)
+        if negative:
+            pout.sign *= -1
+            if not out.has_flow(stim.Flow(input=pin, output=pout, measurements=records)):
+                raise ValueError("Conditional readout has no signed physical flow")
+        flows.append(sf.Flow(start=start, end=end, measurement_indices=records,
+                             sign=negative, center=None))
     for (chunk, _), mapping in zip(parts, measurement_maps, strict=True):
         for flow in chunk.flows:
             flows.append(
@@ -104,7 +122,8 @@ def parallel_chunk(
         out,
         q2i=q2i,
         flows=flows,
-        discarded_inputs=[p for c, _ in parts for p in c.discarded_inputs],
+        discarded_inputs=[p for c, _ in parts for p in c.discarded_inputs]
+        + list(discarded_readout_ports),
         discarded_outputs=[p for c, _ in parts for p in c.discarded_outputs],
     )
     result.verify()

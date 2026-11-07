@@ -18,9 +18,10 @@ Abstract logical operation type, requested primitives, and composite Bell/Knill 
 - `transversal.py` — **TransversalH, TransversalCNOT**: Physical transversal gates, verified logical/stabilizer transforms, code-specific layout/basis effects.
 - `pauli.py` — **LogicalPauli**: Logical Pauli operation, either physical gate realization or virtual logical Pauli-frame update.
 - `measurement.py` — **LogicalMeasure**: Destructive X/Z readout and terminal flow/observable metadata; mark consumed block.
-- `bell_preparation.py` — planned **BellStatePrep**: Composite two-state preparation + H + transversal CNOT, or future alternative resource gadget.
-- `knill_ec.py` — planned **KnillEC**: Composite Bell measurement, logical relocation D->B and symbolic correction/bell measurement metadata; decoder-independent.
+- `bell_preparation.py` — **BellStatePrep**: Concurrent X/Z resource resets and d SE rounds, then transversal CNOT.
+- `knill_ec.py` — **KnillEC**: Composite resource preparation, random Bell readout, and a compiler relocation/frame contract; decoder-independent.
+- `composite.py` — **CompositeOperation**: Expand into staged primitive layers; no second physical gadget implementation.
 
-Memory, TransversalH/CNOT, and physical/virtual LogicalPauli operations are implemented and flow verified. BellStatePrep/KnillEC remain placeholders. Update this folder's `STATUS.md` and root status after changes.
+Memory, TransversalH/CNOT, and physical/virtual LogicalPauli operations are implemented and flow verified. BellStatePrep/KnillEC expand into staged verified primitives through CompositeOperation. They retain child provenance and never inject noise. LogicalMeasure has deterministic/random modes. Update this folder's `STATUS.md` and root status after changes.
 
 Use ordered operands and OperationContext for multi-block builds. Preserve CNOT control/target order. Independent multi-target memory operations retain their compatibility decomposition. Virtual Paulis have zero physical duration.

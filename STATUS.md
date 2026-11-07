@@ -2,9 +2,94 @@
 
 **As of:** 2026-11-07  
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M3_CLIFFORD_IMPLEMENTED` (locally verified)
+**Overall state:** `M5_KNILL_IMPLEMENTED` (local physics verification)
 
-## M3 implemented and verified
+## M5 implemented and verified — 2026-11-07
+
+Baseline local/remote commit: `f1a37d33bd5c4ca0e65a35f42516113d65d0b835`.
+
+- BellStatePrep/KnillEC composite expansion reuses verified primitives, with
+  parallel d-round X/Z resource preparation, optional existing resources, child
+  operation/parent/stage IDs, and preserved primitive noise selection.
+- Explicit random destructive readout retains conditional physical state flows;
+  Bell bits are classical records, never deterministic logical observables.
+- Knill relocates persistent logical D to physical B, retires D/A blocks and A/B
+  resource identities, and retains current/open mappings and relocation history.
+  Subsequent SE/H/CNOT/physical and virtual Paulis and readouts are supported.
+- Open artifacts retain verified flow interfaces and faithful physical circuits
+  without magic MPP/terminal measurements. append recompiles prefix/continuation.
+  The default closed-memory completion check remains for backward compatibility.
+- PhysicalPauliFrame and preparation/check/readout/Bell metadata preserve full
+  syndrome histories, stable data support, orientation, stage/source dependencies,
+  unresolved status, affine byproducts, and residual physical/logical frames.
+- The external correction boundary validates CSS equations and the prepared
+  logical eigenvalue, then propagates actual physical pairings, measurement
+  anticommutation, virtual Paulis, and Bell byproducts exactly once. Unresolved
+  corrections are rejected by the Knill interpretation API; no adaptive gates
+  or production correction selector enters the primary circuit.
+- Complete global physical flows and DEM validity are checked before an explicit
+  detector-boundary policy excludes cross-stage annotations. Excluded relations
+  retain raw parity/provenance metadata; preparation detectors remain local,
+  sector-valued Bell checks remain raw metadata, and M3 correlations remain intact.
+
+### M5 evidence
+
+The unchanged pins are Stim **1.15.0** and stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`. PyMatching **2.3.1** is pinned
+only in the development extra; tests import it unconditionally. Its required
+helper under tests/ solves final noiseless preparation sectors with Matching(H_Z)
+for x and Matching(H_X) for z, checking actual semantic record ordering, physical
+vector lengths, and H_X z=s_X / H_Z x=s_Z. It performs no temporal fault inference.
+
+Verified independent physics includes nonzero preparation gauges across seeds,
+physical corrected Bell XX=ZZ=+1 and random singles, all four input states at
+both d=3/5, all Bell branches, reference-data entanglement after teleportation,
+actual correction execution on a separate Stim simulator, rotated pairings,
+continued computation, and negative vector/matrix/order/mapping/orientation/
+byproduct tests. Exact Knill noise tests count every gate/reset/result/idle fault
+at d=3/5 and compare with independently spelled-out primitive circuits.
+
+Final local verification in Linux/WSL2 Python 3.12.7:
+
+- `python -m pip install -e ".[dev]"`: successful, PyMatching 2.3.1 installed.
+- `python -m pytest`: **221 passed in 123.93 s** (all 173 original tests retained).
+- Focused Knill teleportation/boundary/noise checks after the final provenance
+  refinement: **29 passed in 54.65 s**.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- `python -m pip check`: no broken requirements.
+- All three requested examples passed; ideal/noisy DEMs and seeded sampling valid.
+- Built-wheel import from an isolated target: Knill generation, open continuation,
+  ideal/noisy DEMs pass with PyMatching imports blocked. Wheel metadata makes
+  PyMatching dev-only; the runtime wheel excludes tests and external source.
+- Source/wheel archives exclude local briefs, environments, and external clones;
+  the source distribution retains required test helpers. All four external source
+  working trees remain clean. `git diff --check` passed.
+CI includes Ubuntu/Windows Python 3.11/3.12, the required PyMatching tests, Ruff,
+build, and all three examples. Post-push CI results are reported separately.
+
+The decoder-independent Knill example ends open with 51 qubits, D->physical_B,
+44 preparation/input detectors, 74 raw records, no observables, and 8 excluded
+cross-stage detector relations. Continuing with two SE rounds, H, and Z readout
+produces **51 qubits, 99 measurements, 56 detectors, 1 observable**; the selected
+uniform-noise model gives **549 DEM error mechanisms**. Noisy decoded recovery
+or logical error rate is claimed.
+
+Pinned API inspection: Hex commit `5de58f2f80791054411ad3c0885a4fe3671ed56a`
+separates preparation corrections and Bell measurement correction maps; this
+informs metadata boundaries without importing Hex. Pinned ChunkReflow requires
+square generator changes and has a defective nonsquare diagnostic; supported
+square reflows plus physical measurement/export Chunk boundaries avoid that path.
+No external source or dependency pin was changed.
+
+Production preparation/SE/Bell decoders, noisy sector estimation, stage DEM/window
+slicing with correlated faults, gauge matching/PAL/IRS, LER, and adaptive/retry
+policies remain deferred in docs/deferred_work.md and decoding/STATUS.md.
+No GitHub issue creation is claimed. User authorization includes commit and push
+once verification completes. External clones, local briefs, environments, and
+build/sample artifacts remain excluded.
+
+## Prior M3 implementation and verification
 
 - Multi-block OperationContext/ModuleFragment interfaces, one shared ordered CNOT
   fragment, scalar memory compatibility, atomic state updates, and overlap rejection.
@@ -110,26 +195,33 @@ from these local verification results.
 | M1 | CSS/layout/block models and memory backend contract implemented/verified |
 | M2 | Three primitives and concurrent memory composition implemented/verified |
 | M3 | H/CNOT/physical and virtual Paulis, affine frames, cross-block detectors, Bell round trip verified |
-| M4 | Memory/Clifford noise and synchronous timing verified; stages/composites deferred |
-| M5 | Dedicated BellStatePrep/KnillEC, relocation and teleportation/adaptive frames deferred |
+| M4 | Primitive/composite Clifford noise and synchronous timing verified; stage selectors deferred |
+| M5 | BellStatePrep/KnillEC, random readout, open outputs, relocation, physical frame evaluation verified |
 | M6 | Memory raw metadata implemented; decoder adapters/knill_bench integration deferred |
 | Deferred | Text parser/CLI, other code families, scheduling optimization |
 
-Current restrictions: one logical slot per block, deterministic individual final
-X/Z readouts under the intended Clifford circuit, every registered block initialized
-and measured once, explicit logical barriers, expanded output rounds (linear memory/circuit size). Waiting active
-blocks use global idle defaults. First conjugate-basis syndromes label the random
-preparation sector; no decoder-dependent correction or canonical stabilizer-sector
-preparation is claimed. No general code-distance solver, S/other logical Clifford
-gates, decoder algorithm, logical error-rate benchmark, adaptive physical operation,
-or Knill implementation exists.
+Current restrictions: one logical slot per block, no physical block reuse,
+explicit logical barriers, and expanded output rounds. Readouts default to
+deterministic; random readout and open outputs are explicit options. Waiting
+active blocks use global idle defaults. Physical preparation correction selection
+is external, with unresolved state retained until supplied. The test-only helper
+resolves noiseless final sectors, without noisy fault inference. No general
+code-distance solver, S/other logical Cliffords, production decoder, logical
+error-rate benchmark, adaptive quantum operation, or parser/CLI is implemented.
 
 Surface-sim revision `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
-geometry/schedule reference only. Hex/lomatching remain unintegrated. A project
-license has not been selected. Next: review M3, then separately scope teleportation,
-nondeterministic measurement contracts, and decoder-facing integration.
+geometry/schedule reference; Hex supplies a modular protocol reference. Neither
+is imported. A project license has not been selected. Future work is explicitly
+tracked in docs/deferred_work.md; knill_bench remains a downstream runner.
 
 ## Changelog
+
+- **2026-11-07** — Implemented M5 Bell/Knill composites, random readout and
+  conditional flows, explicit open-output artifacts, logical relocation, external
+  physical preparation-frame evaluation, and detector-region policy. Added 48
+  physics/metadata/noise tests plus a decoder-independent Knill example, test-only
+  PyMatching dev/CI coverage, deferred-work records, and current architecture/API
+  documentation. Verification evidence above; commit/push explicitly authorized.
 
 - **2026-11-07** — Implemented the M3 brief locally, preserving the memory API and
   tests. Added ordered multi-block operations, binary H code frames, affine frames,
