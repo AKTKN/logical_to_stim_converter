@@ -18,3 +18,11 @@ strict/local mixed-patch IDs and deterministic faults. Reject unhandled matching
 hyperedges; never assert a stochastic LER target. PyMatching/Matplotlib stay in
 the dev/example layer. Exact snapshot tests must catch probability rounding and
 source-fingerprint collisions on both Windows and Linux.
+
+M6-D: retain prior physics tests; use d=3/5 T=1/2 and physical reference tableaux.
+Test temporal boundary targets separately from capacity sector representatives,
+including early/late noisy result bits. Check exact conditional Bell Pauli atoms,
+exclusive groups, survivor frames and actual injected physical fault signatures.
+Frame edits must change later current events exactly once while preserving raw
+physical batches. Test decoder replacement, chunking, spectators and no hidden
+truth in stage requests. Wall timings are reported without performance thresholds.

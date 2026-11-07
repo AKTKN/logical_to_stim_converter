@@ -1,5 +1,16 @@
 # STATUS — Package root
 
+## M6-D update — 2026-11-08
+
+CompiledCircuit.make_frame_plan now exports verified sparse batch physical-frame
+propagation. The public decoding namespace adds typed stage requests, correction
+hypotheses, model-only temporal boundary targets and conditional Bell fault actions.
+No PyMatching/Matplotlib imports or mandatory dependencies enter runtime code.
+The fixed-round Knill consumer, modular baseline, LER and exclusive phase wall
+reports live in examples/. Strict noiseless frame proof remains separate from
+noisy hypotheses. Root STATUS and decoding/compiler ledgers record limitations
+and full verification. No upstream edit, block reuse or experiment framework.
+
 ## M6-C update — 2026-11-08
 
 The public converter remains decoder-neutral. The ordinary-memory MWPM consumer

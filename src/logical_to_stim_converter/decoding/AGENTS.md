@@ -14,7 +14,13 @@ here; external consumers and knill_bench own those choices.
 - selectors.py: public semantic anchor/touching/strict block/stage/check selection.
 - records.py: pure vectorized sparse GF(2) transforms and caller-defined record frames.
 - errors.py: typed source/metadata/selection/DEM construction failures.
-- interfaces.py: still a placeholder for future decoder result/prediction schemas.
+- frames.py: immutable correction/plan contracts and isolated caller-owned batch state.
+- stages.py: typed requests/protocol, strict temporal model-only boundary probes,
+  and signed conditional sector transfer from public physical metadata.
+- conditional.py: exact Bell-interval Pauli atoms, exclusive groups and joint
+  raw/survivor fault actions; not a shot-conditioned deterministic Stim DEM.
+- interfaces.py: future production decoder contracts; the small StageDecoder
+  protocol in stages.py supports replaceable external M6-D adapters.
 
 Never remove a physical fault because it touches an excluded detector. Re-extract
 from the unchanged physical gate/noise sequence; preserve hyperedges and correlated
@@ -28,6 +34,13 @@ Keep source/model snapshots and public metadata immutable, return copies of Stim
 objects/matrices, and never edit caller raw arrays in place. Use exact immutable
 instruction snapshots and full-precision source fingerprints; Stim circuit/DEM
 text roundtrips can round floating-point arguments, especially on Windows. All performance-sensitive
-sample transformations operate on whole batches. Physical correction selection and
-automatic Pauli-to-record maps remain outside this milestone. Read STATUS before
+sample transformations operate on whole batches. Physical correction selection stays external. Compiler make_frame_plan supplies
+verified Pauli-to-record maps; this namespace consumes them without private
+compiler state. Read STATUS before
 changes and update it plus root STATUS with exact physics/model evidence.
+
+Model-only ideal boundary probes may define temporal output targets, but never
+enter canonical circuits or normal decoder input truth. Preserve physical noisy
+prefix instructions and every selected fault effect. Conditional Bell models
+retain correlated readout/survivor actions and exclusive categorical alternatives.
+Do not pretend raw random Bell parities are zero-expected global detectors.

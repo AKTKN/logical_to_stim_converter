@@ -131,6 +131,12 @@ class CompiledCircuit:
 
         return make_decoder_view(self, **options)
 
+    def make_frame_plan(self):
+        """Build reusable decoder-neutral batch frame/record maps once."""
+        from ._frame_plan import make_frame_plan
+
+        return make_frame_plan(self)
+
     def interpreted_measurements(self, measurements, *, preparation_corrections=None,
                                  validation="noiseless"):
         if preparation_corrections is not None:

@@ -9,26 +9,32 @@ Offline decoder views now re-extract exact detector/observable marginals from th
 full physical circuit, preserving fault effects across excluded annotations. Public
 GF(2) record maps support software frame updates. M6-C demonstrates ordinary-memory
 noisy MWPM/LER as an external consumer of one shared raw batch; it adds no runtime
-decoder framework. These remaining requirements
-are future work; no GitHub issue creation is claimed.
+decoder framework. M6-D now supplies typed temporal boundary targets, exact
+conditional Bell fault
+actions and static batch frame maps, with a restricted noisy modular demonstration.
+These remaining requirements are future work; no GitHub issue creation is claimed.
 
-- State-preparation decoding: infer physical sector corrections from noisy
-  multi-round measurements; distinguish gauge initialization from fault evidence.
-- Ordinary syndrome-extraction decoding: circuit-level temporal inference and
-  correction updates on active blocks, with backend-independent result contracts.
-- Bell-measurement/teleportation decoding: local versus joint readout inference,
+- Production state-preparation decoding: improve temporal boundary estimates
+  beyond the M6-D MWPM baseline, including ambiguous parallel-edge fault labels.
+- Production ordinary-SE strategies beyond strict windows: cross-boundary
+  frame reference offsets and joint conditional inference on active blocks.
+- Bell-measurement/teleportation joint decoding beyond the per-patch capacity baseline:
   incoming/resource physical-frame dependencies, and output frame updates.
 - Decoder assignment/configuration and downstream `knill_bench` integration.
 - Gauge-detector matching, PAL/IRS, and other optional decoder adapters.
-- Conditional preparation/Bell DEM construction and window/boundary conventions.
+- General conditional preparation/Bell DEMs and cross-boundary reference conventions.
+  M6-D exports model-only boundary probes and an explicit conditional Bell Pauli
+  action model, not an exact shot-conditioned deterministic Bell DEM.
   M6-B physical marginals preserve all retained inter-stage fault effects; they
   do not establish independently decoded or conditional stage models.
-- Noisy preparation-sector estimation, automatic physical-correction-to-record
-  maps, and Knill/conditional decoder-dependent logical error-rate benchmarking.
-  The test-only final-sector PyMatching helper is inadequate here; the ordinary
-  memory M6-C example does not resolve noisy preparation sectors.
+- Improved noisy preparation-sector estimation and research-grade
+  Knill/conditional decoder comparisons. Physical correction-to-record maps
+  are now implemented for verified assembly through make_frame_plan.
+  The M5 test-only final-sector helper remains inadequate for noisy inference.
+  M6-D adds temporal estimates and honest finite-noise LER, without claiming
+  perfect noisy sectors, optimized performance or exact maximum likelihood.
 - Adaptive SE, postselection, retries, physical block reuse, and scheduling
-  optimization. Current Knill circuits are fixed single-round Clifford programs.
+  optimization. Current Knill demonstrations use fixed one-/two-teleportation Clifford programs.
 
 Production decoder interfaces must keep correction selection separate from linear
 physical Clifford propagation. A correction result must identify its physical

@@ -1,5 +1,16 @@
 # STATUS — Compiler
 
+## M6-D update — 2026-11-08
+
+CompiledCircuit.make_frame_plan delegates to _frame_plan.py. One symbolic basis
+batch propagates physical X/Z boundary corrections and raw/readout deltas through
+actual H/CX/reset/measurement instructions, virtual Paulis and causal Bell feedback.
+Immutable sparse GF2Maps then support whole-batch offline replay and open final
+physical frame export. No decoder or shot-specific quantum gate is added. Existing
+evaluate_frames/strict validators remain unchanged and independently check the new
+maps. Canonical circuit assembly, noise and provenance are unchanged. Root STATUS
+records d=3/5 T=1/2 physical, fault, packaging and timing evidence.
+
 ## M6-B update — 2026-11-08
 
 Metadata extraction/validation now exports actual detector check basis and the

@@ -4,7 +4,7 @@ This file applies to the entire repository. Read the nearest nested `AGENTS.md` 
 
 ## Purpose and current reality
 
-Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Bell/Knill composites, random readouts, open outputs, Knill relocation, and externally resolved physical preparation frames now work. Offline decoder views and an external ordinary-memory MWPM/LER example now work;
+Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Bell/Knill composites, random readouts, open outputs, Knill relocation, and externally resolved physical preparation frames now work. Offline decoder views and external ordinary-memory and restricted modular Knill MWPM/LER examples now work;
 other code families and production decoder result/algorithm interfaces remain deferred. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
 
 ## Source-of-truth map
@@ -66,3 +66,12 @@ raw batch and externally decoded reference-relative observable flips. Canonical
 DEMs preserve physical correlations; graphlike matching conversion is explicit
 and rejects unsupported hyperedges. DecoderView schema v2 uses immutable exact
 instruction snapshots, never lossy Stim text, for probabilities and source identity.
+
+
+M6-D adds typed stage requests and source-bound batch correction hypotheses.
+Compiler frame plans precompute sparse physical H/CNOT/readout/Bell feedback maps;
+no shot loop or decoder belongs in quantum assembly. Boundary MPP probes are
+model-only targets, never sampled canonical measurements or decoder truth. Raw
+Bell checks are conditional offline syndromes, not new deterministic detectors.
+Preserve exclusive groups and survivor actions in conditional fault models.
+Record phase wall times outside the shot loop and state baseline approximations.

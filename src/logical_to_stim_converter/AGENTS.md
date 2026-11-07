@@ -16,3 +16,9 @@ M6-B exports DecoderView, DetectorSelector, DEMOptions, GF2Map, RecordFlipMap,
 make_decoder_view, observable_local_views and apply_record_flips. The decoding
 namespace also exports input/mapping/audit/error types. Keep views independent of
 private compiler state and physical correction selection.
+
+M6-D adds CompiledCircuit.make_frame_plan and public decoding namespace types:
+OfflineFramePlan/Batch, FrameBoundary, CorrectionBatch, StageInputs/Result/Decoder,
+BoundaryRequest/ReadoutRequest/StageRequests, ConditionalReadoutModel/PauliFault,
+and stage/conditional factories. Algorithms remain in examples; ideal boundary
+probes remain model-only, and canonical raw records/noise stay unchanged.

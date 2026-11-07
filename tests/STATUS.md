@@ -1,5 +1,28 @@
 # STATUS — Tests
 
+## M6-D update — 2026-11-08
+
+Added 46 integration/physics tests (24 memory and 22 decoder-view tests), retaining
+all 394 M1–M6-C tests. The memory suite covers d=3/5 X/Z, both input bits, T=1/2,
+all four Bell branches, actual physical encoded-reference tableaux, open residual
+frames against M5 replay, omitted byproduct failure, noisy replay/alternate
+capacity weights/chunking, one sampling call, no oracle input and report timing.
+
+Decoder-view tests cover strict stage/gauge partitions, shot-specific conditional
+Bell sectors without preparation normalization, early/late measurement-noise
+targets, every conditional Pauli atom against vectorized Stim FlipSimulator at
+both distances, independent physical correction execution/current-event updates,
+source/batch/double-application failures, actual H/CNOT/orientation and physical/
+virtual Paulis, parallel independent gadgets/spectator isolation and immutable
+stage contracts. Ten separately injected data/SE/resource-CX/Bell-CX/readout/post-SE/
+logical faults compare actual physical global signatures with Stim's linear oracle;
+an undetectable logical fault honestly yields failures.
+
+The normal path never imports the M5 noiseless preparation helper or receives
+hidden faults/tableaux. Full pytest, all six examples, isolated wheel and wall
+results are recorded in root STATUS and e2etest/m6d_knill; no timing/LER threshold
+is asserted and no raw samples/profiler binaries are committed.
+
 ## M6-C update — 2026-11-08
 
 Added 24 tests in test_memory_offline_decoding.py plus two exact snapshot/source

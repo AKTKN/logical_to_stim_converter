@@ -1,0 +1,50 @@
+M6-D fixed-round Knill memory verification — 2026-11-08
+Baseline commit: c927e4b72f72c488d7bc5d853d5f812ac6ab4e86
+Environment: Linux/WSL2 x86_64, Python 3.12.7
+Stim 1.15.0, stimflow 1.17.dev0 at ffe0d043598ed5df0851a3e6b4920359a23fafbd
+PyMatching 2.3.1, NumPy 2.5.4, Matplotlib 3.11.2
+
+PASS python -m pytest --durations=15 --junitxml=implementation_files/e2etest/m6d_knill/pytest.xml
+     440 passed in 258.20s; 46 new tests, all 394 previous tests retained.
+PASS python -m ruff check src tests examples
+PASS python -m build (source distribution and wheel)
+PASS all six examples (Knill memory additionally ran full 8-case 20,000-shot suite)
+PASS isolated installed wheel with PyMatching/Matplotlib/test/reference imports
+     blocked: T=2 canonical generation, exact global DEM/views, stage boundary
+     models, conditional Bell actions and batch frame maps.
+PASS copied standalone example against installed wheel (d=3 T=2, 64 shots).
+PASS archive contents include new modules/tests/examples and exclude local reports,
+     raw samples, environments and reference clones.
+PASS git diff --check; all four read-only external reference trees remain clean.
+
+Noiseless tests: d=3/5, X/Z, input bits 0/1, T=1/2, 64 shots each, all Bell
+branches and intrinsic gauges. Actual physical encoded reference entanglement
+XX=ZZ=+1 survives one/two teleportations at both distances across 16 tableau
+branches. Open physical frames agree with independently validated M5 replay.
+Explicit physical correction execution verifies current-record/frame updates.
+Every conditional Bell-interval atom is checked against vectorized Stim Pauli
+propagation, including exclusive depolarizing alternatives and survivor X/Z action.
+Ten selected physical fault categories compare official global detector/observable
+signatures, including an undetectable logical fault that honestly yields failure.
+Early/late final-result target inference is tested in a measurement-noise regime;
+noisy circuit-level recovery may fail and is not assumed optimal or exact.
+Replay/alternate weights/chunking and independent parallel/spectator isolation pass.
+Normal stage requests contain no hidden faults/tableaux or model-probe truth.
+
+Unprofiled final demonstration: 160,000 total physical shots, 20,000 per case,
+p=0.001, d=3/5, X/Z, T=1/2, resource/input rounds=d and post rounds=1.
+Full CLI wall time: 44.920032 s.
+Experiment phase totals: 42.995043 s; physical sampling calls: 0.354326 s.
+
+See wall_time_report.md for phase breakdowns, bottlenecks, profiling evidence and
+measurement limits. Timings are not performance thresholds; seeds are not portable
+across Stim versions/SIMD machines/sampling call structures.
+
+Baseline restrictions: temporal MWPM parallel-edge target ambiguity; unit-weight
+per-patch conditional Bell capacity approximation; strict SE regions exclude
+cross-boundary offsets and one-round windows have no temporal information.
+Earlier residual errors can violate the conditional incoming-sector hypothesis.
+Canonical full circuits/DEMs and raw records are unchanged and alternatives can
+replace preparation, Bell-readout and ordinary-SE decoders independently.
+Production joint recovery, optimized performance, adaptive control and block reuse
+remain future work. Remote CI is checked after push and reported separately.

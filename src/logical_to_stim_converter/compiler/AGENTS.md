@@ -34,3 +34,9 @@ from the explicit strict noiseless sector/eigenvalue validator.
 M6-B exports actual detector basis and full underlying data support and validates
 them against physical layouts/orientations. CompiledCircuit delegates offline view
 construction to decoding; quantum assembly/noise remain independent of selectors.
+
+M6-D: _frame_plan.py compiles exact physical Clifford and causal Bell feedback
+into immutable sparse batch maps once. It may read private verified assembly;
+external examples must use make_frame_plan instead. Keep per-shot state and
+concrete decoders outside the compiler. Existing evaluate_frames and strict
+noiseless validation remain independent regression references.

@@ -1,5 +1,30 @@
 # STATUS — `decoding`
 
+## M6-D update — 2026-11-08
+
+frames.py adds source-bound CorrectionBatch/FrameBoundary/OfflineFramePlan and
+isolated OfflineFrameBatch state, checked binary shapes/provenance, immutable raw
+storage, once-only updates and current-record event recomputation. stages.py adds
+typed StageInputs/Result/Decoder and Boundary/Readout/StageRequests. Boundary
+models preserve noisy physical prefixes/strict detector regions, adding ideal
+model-only probes for last-record XOR true-check targets and prepared logical
+errors. No canonical probes or sampled decoder truth are introduced. Signed Pauli
+elimination maps prior predicted boundary sectors through actual H/CNOT pairs.
+
+conditional.py exports exact resource-CNOT-through-Bell-readout noise atoms,
+probabilities/exclusive groups, joint destructive record/logical/check effects and
+survivor physical X/Z actions. Unsupported physical channels raise typed errors.
+This is a conditional fault-action model, not a deterministic Bell DEM. Earlier
+residual decoder errors may violate the assumed incoming boundary hypothesis.
+
+All matching adapters live in examples/knill_memory_offline_decoding.py. The
+baseline uses temporal correlated MWPM then CSS capacity representatives, and
+conditional per-patch capacity readout; parallel-edge ambiguities, neglected joint
+inference and one-round SE temporal limits are explicit. Production algorithms,
+optimized cross-boundary conditional models and general decoder result interfaces
+remain future work. Full exact/fault/noiseless/noisy/wall-time evidence is in root
+STATUS; installed pins remain Stim 1.15.0/stimflow ffe0d043/PyMatching 2.3.1 (dev).
+
 ## M6-C precision correction — 2026-11-08
 
 The external ordinary-memory example uses the existing public views; no decoder

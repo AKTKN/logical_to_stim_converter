@@ -2,7 +2,7 @@
 
 **2026-11-08:** Rotated-surface memory, M3 H/CNOT/Pauli, M5 Bell/Knill
 teleportation, and M6-A/B global detector/provenance and offline-view contracts are implemented.
-M6-C demonstrates external ordinary-memory MWPM without a runtime decoder.
+M6-C/D demonstrate external ordinary/Knill memory decoding without a runtime decoder.
 See [repository status](../STATUS.md).
 
 ## Implemented pipeline
@@ -449,4 +449,55 @@ view, with an any-observable shot count and separate per-observable counts.
 
 PyMatching and Matplotlib belong to the development extra/example only. JSON/CSV
 summaries and PNG/SVG figures are small demonstration outputs, not a persistent
-sample format. Conditional preparation/Bell/Knill recovery stays deferred.
+sample format. M6-D below adds a restricted conditional modular baseline; production recovery
+and conditional joint inference remain deferred.
+
+
+## Typed stages and static batch frame propagation (M6-D)
+
+The compiler's make_frame_plan method reads verified physical assembly steps once.
+A basis batch represents each raw record, each preparation/SE physical X/Z input,
+each destructive-readout record correction and an affine constant. It propagates
+through actual ideal H/CX/reset/measurement instructions, virtual logical Paulis
+and causal Bell feedback, then freezes sparse GF2Maps. This setup uses no samples,
+noise oracle or decoder. Runtime cost is sparse batched GF(2) application rather
+than a Python loop over shots. Open final physical X/Z maps support tableau proofs.
+
+OfflineFrameBatch is explicitly caller-owned mutable analysis state. Stored raw
+records are immutable. A CorrectionBatch must match source fingerprint, boundary
+ID, binary dimensions and shot count. Applying a boundary twice is rejected.
+Provisional Bell feedback can be computed up front because the transform is
+causally triangular: a later readout correction adds exactly its feedback delta
+to future records/frames. No physical feed-forward or resampling occurs. Requests
+are decoded in StageRequests.order; current events are recomputed from interpreted
+records and their declared reference convention.
+
+Public decoding/stages.py exports StageInputs/StageResult/StageDecoder plus
+BoundaryRequest/ReadoutRequest. Boundary target models copy the physical noisy
+prefix, retaining strict stage-local detectors, and add ideal model-only MPPs.
+Their observables are last-record XOR true boundary check, and the known prepared
+logical error where appropriate. Probes are not canonical measurements, not input
+to the decoder and not inferred by treating random gauges as deterministic.
+The example first estimates these targets temporally, then solves CSS sector
+representatives with the appropriate prepared-logical constraint. These physical
+vectors enter the verified correction maps; logical flips alone are not physical
+corrections. Strict M5 noiseless-sector proofs remain separate from hypotheses.
+
+Signed Pauli support elimination transports predicted boundary sectors through
+actual transversal unitaries. Readout requests retain physical orientation, raw
+record ordering and logical representatives; synthetic readout syndromes subtract
+predicted sectors offline. An exact conditional fault-action model retains all
+Pauli atoms of standard independent/depolarizing/measurement channels between
+resource CNOT and Bell readout, their exclusive groups, joint destructive record
+and logical/check effects, and survivor X/Z support. No synthetic raw Bell detector
+is added to the global circuit. Unsupported channels fail explicitly.
+
+The reference consumer is deliberately restricted. Temporal MWPM may choose an
+ambiguous parallel-edge representative; unit-weight per-patch capacity Bell
+matching ignores correlated joint inference. Strict ordinary-SE windows exclude
+cross-boundary reference offsets; one-round windows have no temporal information.
+Earlier decoder errors are not assumed absent in the honest final LER label.
+Canonical full DEMs/correlations remain available for alternative joint consumers.
+No decoder algorithm, LER runner or plotting import enters runtime package code.
+Exclusive wall times distinguish one-time validated compilation/maps/models from
+raw sampling, m2d, batch decoding and record/frame transformations.

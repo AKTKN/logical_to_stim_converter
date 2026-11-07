@@ -2,7 +2,131 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M6_C_IMPLEMENTED` (ordinary-memory external-consumer demonstration)
+**Overall state:** `M6_D_IMPLEMENTED` (restricted modular Knill memory demonstration)
+
+## M6-D implemented and verified — 2026-11-08
+
+Baseline local/remote commit: `c927e4b72f72c488d7bc5d853d5f812ac6ab4e86`.
+Its Ubuntu/Windows Python 3.11/3.12 CI run 42424216057 passed all four jobs.
+
+- examples/knill_memory_offline_decoding.py builds fixed X/Z memory with known
+  input 0/1, resource/input SE^d by default, fresh A_t/B_t blocks for T=1/2,
+  optional ordinary post-SE and final destructive readout. Logical D persists.
+  One canonical physical raw batch supplies every sequential offline stage;
+  gates/noise never depend on inferred outcomes. No recycling/adaptive runner.
+- CompiledCircuit.make_frame_plan compiles immutable sparse correction maps once
+  through actual H/CX/reset/measurement, virtual Paulis and causal Bell feedback.
+  Public typed CorrectionBatch/FrameBoundary/OfflineFramePlan/Batch contracts
+  validate source/boundary, binary dimensions and shot counts, reject duplicate
+  updates and preserve original raw records. Current view events are recomputed
+  from interpreted records. Open physical residual X/Z maps support tableau proofs.
+- Public BoundaryRequest/ReadoutRequest/StageRequests and StageInputs/Result/Decoder
+  separate external preparation, Bell and ordinary-SE choices. Strict temporal
+  regions preserve canonical stage/global IDs. Physical noisy prefixes with
+  model-only ideal MPP probes define last-record XOR actual boundary-check and
+  prepared-logical targets. No probes are added to the sampled experiment or
+  exposed as decoder truth. Temporal MWPM precedes a separate CSS sector solve;
+  a logical flip prediction is not treated as an unspecified physical correction.
+- Exact signed Pauli support elimination transports predicted net boundary sectors
+  through actual transversal pairings. Bell capacity input is interpreted raw
+  check parity relative to that predicted sector, not unconditional zero. Physical
+  frame signs are already applied once by the plan. Raw gauges remain records.
+- ConditionalReadoutModel preserves every standard Pauli/depolarizing/measurement
+  atom from resource CNOT through Bell destructive readout, probabilities and
+  exclusive channel groups, joint raw/check/logical effects and survivor physical
+  X/Z actions. It conditions on prior sector/frame hypotheses and is not a
+  deterministic shot-conditioned Bell DEM. Unsupported physical channels fail.
+- Algorithms are replaceable source-example adapters only: correlated temporal
+  MWPM plus CSS sector capacity matching, and conditional unit-weight per-patch
+  readout matching. Canonical full DEMs and cross-stage detectors remain unchanged.
+  Limitations are explicit: parallel-edge target ambiguity, omitted correlated
+  joint inference, strict-window cross-boundary offsets, one-round post-SE without
+  temporal information, and possible earlier residual decoder mistakes. Nonzero
+  LER compares corrected final bits against intended outputs, not decoder belief.
+- Exclusive perf_counter wall phases distinguish validated compilation, exported
+  DEM, frame maps, stage/conditional models, matcher setup, sampler construction,
+  physical sampling, m2d, current-event inputs, decoding and frame updates. Full
+  CLI wall and a separate diagnostic profile are reported. All M6-D reports/figures
+  are in implementation_files/e2etest/m6d_knill, separate from M6-C. Raw samples,
+  profiler binaries, large logs and reference clones are excluded from commits
+  and all implementation reports are pruned from package distributions.
+
+### M6-D evidence
+
+Unchanged installed pins: Stim **1.15.0**, stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`; PyMatching **2.3.1** stays dev/example
+only. Inspected installed matching/decode_batch/fault-ID/parallel-edge APIs,
+check-matrix decoding, Stim boundary MPP/DEM/Pauli conjugation and FlipSimulator
+batch/noise/randomization APIs. Read-only Hex
+`5de58f2f80791054411ad3c0885a4fe3671ed56a` css_detector_module two-stage inference,
+measurement_module, Bell correction generation, sparse measurement-flip maps and
+static simulate sequential event recomputation were studied. No upstream source
+was changed, imported at runtime or copied wholesale. No pin was changed.
+
+Local Linux/WSL2 Python 3.12.7 validation:
+
+- `python -m pytest --durations=15 --junitxml=.../m6d_knill/pytest.xml`:
+  **440 passed in 258.20 s**. Added **46** tests; all 394 previous tests retained.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- All six examples passed, including eight-case Knill noisy/noiseless suites.
+- Isolated installed wheel passed with PyMatching/Matplotlib/test/reference imports
+  blocked: T=2 generation, exact global DEM/views, temporal stage models,
+  conditional Bell actions and batch frame maps. Copied standalone Knill example
+  runs against that wheel. Distribution contents include new code/tests/examples
+  and exclude local reports, environments, raw samples and external clones.
+- d=3/5 X/Z and both intended bits, T=1/2: 64 physical shots per case recover
+  noiselessly with all Bell branches. Actual physical encoded-reference tableaux
+  preserve XX=ZZ=+1 through T=1/2 at both distances across 16 branches each.
+  Open frames agree with M5 physical replay; an omitted byproduct causes failure.
+- Every conditional atom is checked against independent vectorized Stim Pauli
+  propagation at d=3/5, including exclusive groups and survivor actions. Ten
+  selected physical fault categories compare actual Stim global signatures;
+  an undetectable logical fault correctly produces residual failures. Early/late
+  result target inference is verified in a measurement-noise regime. Frame edits
+  agree with explicit physical correction execution/current-event conversion.
+- Noisy replay, alternate matching weights, chunk independence, one sampler call,
+  no oracle input, stage/gauge partitions, physical/virtual Paulis and H,
+  parallel/spectator isolation, malformed batches/source IDs and once-only updates
+  pass. No stochastic LER target or performance timing threshold is asserted.
+- pip check and git diff --check pass; all four external reference trees are clean.
+
+Final unprofiled report command:
+`python examples/knill_memory_offline_decoding.py --suite --shots 20000 --p 0.001
+--seed 20261108 --output-dir implementation_files/e2etest/m6d_knill`.
+Input/resource rounds=d, post rounds=1, 20,000 shots/case, **160,000 total shots**.
+
+| d | Basis | T | Seed | Errors / shots | LER |
+|---|---|---|---|---|---|
+| 3 | X | 1 | 20261108 | 394 / 20000 | 0.01970 |
+| 3 | X | 2 | 20261109 | 715 / 20000 | 0.03575 |
+| 3 | Z | 1 | 20261110 | 645 / 20000 | 0.03225 |
+| 3 | Z | 2 | 20261111 | 1055 / 20000 | 0.05275 |
+| 5 | X | 1 | 20261112 | 373 / 20000 | 0.01865 |
+| 5 | X | 2 | 20261113 | 725 / 20000 | 0.03625 |
+| 5 | Z | 1 | 20261114 | 415 / 20000 | 0.02075 |
+| 5 | Z | 2 | 20261115 | 756 / 20000 | 0.03780 |
+
+Full CLI wall **44.920 s** includes startup/imports/report/exit. Exclusive experiment
+wall totals **42.995 s**: validated compilation **21.119 s**, other model/map/matcher
+setup **8.084 s**, current-event/input work **6.678 s**, frame updates **4.574 s**,
+temporal/capacity decoding **1.535 s**, and physical sampling **0.354 s** (plus
+other recorded phases). Compilation/setup dominate this workload; sampling is
+under 1% of experiment wall. A separate instrumented d=5 Z T=2 1,000-shot profile
+shows heavy flow reflow, Pauli-map and repeated code/metadata construction. Its
+helper cumulative totals overlap and do not account for complete wall; final
+unprofiled phase timings are authoritative. Machine/thread details, full CSV,
+JSON parameters/fingerprints/versions, PNG/SVG and bottleneck analysis are saved
+in the new folder. This run had no concurrent task test/profile/build workload;
+OS activity was uncontrolled and timings are observations, not portable limits.
+
+Implemented but unverified: no additional recovery behavior is claimed. This is
+an explicitly restricted modular baseline, not exact maximum-likelihood or a
+validated production joint decoder. Source seed equality is not promised across
+Stim versions/SIMD machines/call structures. General conditional joint models,
+optimized inference/caching/event updates, adaptive control, block reuse and
+knill_bench integration remain future work. Remote CI is checked after push and
+reported separately. User explicitly authorized commit/push after verification.
 
 ## M6-C implemented and verified — 2026-11-08
 

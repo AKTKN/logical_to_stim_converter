@@ -1,6 +1,6 @@
 # logical_to_stim_converter
 
-**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance, offline decoder views and an ordinary-memory MWPM demo.**
+**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance, offline decoder views and ordinary/Knill memory decoding demos.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -482,8 +482,9 @@ shape `(input_bits, output_bits)`. `view.record_flip_map(input_ids, matrix)` bin
 an external binary `(correction_bits, global_records)` map to the physical source;
 `map.apply(raw, correction_bits, source_fingerprint=view.source_fingerprint)`
 returns interpreted records. The caller supplies the physical interpretation of
-these correction bits. Automatic physical correction-map generation and Bell
-conditional views remain M6-D work; there is no correction selector here.
+these correction bits. CompiledCircuit.make_frame_plan now generates physical correction maps from the
+verified assembly, as described under M6-D below. A RecordFlipMap still accepts
+caller-supplied maps; its operations choose no correction.
 
 `schema_version` and `source_fingerprint` identify immutable model/metadata
 snapshots, covering ideal/noisy circuits and semantic metadata. Use
@@ -574,5 +575,132 @@ Fixed seeds reproduce results for the same circuit, Stim version, machine and
 sampling call structure; Stim does not promise identical samples across versions,
 SIMD architectures or different batch sizes. Offline decoding of the stored batch
 is tested to agree when split into consecutive chunks. Raw records are retained
-in canonical order. Knill/Bell noisy recovery and conditional decoding remain
-M6-D work; `knill_bench` remains an independent future consumer.
+in canonical order. The restricted Knill baseline and conditional fault-action requests below extend
+this demonstration. `knill_bench` remains an independent future consumer.
+
+
+## Static Knill memory and offline stages (M6-D)
+
+```bash
+python examples/knill_memory_offline_decoding.py --distance 3 --basis X --bit 1 --teleportations 2 --resource-rounds 3 --post-rounds 2 --shots 1000 --p 0.001 --seed 7
+python examples/knill_memory_offline_decoding.py --suite --shots 20000 --p 0.001 --seed 20261108 --output-dir implementation_files/e2etest/m6d_knill
+```
+
+The fixed suite runs X/Z at d=3/5, T=1/2, with 20,000 shots per case in the
+command above. Resource and input preparation each use d full syndrome rounds
+by default; post-teleportation SE defaults to one round and is independently
+selectable. Logical identity `D` persists while fresh `physical_A0/B0`, then
+`physical_A1/B1` blocks are allocated. There is no block reuse or adaptive gate.
+All gates and noise are static. Each case compiles once, samples one global raw
+batch, and decodes preparations, Bell readouts and ordinary SE sequentially in
+software. All canonical deterministic cross-stage detectors remain present.
+
+The source example exposes `build_knill`, `prepare_experiment`, `prepare_compiled`,
+`analyze_knill`, `run_knill` and `save_report`. Its PyMatching adapters are optional
+consumer code. To replay the same data with another readout decoder:
+
+```python
+from examples.knill_memory_offline_decoding import (
+    prepare_experiment, analyze_knill, ReadoutMatching,
+)
+
+experiment = prepare_experiment(distance=3, teleportations=2, p=0.001)
+raw = experiment.compiled.circuit.compile_sampler(seed=7).sample(shots=1000)
+first = analyze_knill(experiment, raw)
+alternative = {
+    r.readout.module_id: ReadoutMatching(r, weights=[1.2] * len(r.record_ids))
+    for r in experiment.requests.readouts
+}
+second = analyze_knill(experiment, raw, readout_decoders=alternative)
+```
+
+`boundary_decoders` independently replaces preparation/ordinary-SE adapters by
+module ID. These source-example functions are not installed converter APIs. An
+external package can instead consume public `logical_to_stim_converter.decoding`
+contracts and supply its own adapters without importing PyMatching:
+
+- `compiled.make_frame_plan()` builds an immutable `OfflineFramePlan` once.
+  `plan.start(raw, source_fingerprint=plan.source_fingerprint)` creates isolated
+  caller-owned batch state. It retains original records and applies virtual
+  Paulis/Bell feedback as an affine GF(2) transform, including later teleportations.
+- `make_stage_requests(compiled)` returns typed `BoundaryRequest`, `ReadoutRequest`
+  and causal `StageRequests.order`. Each request exposes a M6-B view, exact
+  global/local record/detector IDs, check support, physical ordering/orientation,
+  and boundary-model or conditional-sector information.
+- `StageDecoder.decode_batch(request, StageInputs)` returns `StageResult` with a
+  source-bound `CorrectionBatch`. Physical boundary bits are X(data_ids), then
+  Z(data_ids). Readout bits flip records in `LogicalReadout.records` order.
+  The boundary ID and source fingerprint validate provenance; shapes/binary values
+  are checked. Boundary results also declare predicted last-record errors and
+  net post-correction sectors. They are hypotheses, not a proof of recovery.
+- `batch.apply(result.correction)` applies each boundary once, including the
+  delta to later Bell byproducts. `batch.events(view)` recomputes events from
+  current interpreted records. Original raw samples and physical global events
+  remain unchanged. Directly slicing initial events after a frame edit is unsafe.
+- Readout expected sectors come from `request.sector_map` applied to prior decoded
+  net boundary sectors, plus `sector_constant`. The map is derived by exact signed
+  Pauli conjugation through actual physical H/CNOT pairs, not code-name assumptions.
+  Carried physical-frame anticommutation is already in the interpreted records.
+  Never subtract it a second time.
+
+Preparation inference has two separate steps. A circuit-level temporal DEM predicts
+**last recorded check XOR actual boundary check**, plus the prepared logical error.
+The model copies the actual noisy physical prefix and selected strict stage
+annotations, then appends ideal boundary MPP probes with observable targets. These
+probes exist **only in the model**: no experiment samples them, and the decoder
+never receives their truth. Their parities are verified deterministic ideal flows.
+CSS capacity matching then finds a physical sector representative using the
+predicted final syndrome; the known prepared eigenvalue fixes its logical
+ambiguity. The physical correction-to-record map is independently verified against
+actual correction execution. This is different from capacity-decoding a noisy raw
+last syndrome. Early/late result faults are tested in a measurement-noise regime.
+
+Ordinary SE uses strict within-module M6-B regions and corresponding boundary
+check-error targets. A single post-SE round has no internal temporal detectors;
+its final-result error is not independently identifiable. Cross-boundary models
+with shot-specific frame reference offsets are left to an external joint strategy.
+The baseline keeps cross-stage detectors in the canonical artifact but does not
+use them as if unchanged after inserting software frames.
+
+For Bell readout, per-patch capacity matching receives
+`H_P @ interpreted_data XOR predicted_sector`, with the current physical check and
+logical representatives. Raw gauge-dependent parities are never inserted as
+zero-expected detectors. `make_conditional_readout_model(compiled, bell)` exports
+an explicit `ConditionalReadoutModel` from immediately before resource CNOT through
+destructive Bell readout: physical noise atoms, probabilities and exclusive channel
+groups, joint readout flips, X/Z syndrome/logical effects, and survivor physical X/Z
+actions. It includes resource-CNOT, Bell-CNOT, measurement and idle faults. The
+boundary assumes prior sector/frame hypotheses; unrecognized earlier residual
+errors remain possible. It is **not** a conditional deterministic Stim DEM.
+Every atom's readout and survivor action is tested against Stim's Pauli propagator.
+
+The Bell adapter uses unit-weight per-patch capacity matching and does not perform
+joint inference using those correlated atoms. Temporal correlated MWPM is also a
+heuristic: PyMatching merges parallel edges and can retain one representative's
+fault IDs, so ambiguous boundary targets may be mispredicted. Unsupported graph
+hyperedges or physical noise channels raise explicit errors. Exact canonical
+physical noise/DEMs and the conditional action model retain all mechanisms;
+these algorithmic approximations are confined to the example. Nonzero-noise
+recovery is allowed to fail, and no optimality or threshold claim is made.
+
+Final failure compares the corrected final logical bit to the known intended
+`ObservableInfo.expected_value`, independently of the decoder's belief. Raw
+physical observable flips remain available for separate global-decoder analyses;
+they are not assumed equal to this modular strategy's residual failures. Tests
+cover both signs, all Bell branches, physical d=3/5 reference entanglement after
+T=1/2, physical/virtual Paulis and H, selected faults, independent parallel gadgets,
+immutable replay and chunk-independent predictions. No normal decoder request
+contains hidden faults or tableau state. The M5 noiseless helper is not imported
+by the example.
+
+The separate [M6-D results](implementation_files/e2etest/m6d_knill/README.md) contain
+JSON/CSV aggregates, a LER/timing PNG/SVG, full test results and wall-time analysis.
+`timings_seconds` measures exclusive `perf_counter` phases: compile (including
+internal physical/flow validation), exported global DEM, frame maps, stage models,
+conditional actions, matching setup, sampler setup, sampling, m2d, current-event
+inputs, temporal/capacity decoding, frame updates and final evaluation. Total wall
+and remaining overhead are included; model/map construction occurs outside the
+shot loop. The execution report additionally measures full CLI startup/imports,
+report/figure generation and exit. Timings are observations of the recorded
+machine/load, not CI performance assertions. Production decoder optimization,
+conditional joint inference, scheduling and runner integration remain future work.

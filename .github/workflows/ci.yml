@@ -37,3 +37,5 @@ jobs:
         run: python examples/offline_dem_views.py
       - name: Memory offline MWPM demonstration
         run: python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
+      - name: Knill memory offline stages and wall-time demonstration
+        run: python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732

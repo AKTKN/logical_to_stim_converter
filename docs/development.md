@@ -19,6 +19,7 @@ python examples/two_patch_bell_roundtrip.py
 python examples/knill_ec_single_round.py
 python examples/offline_dem_views.py
 python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
+python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -43,7 +44,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and all five memory/Bell/Knill/offline-view/MWPM examples. Local verification results/platforms are recorded in STATUS;
+and all six circuit/view/ordinary-memory/Knill-memory examples. Local verification results/platforms are recorded in STATUS;
 CI configuration alone is not evidence that those remote jobs ran.
 
 `surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
@@ -95,7 +96,7 @@ both after this milestone's implementation and verification.
 
 The development extra pins **PyMatching 2.3.1**; tests import it unconditionally.
 It is absent from mandatory runtime dependencies and production imports. CI runs
-the full physics suite and, since M6-C, all five examples on Ubuntu/Windows
+the full physics suite and, since M6-D, all six examples on Ubuntu/Windows
 Python 3.11/3.12.
 The Knill example generates circuits without any decoder.
 
@@ -155,3 +156,23 @@ The memory example's fixed suite uses only 128 shots/case in CI. The documented
 local figure command uses 20,000 shots/case. `implementation_files/e2etest` stores
 requested aggregate reports/figures; raw samples and large local logs stay ignored,
 and the directory is pruned from wheel/source distributions.
+
+
+## M6-D regression and wall-time requirements
+
+Retain every M1–M6-C test. Cover d=3/5, X/Z, both intended bits and T=1/2 with
+fresh resources; use physical tableaux for reference entanglement. Compare sparse
+frame maps with M5 physical-frame replay and explicit physical correction execution.
+Check all conditional Pauli atoms against Stim FlipSimulator (stabilizer
+randomization disabled only in this explicitly linear test oracle). Separately
+inject physical faults into actual Stim circuits and compare global signatures.
+Early/late preparation-result targets are tested in a supported measurement-noise
+regime, rather than demanding that ambiguous circuit-noise faults always decode.
+Undetectable logical faults must yield failures. No oracle enters normal inputs.
+
+The fixed CI Knill suite uses 64 shots/case. Local reports may use larger batches;
+record every phase's wall seconds, total CLI wall and parameters, without timing
+threshold assertions. Profile separately from final unprofiled timing runs and
+label instrumentation overhead. Store M6-D results in e2etest/m6d_knill without
+changing M6-C reports. No raw samples, large profiler binaries or upstream clones
+are committed. Verify the wheel with optional decoders/plotting imports blocked.

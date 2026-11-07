@@ -1,0 +1,64 @@
+Separate instrumented callable profile, excluding imports: d=5 T=2 Z p=.001 shots=1000 seed=27.
+Instrumented function wall seconds: 12.349586947999342
+Cumulative rows overlap and must not be summed. Profiling adds overhead;
+use knill_timing.csv for the final unprofiled phase wall measurements.
+Profiler helper totals do not account for the complete instrumented wall time;
+use them as call-count/hot-helper evidence, not exclusive wall attribution.
+         17968622 function calls (17145753 primitive calls) in 7.012 seconds
+
+   Ordered by: cumulative time
+   List reduced from 760 to 28 due to restriction <28>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      159    0.321    0.002    2.969    0.019 _chunk_reflow.py:39(from_auto_rewrite)
+    43239    0.469    0.000    1.864    0.000 _pauli_map.py:209(__mul__)
+   115494    0.760    0.000    1.609    0.000 _pauli_map.py:43(__init__)
+      142    0.011    0.000    1.206    0.008 surface_code.py:13(stabilizer_code)
+    21793    0.011    0.000    0.923    0.000 dataclasses.py:1308(asdict)
+667392/21793    0.468    0.000    0.904    0.000 dataclasses.py:1332(_asdict_inner)
+  1583437    0.498    0.000    0.805    0.000 _pauli_map.py:168(__getitem__)
+    66640    0.069    0.000    0.764    0.000 _tile.py:109(to_pauli_map)
+      142    0.038    0.000    0.653    0.005 _stabilizer_code.py:495(verify)
+170423/134071    0.176    0.000    0.478    0.000 {built-in method builtins.sorted}
+344175/204375    0.077    0.000    0.470    0.000 dataclasses.py:1373(<genexpr>)
+       52    0.002    0.000    0.456    0.009 _logical.py:26(check_maps)
+       42    0.113    0.003    0.431    0.010 {built-in method builtins.repr}
+       41    0.003    0.000    0.409    0.010 _logical.py:32(prepare_part)
+       41    0.000    0.000    0.348    0.008 surface_code.py:119(logical_pauli)
+  2445295    0.346    0.000    0.346    0.000 {method 'get' of 'dict' objects}
+   404625    0.318    0.000    0.318    0.000 __init__.py:32(<lambda>)
+   355501    0.179    0.000    0.310    0.000 typing.py:521(__getitem__)
+   595004    0.195    0.000    0.290    0.000 _pauli_map.py:197(_mul_term)
+      147    0.018    0.000    0.289    0.002 physical_layout.py:123(rotated_surface)
+   111811    0.038    0.000    0.270    0.000 _complex_util.py:7(sorted_complex)
+      142    0.001    0.000    0.244    0.002 _patch.py:17(__init__)
+  1915361    0.240    0.000    0.242    0.000 {built-in method builtins.isinstance}
+     9088    0.008    0.000    0.239    0.000 _tile.py:89(__lt__)
+    18176    0.018    0.000    0.231    0.000 _tile.py:71(_cmp_key)
+    70592    0.145    0.000    0.213    0.000 dataclasses.py:1278(fields)
+    59915    0.064    0.000    0.213    0.000 numeric.py:675(flatnonzero)
+        1    0.001    0.001    0.170    0.170 _metadata.py:183(protocol_metadata)
+
+
+         17968622 function calls (17145753 primitive calls) in 7.012 seconds
+
+   Ordered by: internal time
+   List reduced from 760 to 16 due to restriction <16>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   115494    0.760    0.000    1.609    0.000 _pauli_map.py:43(__init__)
+  1583437    0.498    0.000    0.805    0.000 _pauli_map.py:168(__getitem__)
+    43239    0.469    0.000    1.864    0.000 _pauli_map.py:209(__mul__)
+667392/21793    0.468    0.000    0.904    0.000 dataclasses.py:1332(_asdict_inner)
+  2445295    0.346    0.000    0.346    0.000 {method 'get' of 'dict' objects}
+      159    0.321    0.002    2.969    0.019 _chunk_reflow.py:39(from_auto_rewrite)
+   404625    0.318    0.000    0.318    0.000 __init__.py:32(<lambda>)
+  1915361    0.240    0.000    0.242    0.000 {built-in method builtins.isinstance}
+   595004    0.195    0.000    0.290    0.000 _pauli_map.py:197(_mul_term)
+   355501    0.179    0.000    0.310    0.000 typing.py:521(__getitem__)
+170423/134071    0.176    0.000    0.478    0.000 {built-in method builtins.sorted}
+  2545877    0.162    0.000    0.162    0.000 typing.py:2182(cast)
+     14/1    0.154    0.011    0.011    0.011 _chunk_builder.py:607(finish_chunk)
+    70592    0.145    0.000    0.213    0.000 dataclasses.py:1278(fields)
+       42    0.113    0.003    0.431    0.010 {built-in method builtins.repr}
+    12375    0.104    0.000    0.117    0.000 _pauli_map.py:287(to_stim_pauli_string)

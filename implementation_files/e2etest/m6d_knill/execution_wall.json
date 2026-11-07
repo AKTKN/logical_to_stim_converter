@@ -1,0 +1,19 @@
+{
+  "command": [
+    ".venv/bin/python",
+    "examples/knill_memory_offline_decoding.py",
+    "--suite",
+    "--shots",
+    "20000",
+    "--p",
+    "0.001",
+    "--seed",
+    "20261108",
+    "--output-dir",
+    "implementation_files/e2etest/m6d_knill"
+  ],
+  "process_wall_seconds": 44.9200321190001,
+  "returncode": 0,
+  "includes": "Python startup/imports, compilation, models/maps, physical sampling, offline analysis, report/figure generation and exit",
+  "measurement_conditions": "Final unprofiled suite; no concurrent test, profile or build workload from this task. Single run, OS/background activity uncontrolled."
+}
