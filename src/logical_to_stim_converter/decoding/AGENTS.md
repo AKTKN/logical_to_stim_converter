@@ -1,17 +1,31 @@
 # AGENTS.md — `decoding`
 
-Scope: `src/logical_to_stim_converter/decoding/`. Root `AGENTS.md` and `docs/architecture.md` also apply.
+Scope: `src/logical_to_stim_converter/decoding/`. Root AGENTS and architecture apply.
 
 ## Responsibility
 
-Reserved shared interface to decoder inputs/outputs; no decoder algorithm in this package initially.
+Provide decoder-neutral offline inputs/models over one canonical physical experiment.
+No decoder algorithm, fitting, Monte Carlo runner, LER aggregation or sweep belongs
+here; external consumers and knill_bench own those choices.
 
-- Preserve decoder-independent detector, observable, measurement, and scope metadata.
-- Do not force every decoder to output a physical correction; allow observable flips and optional extra data.
-- Keep fitting, Monte Carlo orchestration, LER aggregations and experimental sweeps in knill_bench.
+- views.py: immutable DecoderView snapshots, bidirectional IDs, content fingerprints,
+  public-metadata validation, exact noise-preserving annotation selection and Stim
+  DEM re-extraction, observable-local region example and batch input adapters.
+- selectors.py: public semantic anchor/touching/strict block/stage/check selection.
+- records.py: pure vectorized sparse GF(2) transforms and caller-defined record frames.
+- errors.py: typed source/metadata/selection/DEM construction failures.
+- interfaces.py: still a placeholder for future decoder result/prediction schemas.
 
-## Files and intended responsibilities
+Never remove a physical fault because it touches an excluded detector. Re-extract
+from the unchanged physical gate/noise sequence; preserve hyperedges and correlated
+^ components. Explicit DEMOptions must not silently enable approximations. Keep
+random Bell records separate from reliable observables. View ordering is the
+caller's explicit ID sequence or canonical order for semantic callbacks. Selection
+audit and source fingerprint are authoritative; NumPy widths alone cannot prove
+sample identity. No view code may depend on private compiler/evaluation state.
 
-- `interfaces.py` — planned **Decoder-facing contracts**: Future local/joint scope, observable prediction and optional correction/soft output schemas; intentionally deferred.
-
-All `.py` files in this folder are **docstring-only placeholders** as of 2026-11-07. Do not treat documented methods as implemented. Implement the minimum validated surface-code path first unless the user requests otherwise. Update this folder's `STATUS.md` after changes; update root status for completed milestones.
+Keep source/model snapshots and public metadata immutable, return copies of Stim
+objects/matrices, and never edit caller raw arrays in place. All performance-sensitive
+sample transformations operate on whole batches. Physical correction selection and
+automatic Pauli-to-record maps remain outside this milestone. Read STATUS before
+changes and update it plus root STATUS with exact physics/model evidence.

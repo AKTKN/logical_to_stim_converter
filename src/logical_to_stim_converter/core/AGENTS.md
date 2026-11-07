@@ -32,3 +32,7 @@ M6-A: protocol.py also owns typed PreparationDependencyEvent edges and
 DetectorBoundaryCandidate provenance. DetectorInfo.index is always global;
 stage_id names its anchor stage, source_stage_ids preserves all source stages.
 Ancestry is causal source metadata, never a replacement for symplectic values.
+
+M6-B: DetectorInfo.basis is the physical anchor check basis, including orientation;
+physical_support contains stable data sites underlying every contributing record.
+Selectors must not infer X/Z from a check ID prefix or restrict scope to an anchor.

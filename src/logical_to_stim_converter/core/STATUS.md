@@ -1,5 +1,14 @@
 # STATUS — Core
 
+## M6-B update — 2026-11-08
+
+DetectorInfo adds actual physical check basis at its semantic anchor and stable
+physical data support underlying all contributing syndrome/data records. H-induced
+basis changes and cross-block support are explicit, with no check-prefix inference.
+Compiler validation checks these fields against layouts and orientation metadata;
+negative basis/support tests reject corrupted provenance. No flow/frame algebra
+or physical gate/noise behavior changes. Exact verification is in root STATUS.
+
 ## M6-A update — 2026-11-08
 
 DetectorInfo now carries a stable global index, an explicit anchor module/stage,

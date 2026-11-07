@@ -125,6 +125,12 @@ class CompiledCircuit:
 
         validate_metadata(self)
 
+    def make_decoder_view(self, **options):
+        """Select offline decoder inputs from this physical experiment; never resample."""
+        from ..decoding import make_decoder_view
+
+        return make_decoder_view(self, **options)
+
     def interpreted_measurements(self, measurements, *, preparation_corrections=None,
                                  validation="noiseless"):
         if preparation_corrections is not None:

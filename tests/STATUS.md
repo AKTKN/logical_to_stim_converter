@@ -1,5 +1,24 @@
 # STATUS — Tests
 
+## M6-B update — 2026-11-08
+
+Added 105 tests; all 263 M1–M6-A tests remain unchanged. test_decoder_views checks
+d=3/5 memory and open/closed Knill identity DEMs, permuted/sparse/global-to-local
+indices, one-batch semantic selections, strict/touching/anchor regions, cross-stage
+policy/audit, signed reference conversion and record updates. It compares exact
+DEM marginal parity expectations, physically enumerates selected faults, preserves
+hyperedges/correlated ^ components, and checks independently seeded statistical
+marginals. Public metadata hand circuits deliberately have no private compiler or
+frame state. Negative indices, sources, missing metadata, check basis/support,
+random observables, sample shapes and unsupported exact noise modes fail clearly.
+
+test_record_frames checks immutable sparse/dense GF(2) maps (including uint8
+overflow), empty dimensions, external correction maps against explicit physical
+Pauli execution, once-only copy-based record updates, and malformed/source/shape
+rejection. helpers/decoder_view_physics contains independent metadata/fault/parity
+checks. The fourth example samples once for global/patch/observable-local views.
+Root STATUS records final full test/lint/build/example and pinned API evidence.
+
 ## M6-A update — 2026-11-08
 
 Added 42 tests; all 221 M1–M5 regressions are retained. Only the two explicit

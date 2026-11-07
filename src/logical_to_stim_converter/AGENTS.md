@@ -11,3 +11,8 @@ M6-A exports global MeasurementInfo/MeasurementKey/DetectorInfo/ObservableInfo,
 DetectorBoundaryCandidate, PreparationDependencyEvent, PreparationInfo,
 LogicalReadout, BellMeasurementResult, and RelocationRecord at package level.
 Keep principal compiled circuits complete and legacy stage separation explicit.
+
+M6-B exports DecoderView, DetectorSelector, DEMOptions, GF2Map, RecordFlipMap,
+make_decoder_view, observable_local_views and apply_record_flips. The decoding
+namespace also exports input/mapping/audit/error types. Keep views independent of
+private compiler state and physical correction selection.

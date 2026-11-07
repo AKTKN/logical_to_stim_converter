@@ -1,7 +1,7 @@
 # Architecture and implemented circuit contracts
 
 **2026-11-08:** Rotated-surface memory, M3 H/CNOT/Pauli, M5 Bell/Knill
-teleportation, and M6-A global detector/provenance contracts are implemented.
+teleportation, and M6-A/B global detector/provenance and offline-view contracts are implemented.
 See [repository status](../STATUS.md).
 
 ## Implemented pipeline
@@ -305,7 +305,7 @@ relations. The private `separate_detector_regions` helper remains available for
 explicit legacy calls; compilation never calls it or the stage-only validator.
 This migration intentionally increases Knill detector counts. M3 un-staged
 correlations remain unchanged. This view neither slices faults nor establishes
-independent stage DEMs; general projection belongs to M6-B.
+independent stage DEMs. M6-B provides explicit physical-model marginal views below.
 
 `validate_metadata` checks the annotation reader against the canonical circuit,
 physical site/record order, fragment modules and stages, exact detector/observable
@@ -342,3 +342,83 @@ of these source lists. Ancestry never supplies a correction value.
 
 No runtime decoder, adaptive branch, independent stage DEM or batch decoder
 adapter is introduced. See [deferred work](deferred_work.md).
+
+## Offline model and record views (M6-B)
+
+`decoding` owns immutable `DecoderView`, `IndexMap`, `DEMOptions`,
+`DetectorSelector`, `SelectionAudit`, `DecoderInputs`, `GF2Map`, and `RecordFlipMap`.
+It contains no decoder algorithm. `CompiledCircuit.make_decoder_view` delegates to
+this public namespace without exposing compiler/evaluation internals. Principal
+circuits remain canonical full circuits.
+
+The view validates global indices, record keys/parities, coordinates, physical
+support and source annotation agreement against public artifact metadata. A SHA256
+content fingerprint covers the ideal and physical circuits, Stim version, schema
+version and relevant metadata, including semantic operation/relocation history.
+No per-shot state is retained. Source/derived circuit and DEM text are immutable
+snapshots; properties materialize copies. Input arrays can optionally carry a
+separately stored fingerprint; their width alone cannot prove provenance.
+
+`DetectorInfo.basis` records the actual physical check basis at its anchor module,
+including orientation changes. `physical_support` unions stable data sites of all
+underlying ancilla checks and raw data readouts; it does not collapse cross-block
+correlations into the anchor's scope. Compiler validation independently checks
+these against layouts/orientations. Selector callbacks use these public fields.
+Block and stage membership have explicit anchor/touching/strict semantics. A
+selector combines fields by intersection, supports unions, and preserves canonical
+order; explicit ID lists instead preserve caller order. Every view exposes exact
+bidirectional detector/observable/record maps with contiguous local IDs. Random
+Bell readouts are raw metadata, never reliable observable selectors.
+
+The default cross-region policy retains selected crossings. Omit explicitly drops
+any detector spanning multiple physical blocks or source stages. Joint retains
+selected crossings with an auditable combined scope. These policies select
+annotations; they neither delete faults nor assert statistical independence.
+Observable-local default regions are conservative connected components of actual
+CNOT/relocation history, seeded by the output block and raw observable parity.
+A user region-selector callback may replace this choice. This supports the style
+of observable-local subgraphs without prescribing lomatching or another decoder.
+
+The derived circuit copies every physical instruction/noise channel. Repeat
+occurrences are expanded while preserving SHIFT_COORDS and TICKs. Selected
+OBSERVABLE_INCLUDE instructions stay at their original positions with remapped
+IDs. All selected detectors are emitted at the end in requested local order,
+using global record supports converted to end-relative offsets, original tags,
+and coordinates translated through the retained final coordinate shift. No
+quantum gate, raw measurement or boundary relation is synthesized. This ordering
+allows arbitrary detector permutations even when records were produced at very
+different times. Physical timing and absolute detector coordinates are unchanged.
+
+Stim 1.15.0 re-extracts the selected DEM from the physical circuit. A physical
+fault affecting kept and excluded detectors survives on its retained support.
+Default extraction preserves hyperedges; requested decomposition keeps Stim's
+correlated ^ semantics. There is no direct DEM projection path, probability
+compression engine, gauge elimination or disjoint-error approximation. Unsupported
+exact extraction/decomposition raises a typed DEMConstructionError carrying Stim's
+reason, rather than silently claiming MWPM compatibility. DEM repeat/shift
+handling and optional flattening are delegated to Stim.
+
+Sparse GF2Map multiplication uses uint8 arithmetic reduced modulo two; overflow
+by 256 preserves parity. Public incidence matrices are copies. The reference raw
+sample comes from the same physical circuit's noiseless reference sample. Selected
+detector/observable parity offsets therefore match compile_m2d_converter, including
+nonzero deterministic signs. An override reference is accepted only if its
+selected deterministic parities agree. Projecting stored events is appropriate
+for unedited samples; edited records require parity recomputation or incidence-map
+XOR updates. GF2Map and RecordFlipMap operate on entire batches without per-shot
+Python loops. All raw/mask inputs remain unchanged.
+
+RecordFlipMap accepts caller-defined correction bits and their linear effects on
+future global records. It verifies source identity and bit/shot dimensions, not
+whether a decoder chose a correct correction. Automatic Pauli-to-record maps,
+conditional Bell checks, noisy preparation decoding and LER demonstrations remain
+separate work. A selected DEM is a physical marginal; using it after a conditional
+record-frame update may require a later decoder-specific conditional model.
+
+Reference inspections: lomatching b55a7a65969a106a547622287b620f0da2cb5e39 uses
+observable observing regions plus physical-circuit annotation selection and DEM
+re-extraction. surface-sim 493f800a3b4e9f80a6a569eb92d3c962dd6b09ad separates
+semantic ancilla/check identity, basis and detector history. Hex
+5de58f2f80791054411ad3c0885a4fe3671ed56a separates correction-to-measurement maps
+from static sampling. These informed the boundary, not runtime imports or copied
+integration code. Stim/stimflow pins are unchanged.

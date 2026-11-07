@@ -1,5 +1,15 @@
 # STATUS — Compiler
 
+## M6-B update — 2026-11-08
+
+Metadata extraction/validation now exports actual detector check basis and the
+union of data sites underlying contributing checks/readouts. CompiledCircuit's
+make_decoder_view delegates to the public decoding module. No operation, flow,
+noise, timing or canonical annotation policy changes. Offline views consume only
+public artifact metadata; no private compiler/evaluation state is required.
+Focused d=3/5 identity, parity, support, cross-block and negative metadata checks
+pass. Full test/build/example evidence is in root STATUS. M6-C/D remain separate.
+
 ## M6-A update — 2026-11-08
 
 Principal ideal/noisy circuits and detector metadata retain the full verified

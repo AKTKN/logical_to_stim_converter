@@ -1,6 +1,6 @@
 # logical_to_stim_converter
 
-**Status (2026-11-08): verified memory, Clifford/Knill circuits, and M6-A global provenance.**
+**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance and offline decoder views.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -361,8 +361,8 @@ after two SE rounds, H and readout it has **72** (M5: 56).
   coordinates, and ancestry edges against physical fragments and relocations.
 
 These metadata types are public package exports. Global detector IDs and raw
-record indices remain unchanged when deriving a view. General offline DEM
-projection and decoder-specific region selection are deferred to M6-B.
+record indices remain unchanged when deriving a view. M6-B provides the general
+offline selections and exact marginal DEM construction described below.
 
 Run `python examples/knill_ec_single_round.py` for decoder-independent ideal/noisy
 circuit generation and metadata. The required tests use **PyMatching 2.3.1** only
@@ -371,3 +371,119 @@ noiseless final preparation sectors and independently verify state recovery and
 reference entanglement on physical Stim tableaux. This helper does not infer
 circuit-level faults or establish noisy logical error rates. Future decoder and
 DEM work is tracked in [deferred work](docs/deferred_work.md).
+
+## Offline decoder views (M6-B)
+
+A view selects decoder inputs from the same physical experiment. It samples
+nothing and leaves `compiled.circuit` unchanged. For an external consumer:
+
+```python
+from logical_to_stim_converter import DetectorSelector, observable_local_views
+
+full = compiled.make_decoder_view()
+patch = compiled.make_decoder_view(
+    detector_selector=DetectorSelector(
+        block_ids=(compiled.observables[1].block_id,), block_membership="strict"),
+    observable_selector=(1,),  # global observable 1 becomes local observable 0
+)
+raw = compiled.circuit.compile_sampler(seed=7).sample(1000)  # sample once
+full_inputs = full.inputs_from_raw(raw)
+patch_inputs = patch.inputs_from_raw(
+    raw, source_fingerprint=full_inputs.source_fingerprint)
+assert (patch_inputs.detection_events ==
+        patch.project_detection_events(full_inputs.detection_events)).all()
+local_dem = patch.detector_error_model
+per_observable = observable_local_views(compiled)
+```
+
+Use your artifact's actual block and observable IDs. The runnable
+`python examples/offline_dem_views.py` constructs a complete two-patch example.
+No decoder or experiment runner is required.
+
+`DecoderView`, `DetectorSelector`, `DEMOptions`, `GF2Map`, `RecordFlipMap`,
+`apply_record_flips`, `make_decoder_view` and `observable_local_views` are package
+exports. Additional mapping/input/audit/error types and `source_fingerprint` are
+public in `logical_to_stim_converter.decoding`.
+
+- `detector_map`, `observable_map`, and `measurement_map` expose `global_ids`
+  (also `local_to_global`), `global_to_local`, `local_ids`, and `global_size`.
+  An explicit ID sequence sets the exact local order, including permutations;
+  callbacks and semantic selectors retain canonical order. Selected metadata
+  objects keep their global `index`. `measurements` retains selected semantic keys.
+- `detector_selector` accepts global IDs, a `DetectorSelector`, or a callback on
+  public `DetectorInfo`. Select blocks by `anchor` (default), `touching` (any
+  contributing block), or `strict` (all contributing blocks are in the set).
+  Select `stage_ids` by `touching` (default), `anchor`, or `strict`, and optionally
+  restrict `basis="X"`/`"Z"`. Fields combine by AND; IDs within a block/stage tuple
+  form a union. `selector_a | selector_b` forms an arbitrary region union.
+  `DetectorInfo.basis` is the physical anchor check basis, including H; its
+  `physical_support` contains stable `(block_id, data_id)` sites underlying all
+  contributing records. Check ID prefixes are not used to guess the basis.
+- `observable_selector` accepts reliable global observable IDs, logical names,
+  or a callback on `ObservableInfo`. Random Bell readout module IDs have no
+  reliable observable and raise `UndefinedObservableError`. Default selection is
+  all reliable observables. `measurement_selector` accepts global raw indices,
+  `MeasurementKey` values or a callback; its default is all raw records.
+- `cross_region_policy="retain"` keeps selected cross-region detectors;
+  `"omit"` drops any selected detector spanning multiple blocks or source stages;
+  `"joint"` keeps them and records the combined region. The immutable `audit`
+  records requested, omitted and crossing IDs plus the actual region blocks/stages.
+  Membership alone never implies independent fault models.
+- `observable_local_views` constructs one view per reliable observable. Default
+  regions use physical interaction components seeded by the observable's output
+  and parity support, including CNOTs and relocations. They include real cross-block
+  correlations even after a later inverse gate. Override with
+  `region_selector=lambda observable: your_detector_selector`. This is a reusable
+  observable-local selection example, not the lomatching algorithm or an optimizer.
+
+Each local circuit retains the full physical gate/noise/measurement sequence,
+`TICK`s, qubit coordinates and `SHIFT_COORDS`. Selected detectors are placed at the
+end with rewritten absolute-record references and preserved coordinates, allowing
+arbitrary local order. Repeat occurrences are expanded for selection. Selected
+observable annotations retain their positions with contiguous local IDs. Stim
+re-extracts the DEM, so an error touching a removed detector keeps all remaining
+selected effects. No DEM line filtering or manual `^` rewriting occurs.
+
+`DEMOptions()` preserves hyperedges and correlated errors. Explicit
+`DEMOptions(decompose_errors=True)` requests Stim's correlated decomposition;
+`flatten_loops=True` requests a flattened output DEM. Unsupported decompositions
+or noise requiring disjoint-error approximation raise `DEMConstructionError`.
+Gauge elimination, silent MWPM approximation and direct global-DEM rewriting are
+unsupported. Public circuit/DEM properties return independent copies.
+
+`project_detection_events`, `project_observable_flips`, and
+`project_raw_measurements` slice already sampled global batches. `events_from_raw`
+and `observable_flips_from_raw` recompute parities with Stim's noiseless reference
+alignment; these are observable *flips*, separate from interpreted logical values.
+An optional `reference_sample` must reproduce the selected noiseless parity signs.
+All sample methods require unpacked binary matrices with global shot widths and
+return fresh arrays; `inputs_from_raw` returns a `DecoderInputs` batch with read-only
+arrays. Selecting fewer records does not restrict the full raw records required
+for event reconstruction.
+
+Software record frames can be applied without changing the sample:
+
+```python
+from logical_to_stim_converter import apply_record_flips
+
+interpreted = apply_record_flips(raw, caller_supplied_record_masks)
+updated_events = patch.events_from_raw(interpreted)
+# Equivalently, update the original events through the stored GF(2) incidence map:
+updated_events = patch.update_detection_events(
+    full_inputs.detection_events, caller_supplied_record_masks)
+```
+
+`GF2Map(input_size, supports)` provides a sparse batched map; each output support
+lists its contributing input indices. `incidence_matrix` returns a copy with
+shape `(input_bits, output_bits)`. `view.record_flip_map(input_ids, matrix)` binds
+an external binary `(correction_bits, global_records)` map to the physical source;
+`map.apply(raw, correction_bits, source_fingerprint=view.source_fingerprint)`
+returns interpreted records. The caller supplies the physical interpretation of
+these correction bits. Automatic physical correction-map generation and Bell
+conditional views remain M6-D work; there is no correction selector here.
+
+`schema_version` and `source_fingerprint` identify immutable model/metadata
+snapshots, covering ideal/noisy circuits and semantic metadata. Use
+`view.assert_source(compiled)` or pass the recorded fingerprint to projection
+methods when exchanging batches. Bare NumPy arrays carry no source identity;
+matching widths alone cannot detect a batch from a different experiment.

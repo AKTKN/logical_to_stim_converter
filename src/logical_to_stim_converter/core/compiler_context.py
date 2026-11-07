@@ -83,6 +83,8 @@ class DetectorInfo:
     source_stage_ids: tuple[str | None, ...] = ()
     crosses_decoder_boundary: bool = False
     anchor_module_id: str = ""
+    basis: str = ""
+    physical_support: tuple[GlobalSiteId, ...] = ()
 
     @property
     def anchor_block_id(self):

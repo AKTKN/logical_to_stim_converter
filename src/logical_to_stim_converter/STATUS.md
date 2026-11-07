@@ -1,5 +1,15 @@
 # STATUS — Package root
 
+## M6-B update — 2026-11-08
+
+Public DecoderView/DetectorSelector/DEMOptions, GF2Map/RecordFlipMap, factories,
+observable-local selections and record XOR transforms now expose decoder-neutral
+offline inputs. Mapping/input/audit/error types and source_fingerprint are public
+in decoding. Principal circuits remain complete and unchanged; every local DEM
+is re-extracted from the same physical instructions/noise. Actual detector basis
+and full underlying data support are public. No runtime decoder or runner added.
+See README/architecture and root STATUS for tested contracts and limitations.
+
 ## M6-A update — 2026-11-08
 
 Public exports now include global measurement/detector/observable metadata,

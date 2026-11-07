@@ -2,7 +2,107 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M6_A_IMPLEMENTED` (local physics verification)
+**Overall state:** `M6_B_IMPLEMENTED` (local physics verification)
+
+## M6-B implemented and verified — 2026-11-08
+
+Baseline local/remote commit: `1d502621cab1595b35f74c1e2d628527ac11ad06`.
+
+- Public immutable DecoderView snapshots select decoder inputs from one canonical
+  physical experiment without sampling, modifying gates/noise, or importing a
+  decoder. CompiledCircuit.make_decoder_view delegates to public decoding APIs.
+- Explicit detector/observable/raw-record sequences preserve caller order;
+  semantic selectors/callbacks preserve canonical order. IndexMap exports exact
+  bidirectional global/local IDs. Reliable observable IDs remap contiguously,
+  including a selected global observable 1 becoming local observable 0. Random
+  Bell readout module IDs are explicitly rejected as reliable observables.
+- DetectorSelector supports anchor/touching/strict block/stage membership, unions,
+  X/Z checks and custom public-metadata callbacks. DetectorInfo now includes its
+  actual physical anchor check basis and stable data support underlying all source
+  records, checked against layouts/orientations independently of check ID prefixes.
+  Explicit retain/omit/joint policies retain auditable requested/crossing/omitted
+  detector IDs and actual region scope.
+- Selected annotation circuits copy every original physical instruction/noise
+  channel, TICK and coordinate shift. Repeat occurrences expand for arbitrary
+  per-occurrence selection. Detectors move to end annotations in requested local
+  order, with translated global record references and unchanged absolute
+  coordinates; observable updates stay at their physical positions with local IDs.
+  Stim re-extracts the DEM. Faults retain their selected effects even when they
+  also touch excluded detectors; no global DEM line filtering occurs.
+- Default models preserve hyperedges. Optional Stim correlated decomposition and
+  DEM flattening preserve ^ semantics. Unsupported exact noise/decompositions,
+  approximation options and direct global-DEM rewriting fail with typed errors;
+  no silent MWPM approximation or gauge elimination is enabled.
+- Vectorized sparse GF2Map operations project/recompute selected events and
+  observable flips with the source circuit's noiseless reference alignment.
+  RecordFlipMap and record XOR masks apply externally specified linear software
+  frames to copies. Event updates agree with reconversion of corrected records.
+  There is no per-shot Python loop or runtime correction-selection algorithm.
+- Fingerprints cover ideal/physical circuits, Stim/schema version and public
+  metadata. Public circuit/DEM/matrix objects return copies; typed DecoderInputs
+  stamps a source identity on read-only arrays. Bare NumPy arrays need an explicit
+  fingerprint check when exchanged between consumers; shape alone cannot prove
+  sample provenance.
+- Observable-local example selections use conservative physical interaction
+  components (CNOT/relocation histories), with a user region-selector override.
+  This supplies selection/models for external strategies, not lomatching itself.
+  examples/offline_dem_views.py samples once for global/patch/observable views and
+  software record updates; CI now runs all four examples. README, architecture,
+  development guidance and affected AGENTS/STATUS ledgers document the real API.
+
+### M6-B evidence
+
+Unchanged installed pins: Stim **1.15.0**, stimflow **1.17.dev0** at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd`. Inspected installed circuit-to-DEM,
+reference_sample, m2d conversion, DEM indexing/flattened repeats/shifts and ^ target
+APIs. Read-only references inspected: lomatching
+`b55a7a65969a106a547622287b620f0da2cb5e39` (observing regions, annotation circuit
+selection/re-extraction), surface-sim `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad`
+(semantic detector/check metadata), and Hex
+`5de58f2f80791054411ad3c0885a4fe3671ed56a` (offline correction-to-record maps).
+None is imported, copied into runtime code, or modified.
+
+Final local Linux/WSL2 Python 3.12.7 checks:
+
+- `python -m pytest`: **368 passed in 153.61 s**. Added **105** tests; all 263
+  M1–M6-A tests are retained unchanged.
+- Focused view/record/M6-A parity suite: **119 passed in 20.45 s**, plus the final
+  six physical-basis/support and cross-stage policy tests: **6 passed in 6.11 s**.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: source distribution and wheel built successfully.
+- Isolated built-wheel checks passed with decoder/test/reference imports blocked:
+  memory/Knill identity models, permutations, observable maps, record frames and
+  source validation. Wheel/source archives contain the new modules, helpers and
+  example while excluding local briefs, environments and external clones.
+- All four examples passed. Memory, Bell and Knill ideal/noisy DEMs remain valid;
+  the new example reuses one 512-shot batch for 32-detector per-observable views
+  with correctly mapped local observable IDs and 370/372 local DEM mechanisms.
+- `python -m pip check`: no broken requirements. `git diff --check` passed;
+  all four external reference working trees remain clean.
+
+Independent model tests compare full/local marginal characteristic functions,
+exhaustively over small hand-circuit output spaces and over seeded parity masks
+for larger models. Physically enumerated faults verify that a mechanism touching
+both kept/removed detectors survives, including observable flips and combined
+independent fault probabilities. Other tests preserve true hyperedges and correlated
+^ components, check repeat/SHIFT_COORDS behavior and nonzero reference signs,
+compare 25,000-shot independent-stream marginals with uncertainty-aware bounds,
+validate d=3/5 memory and open/closed Knill identity models, and reconstruct/project
+one raw batch into many semantic regions. Record maps agree with independently
+executed physical Pauli corrections. Negative source/record/stage/basis/support/
+observable/shape/model requests fail clearly. Canonical full counts and M5
+noiseless teleportation/entanglement/exact noise regressions all remain intact.
+
+Implemented but unverified: no additional M6-B behavior is claimed. Windows and
+remote CI execution remain separate from these local results.
+Supported projection is exact physical-circuit re-extraction, not a direct global
+DEM transform. Default regions are conservative candidates, not optimized observing
+regions. Conditional Bell/preparation models, automatic physical-Pauli-to-record
+maps, decoded noisy recovery/LER and the M6-C/D demonstrations remain deferred.
+Edited records do not automatically produce a conditional DEM. No runtime decoder,
+runner, adaptive branch, block reuse or upstream modification was introduced.
+User explicitly authorized commit and push after testing; local briefs, generated
+artifacts, environments and external clones remain excluded.
 
 ## M6-A implemented and verified — 2026-11-08
 
@@ -287,7 +387,8 @@ from these local verification results.
 | M4 | Primitive/composite Clifford noise and synchronous timing verified; stage selectors deferred |
 | M5 | BellStatePrep/KnillEC, random readout, open outputs, relocation, physical frame evaluation verified |
 | M6-A | Canonical global detectors, causal preparation ancestry, exact metadata and frame-validation modes verified |
-| M6-B/C/D | Offline DEM views, decoder demonstrations and knill_bench integration deferred |
+| M6-B | Exact physical-model marginals, semantic decoder views and batched software record transforms verified |
+| M6-C/D | Ordinary/Knill decoding demonstrations and knill_bench integration deferred |
 | Deferred | Text parser/CLI, other code families, scheduling optimization |
 
 Current restrictions: one logical slot per block, no physical block reuse,
@@ -305,6 +406,11 @@ is imported. A project license has not been selected. Future work is explicitly
 tracked in docs/deferred_work.md; knill_bench remains a downstream runner.
 
 ## Changelog
+
+- **2026-11-08** — Implemented M6-B immutable decoder views, exact physical
+  marginal DEM re-extraction, semantic/observable-local selectors, source IDs and
+  batched GF(2) record frames. Added 105 tests and a one-batch example; all 368
+  tests, lint, build and four examples passed. Full evidence and limits above.
 
 - **2026-11-08** — Implemented M6-A canonical global detectors, causal preparation
   provenance, global metadata validation, explicit legacy stage views, and separate

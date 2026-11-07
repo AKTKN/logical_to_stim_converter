@@ -17,6 +17,7 @@ python -m build
 python examples/two_patch_memory.py
 python examples/two_patch_bell_roundtrip.py
 python examples/knill_ec_single_round.py
+python examples/offline_dem_views.py
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -41,7 +42,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and all three memory/Bell/Knill examples. Local verification results/platforms are recorded in STATUS;
+and all four memory/Bell/Knill/offline-view examples. Local verification results/platforms are recorded in STATUS;
 CI configuration alone is not evidence that those remote jobs ran.
 
 `surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the
@@ -117,3 +118,15 @@ pre-existing resources, repeated relocation, open continuation, noisy hypotheses
 and negative metadata/edge/sign tests. Compare all physical/noise instructions
 between canonical and derived views. Pinned public FlowMetadata tags carry IDs;
 keep detector coordinates at three dimensions. No external source is modified.
+
+## M6-B regression requirements
+
+Retain all 263 M1–M6-A regressions. Add independent DEM marginal characteristic-
+function comparisons, enumerated physical faults, hyperedges and correlated ^
+components, arbitrary local index order, signed reference conversion and record
+updates. Check physical/noise sequence equality and use one stored raw batch for
+several views. The separate-stream statistical smoke test uses seeded samples and
+uncertainty-aware bounds. Default models remain hypergraph-capable; unsupported
+exact/decomposition/approximation requests fail explicitly. The fourth example
+samples once and constructs views without importing a decoder. Read the public
+M6-B contract before implementing M6-C/D consumers.

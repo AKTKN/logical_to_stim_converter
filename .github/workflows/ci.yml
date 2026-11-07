@@ -33,3 +33,5 @@ jobs:
         run: python examples/two_patch_bell_roundtrip.py
       - name: Knill EC single round (decoder independent)
         run: python examples/knill_ec_single_round.py
+      - name: Offline decoder views (one physical batch)
+        run: python examples/offline_dem_views.py

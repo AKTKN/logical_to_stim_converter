@@ -4,7 +4,7 @@ This file applies to the entire repository. Read the nearest nested `AGENTS.md` 
 
 ## Purpose and current reality
 
-Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Bell/Knill composites, random readouts, open outputs, Knill relocation, and externally resolved physical preparation frames now work. Other code families and production decoder interfaces remain placeholders. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
+Build an independent `logical_to_stim_converter` package that compiles logical operations into physical Stim circuits, initially for rotated surface codes and later color/other CSS codes, using `stimflow` for verified stabilizer-flow composition. `knill_bench` remains the experiment runner. **As of 2026-11-07 the rotated-surface memory and M3 H/CNOT/Pauli paths are implemented and locally verified.** Core models, multi-block fragments, code orientation, affine frames, correlated detectors, concurrent physical layers, and operation noise work. Bell/Knill composites, random readouts, open outputs, Knill relocation, and externally resolved physical preparation frames now work. Offline decoder views now work; other code families and decoder result/algorithm interfaces remain deferred. Check STATUS for exact evidence; do not infer functionality from names or docstrings.
 
 ## Source-of-truth map
 
@@ -16,7 +16,7 @@ Build an independent `logical_to_stim_converter` package that compiles logical o
 - `.../backends/`: code-family physical implementations and optional adapters to existing generators.
 - `.../noise/`: operation-aware policy; built on `stimflow` noise rules; avoids duplicate injection.
 - `.../compiler/`: module assembly, flow validation, circuit metadata, compiled artifact.
-- `.../decoding/`: decoder-facing formats only; no decoder algorithm in the initial scope.
+- `.../decoding/`: offline decoder views, exact physical-model marginals and record transforms; no decoder algorithm.
 - `tests/`: signed-flow, algebra, geometry, distance, detector/observable parity, mapping, lifecycle, and exact noise-location tests for memory and interacting Clifford circuits.
 - `external_lib/`: local **reference** copies. Not tracked by Git by default. Do not edit upstream source unless explicitly directed.
 
@@ -36,6 +36,10 @@ Build an independent `logical_to_stim_converter` package that compiles logical o
     separation is an explicit derived annotation view; metadata keeps global IDs.
     Join preparation ancestry only through actual operand interactions/relocation.
     Keep noisy frame hypotheses separate from strict noiseless-sector proofs.
+12. Decoder views preserve every physical instruction/noise channel and re-extract
+    DEMs with Stim. Never discard faults merely because they touch excluded
+    detectors. Preserve hyperedges/correlated ^ components and global/local maps.
+    Software record frames edit copies with explicit source/reference alignment.
 
 ## Workflow for each coding task
 

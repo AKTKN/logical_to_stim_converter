@@ -100,6 +100,16 @@ def extract_metadata(
                     support = tuple(sorted({key.block_id for key in keys}))
                     if block_id not in support or not set(support) <= causal_graph[block_id]:
                         raise ValueError("Detector records have invalid cross-block provenance")
+                    anchor = by_module[module_id]
+                    orientation = anchor.orientations_before[anchor.block_ids.index(block_id)]
+                    check = context.blocks[block_id].layout.check_for_ancilla(check_id)
+                    basis = ("Z" if check.basis == "X" else "X") if orientation else check.basis
+                    physical_support = set()
+                    for key in keys:
+                        layout = context.blocks[key.block_id].layout
+                        data = (layout.check_for_ancilla(key.local_id).support
+                                if key.kind == "syndrome" else (key.local_id,))
+                        physical_support.update((key.block_id, q) for q in data)
                     detectors.append(
                         DetectorInfo(
                             len(detectors),
@@ -113,6 +123,8 @@ def extract_metadata(
                             ordered_stages(measurements[i].stage_id for i in indices),
                             len({measurements[i].stage_id for i in indices}) > 1,
                             module_id,
+                            basis,
+                            tuple(sorted(physical_support)),
                         )
                     )
                 else:

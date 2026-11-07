@@ -73,6 +73,18 @@ def validate_metadata(compiled):
             if (d.supporting_block_ids != tuple(sorted({k.block_id for k in keys}))
                     or d.coordinates != tuple(coords[detector_index])):
                 raise ValueError("Detector physical provenance disagrees")
+            f = fragments[d.anchor_module_id]
+            orientation = f.orientations_before[f.block_ids.index(d.block_id)]
+            check = blocks[d.block_id].layout.check_for_ancilla(d.check_id)
+            basis = ("Z" if check.basis == "X" else "X") if orientation else check.basis
+            support = set()
+            for k in keys:
+                layout = blocks[k.block_id].layout
+                data = (layout.check_for_ancilla(k.local_id).support
+                        if k.kind == "syndrome" else (k.local_id,))
+                support.update((k.block_id, q) for q in data)
+            if d.basis != basis or d.physical_support != tuple(sorted(support)):
+                raise ValueError("Detector check basis or data support disagrees")
             detector_index += 1
     if (tuple(o.index for o in compiled.observables) != tuple(range(circuit.num_observables))
             or any(o.measurement_indices != tuple(sorted(observables[o.index]))

@@ -30,3 +30,7 @@ record/annotation mappings and causal event edges; validate these at compilation
 `_teleport.py` joins preparation ancestry at actual physical interactions and
 relocation only. Frame replay accepts well-formed noisy hypotheses independently
 from the explicit strict noiseless sector/eigenvalue validator.
+
+M6-B exports actual detector basis and full underlying data support and validates
+them against physical layouts/orientations. CompiledCircuit delegates offline view
+construction to decoding; quantum assembly/noise remain independent of selectors.

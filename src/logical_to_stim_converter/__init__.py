@@ -25,6 +25,16 @@ from .core.protocol import (
     PreparationInfo,
     RelocationRecord,
 )
+from .decoding import (
+    DecoderView,
+    DEMOptions,
+    DetectorSelector,
+    GF2Map,
+    RecordFlipMap,
+    apply_record_flips,
+    make_decoder_view,
+    observable_local_views,
+)
 from .noise.injector import NoiseInjector
 from .noise.model import NoiseModel, NoiseOverride, NoiseParameters
 from .operations.base import OperationModule
@@ -75,4 +85,12 @@ __all__ = [
     "LogicalReadout",
     "BellMeasurementResult",
     "RelocationRecord",
+    "DecoderView",
+    "DEMOptions",
+    "DetectorSelector",
+    "GF2Map",
+    "RecordFlipMap",
+    "apply_record_flips",
+    "make_decoder_view",
+    "observable_local_views",
 ]
