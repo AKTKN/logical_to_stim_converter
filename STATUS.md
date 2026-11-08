@@ -2,7 +2,121 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M7_B_IMPLEMENTED` (use-aware physical models and offline frames)
+**Overall state:** `M7_C_IMPLEMENTED` (explicit three-patch static Knill memory)
+
+## M7-C three-patch Knill memory — 2026-11-08
+
+Baseline: main `8fc65a9b808d31308878f8bd22d8d32ffa359a5d` (M7-B), with
+544 passing tests and all Ubuntu/Windows Python 3.11/3.12 jobs successful in
+CI run 42470273846. Existing uncommitted inspection/export/report work is
+preserved and excluded from this implementation's commit.
+
+Added a separate source example, examples/knill_memory_three_patch_reuse.py,
+with explicit caller-authored triples, fresh A_t/B_t BindPatch reservations and
+existing KnillEC primitives. The compiler/package public API needs no change.
+build_explicit_three_patch_knill, explicit_three_patch_program,
+prepare_three_patch, run_three_patch, describe_experiment and save_report expose
+canonical artifacts, replaceable M6-D external adapters and bounded aggregate
+reports. M6-D fresh-resource behavior and its result format remain unchanged.
+
+Cycle uses (input D, A, B/output D):
+
+| Cycle | Input use | A use | B/output use |
+| --- | --- | --- | --- |
+| 0 | P0/0 | P1/0 | P2/0 |
+| 1 | P2/0 | P0/1 | P1/1 |
+| 2 | P1/1 | P2/1 | P0/2 |
+| 3 | P0/2 | P1/2 | P2/2 |
+| 4 | P2/2 | P0/3 | P1/3 |
+
+Exactly 3(2d²-1) physical wires are retained: 51 at d=3, 147 at d=5.
+Input/resource preparation defaults to d full SE rounds; ordinary post-SE is
+independently configured. Open outputs remain available. Canonical detectors,
+all physical noise, source/use histories and exact v3 views/models are preserved.
+One compiled sampler samples once per bounded batch; decoder hypotheses edit
+only offline records/frames. Aggregate runs retain no raw shot matrices. Reports
+include use/stage/global-local identities and a full-precision flattened DEM hash,
+honest corrected-readout XOR input labels, algorithm limitations and wall phases.
+
+The 61 new focused cases retain all 544 regressions and independently check
+occupancy, signed physical tableaux/correction execution and untouched encoded
+reference entanglement through three teleports, all Bell branches/random gauges,
+epoch-local exact fault marginals and all categorical Bell atoms, physical noise,
+fresh-resource gate/fault unfolding, temporal targets, stale-state/byproduct
+negatives, public-only decoder replacement, unchanged raw/DEM replay, exact
+chunk-independent predictions, causal once-only corrections and T=10 smoke.
+README, architecture, root/test policies, local ledgers and a detailed experiment
+guide document the physical identities and verified boundaries. Every significant
+function/class in the new example has an English physical/order/API docstring.
+
+### M7-C verification
+
+Commands use `.venv/bin/python` on Linux/WSL2 Python 3.12.7. Inspected actual
+Stim compile_sampler/FlipSimulator/DEM and public stimflow Chunk.verify APIs.
+Pins remain Stim 1.15.0, stimflow 1.17.dev0 at
+ffe0d043598ed5df0851a3e6b4920359a23fafbd, PyMatching 2.3.1 (dev/example only),
+NumPy 2.5.4, pytest 9.2.0, Ruff 0.17.4 and build 1.6.1. No upstream copy changed.
+
+- `python -m pytest -q tests/test_patch_reuse_knill_e2e.py
+  tests/test_patch_reuse_offline_replay.py`: **61 passed in 300.29 s**.
+- Corrected temporal-target checkpoint: `python -m pytest -q
+  tests/test_patch_reuse_knill_e2e.py -k temporal_model`: **4 passed,
+  36 deselected in 21.35 s**. A one-round ordinary SE's first record is also
+  its final record; the test checks actual target record identity. The initial
+  combined focused pass had 59 passed/2 failed solely from that harness assumption.
+  No runtime or historic physics assertion was changed to resolve it.
+- `python -m pytest`: **605 passed in 669.37 s**, retaining all 544 previous
+  tests (including the 440 historic M6 checks). An earlier run was interrupted
+  after 382 passing checks to apply the new temporal test correction.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: **sdist and wheel built successfully**. The exact staged
+  tree independently builds; its sdist includes the new example/guide/tests,
+  while the wheel contains no examples/tests/reference code.
+- `python /tmp/m7c_validate_wheel.py`: isolated wheel consumer passes three-cycle
+  X/Z memory with its own noiseless GF(2) sector StageDecoder, public use-aware
+  requests/views/conditional models and use/input-bound correction replay. Optional
+  PyMatching, Matplotlib, examples, tests and reference imports are actively blocked;
+  package code loads from the isolated installation with pinned shared dependencies.
+- All seven CI example commands pass from the exact staged source tree:
+  `python examples/two_patch_memory.py`, `python examples/two_patch_bell_roundtrip.py`,
+  `python examples/knill_ec_single_round.py`, `python examples/offline_dem_views.py`,
+  `python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731`,
+  `python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732`,
+  `python examples/knill_memory_three_patch_reuse.py --suite --shots 32
+  --batch-size 13 --p 0.001 --seed 733`. CI adds the last bounded command to
+  all four Ubuntu/Windows Python 3.11/3.12 jobs; remote results are checked after
+  push and reported separately from local evidence.
+- The README public-usage snippet and a different caller-authored triple schedule
+  execute successfully. AST audit passes all nine functions/classes plus the
+  new example module description. `python -m pip check` finds no broken
+  requirements; Git whitespace checks pass. Pre-existing tracked edits/deletions
+  and untracked example-status contents are preserved and excluded from staging.
+
+Noisy report command:
+`python examples/knill_memory_three_patch_reuse.py --suite --shots 2048
+--batch-size 256 --p 0.003 --seed 20261108
+--output-dir implementation_files/e2etest/m7c_three_patch`.
+All four T=3 cases use eight batches; d=3 X/Z yield 454/553 failures of 2048,
+d=5 X/Z yield 652/651. Run walls are 2.631/2.582/14.823/13.796 s; report wall
+0.618 s. These are honest restricted-decoder results, not threshold claims.
+
+`python examples/knill_memory_three_patch_reuse.py --teleportations 10 --shots 9
+--batch-size 4 --p 0 --bit 1
+--output-dir implementation_files/e2etest/m7c_ten_cycle` gives 51 physical wires,
+773 records, 584 detectors, 21 uses and zero failures in batches 4/4/1. Run wall
+10.540 s: compile/validation 3.415 s, temporal stage/view models 5.877 s, frame
+maps 0.294 s, conditional models 0.837 s, sampling 0.00046 s. Prefix/model setup
+is the largest observed cost here. Only physical-state width is bounded;
+instructions, records, detectors, history and symbolic/model setup grow with T.
+Local aggregate JSON/CSV/PNG/SVG are ignored, raw shots are not saved/committed.
+
+Remaining limitations: inherited temporal parallel-edge ambiguity, per-patch Bell
+capacity approximation, omitted cross-boundary SE offsets and incoming-sector
+residual errors; no optimal joint decoding, threshold claim, automatic allocation,
+adaptive sampling/factories, hardware transport or real-time feedback. General
+large-T setup optimization and external production decoder/runner work remain
+deferred. Verified behavior is restricted to the explicitly tested code/duration/
+noise/adapter cases; no untested new runtime functionality is claimed.
 
 ## M7-B epoch-aware flows, noise, views and offline frames — 2026-11-08
 

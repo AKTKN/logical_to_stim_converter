@@ -39,3 +39,5 @@ jobs:
         run: python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
       - name: Knill memory offline stages and wall-time demonstration
         run: python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
+      - name: Three explicit patches, repeated Knill cycles and bounded offline batches
+        run: python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733

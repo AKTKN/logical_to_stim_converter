@@ -1,5 +1,39 @@
 # STATUS — Tests
 
+## M7-C update — 2026-11-08
+
+Added 61 tests in test_patch_reuse_knill_e2e.py and
+test_patch_reuse_offline_replay.py, retaining all 544 M1–M7-B checks, including
+the 440 historic M6 tests. No runtime package or pre-existing test is modified.
+The baseline is main 8fc65a9b808d31308878f8bd22d8d32ffa359a5d,
+verified by all four Ubuntu/Windows Python 3.11/3.12 CI jobs (42470273846).
+
+The new cases cover T=1..5 d=3 and T=1..3 d=5 X/Z physical occupancy, explicit
+manual bindings, constant physical width and advancing uses; d=3/5 both input
+signs under random gauges/all Bell branches, M5 replay, actual physical tableaux
+and explicit Pauli execution; three-cycle untouched encoded-reference XX/ZZ;
+exact global source parities/coordinates, all P0 epochs/local marginals and record
+edits, use-aware temporal probes, exact gate/idle/reset/result noise and every
+conditional Bell atom/exclusive group/survivor action against FlipSimulator;
+fresh-use unfolded gate/noise sites and six selected deterministic fault locations
+at both distances; independent noisy-stream 99.99% Wilson consistency; causal
+boundary/readout use histories, decoder replacement with public inputs only,
+immutable raw/DEM replay, exact chunk equivalence including stage predictions,
+one sampler/one sample per batch and once-only corrections; wrong epoch/prep/
+record/reset and missing-later-Bell negatives; honest nonzero noisy failure labels,
+and ten-cycle bounded-batch/noiseless/report smoke. Exact commands/counts and
+final lint/build/platform evidence are in root STATUS.
+Focused command: `python -m pytest -q tests/test_patch_reuse_knill_e2e.py
+tests/test_patch_reuse_offline_replay.py` -> **61 passed in 300.29 s**.
+The temporal-only checkpoint passes four cases at d=3/5; first and last records
+coincide for a one-round SE, unlike d-round preparations. The corrected test
+derives this from actual record IDs. Historic physics assertions and runtime
+source remain unchanged; root STATUS distinguishes the initial harness failures
+from the final verified result.
+Final `python -m pytest`: **605 passed in 669.37 s**, including all 544 prior
+regressions and the 61 new cases. Full lint, seven examples, build and isolated
+public-API wheel checks pass; remote CI results are reported after push.
+
 ## M7-B update — 2026-11-08
 
 Added 51 tests across test_epoch_views_noise.py and test_epoch_stages_frames.py.

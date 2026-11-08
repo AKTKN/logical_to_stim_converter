@@ -34,3 +34,11 @@ targets with independent faults, all Bell atoms with Stim, sector transfer throu
 real H/CNOT, and frame replay against explicit physical corrections across resets.
 Keep the M7-A regression physics. v3 negative tests must rebind deliberately
 corrupted Bell semantics after first checking rejection of stale source requests.
+
+M7-C independently certifies three working patches through >=3 cycles using
+actual physical tableaux/correction execution, random gauges and Bell branches,
+plus an untouched encoded reference. Unfold reset intervals to fresh patches to
+compare exact gate/noise sites and selected deterministic fault truth tables;
+compare independent noisy streams with explicit confidence bounds. Check static
+sampling calls, causal once-only corrections, chunk-identical predictions and
+physical readout failure labels. Ten-cycle smoke bounds physical width only.

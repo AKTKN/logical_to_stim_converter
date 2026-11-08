@@ -87,7 +87,8 @@ readout and relocation events rather than trusting final mappings.
 
 M7-A proves sequential independent patch reuse and relocation/binding composition.
 M7-B extends the decoder-neutral contracts below across these uses; production
-allocation and the full M7-C three-patch Knill decoding demonstration remain separate.
+allocation remains deferred. M7-C demonstrates caller-authored three-patch Knill
+memory using those contracts without adding runtime compiler/decoder behavior.
 Pinned stimflow `ChunkCompiler.o2i` assigns named observables by first encounter;
 the compiler remaps their final Stim IDs to historical logical-name order after
 lazy planning. Physical instructions and signed flow verification are unchanged.
@@ -164,8 +165,56 @@ events after frame edits. Strict noiseless sector proofs remain independent from
 acceptance of well-formed, potentially incorrect noisy decoder hypotheses.
 
 The implementation adds no allocator, scheduler, decoder, sampling orchestrator
-or adaptive quantum feedback. Full multi-cycle three-patch LER comparison belongs
-to M7-C; generic conditional models do not promise optimal joint inference.
+or adaptive quantum feedback. The M7-C example below consumes these interfaces;
+generic conditional models do not promise optimal joint inference.
+
+## Explicit three-patch Knill memory (M7-C)
+
+`examples/knill_memory_three_patch_reuse.py` declares the caller's repeating
+triples `(D input, A resource, B output)` as `(P0,P1,P2)`, `(P2,P0,P1)`,
+`(P1,P2,P0)`. Its authoring helper emits fresh A_t/B_t names and explicit
+BindPatch directives before subsequent KnillECs. A caller may instead write
+every directive manually or provide another explicit three-patch triple list.
+CircuitCompiler discovers no rotation or free resource. Existing signed physical
+primitives, global detectors/noise, epoch/source metadata and v3 snapshots are
+unchanged. Temporary B's retirement transfers ownership to D without releasing
+its active physical use. T=3 returns D to P0/2, distinct from its initial P0/0.
+
+A physical patch has d² data plus d²-1 check ancillas at fixed hardware
+coordinates/wire indices. A use counts one reset-to-release occupancy; its epoch
+is independent of gates, syndrome-extraction (SE) rounds and training epochs.
+A Knill cycle includes Bell-resource preparation, encoded entangling operations
+and destructive Bell measurement. Resource preparation defaults to d full SE
+rounds, while optional ordinary post-teleportation SE has its own round count.
+A semantic stage labels one such subcircuit. A physical time layer is a TICK
+interval for gate/idle noise. A decoder boundary is a state/record cut where
+an external algorithm returns a hypothesis; it supplies no hidden quantum truth.
+
+`prepare_three_patch` builds one static artifact and delegates model/map/adapter
+setup to M6-D `prepare_compiled`. `analyze_knill` accepts repeated analyses of
+the same raw batch with caller-selected boundary/readout adapters. Corrections
+edit isolated records and residual frames, once per causal module. Physical
+resets clear old supports while earlier Bell records retain their effects on
+surviving D. Model-only MPP probes stay outside canonical sampling. Logical
+failure is corrected final physical-readout parity XOR the declared input bit,
+with that bit used only for labeling. Open-output artifacts support frame and
+physical-reference checks, without pretending to measure an LER.
+
+`run_three_patch` compiles one sampler, samples each bounded batch once, then
+releases its raw/analysis matrices after aggregating errors, timings and a raw
+stream hash. Only physical-state width, 3(2d²-1), stays independent of cycle
+count. Instructions, records, detectors, symbolic frame-plan/model setup and
+metadata grow with duration. Saved JSON/CSV/PNG/SVG exports contain aggregate
+statistics, actual use/owner/binding/relocation histories, module/stage IDs,
+global/local selections, source/DEM identities and restrictions, without raw
+shots or dense correction maps. See [the experiment guide](three_patch_knill.md)
+for physical-use tables, reproducible commands and measured evidence.
+
+The unchanged restricted baseline combines temporal correlated MWPM and CSS
+capacity sector representatives with independent per-patch Bell capacity MWPM.
+Parallel-edge target ambiguity, omitted cross-boundary offsets and residual
+incoming-sector errors remain limitations. No optimal joint inference, automatic
+allocation, adaptive factories or real-time feed-forward is introduced.
 
 ## Physical and flow boundaries
 

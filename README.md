@@ -833,3 +833,39 @@ shot loop. The execution report additionally measures full CLI startup/imports,
 report/figure generation and exit. Timings are observations of the recorded
 machine/load, not CI performance assertions. Production decoder optimization,
 conditional joint inference, scheduling and runner integration remain future work.
+
+## Knill memory on three explicitly reused patches (M7-C)
+
+```bash
+python examples/knill_memory_three_patch_reuse.py --distance 5 --basis X --bit 1 --teleportations 4 --resource-rounds 5 --post-rounds 1 --shots 1000 --batch-size 128 --seed 7
+python examples/knill_memory_three_patch_reuse.py --suite --shots 2048 --batch-size 256 --p 0.003 --seed 20261108 --output-dir implementation_files/e2etest/m7c_three_patch
+```
+
+The example explicitly declares `(D input, A, B output)` physical assignments
+P0/P1/P2, P2/P0/P1, P1/P2/P0 and repeats that caller-authored list. Fresh A_t/B_t
+names bind to specifically named measured patches before each later KnillEC.
+The compiler validates those directives. Persistent D returns to P0 after three
+cycles, on P0's third use (epoch 2). Physical wires stay fixed: 51 qubits at d=3
+or 147 at d=5, for any number of cycles. Circuit, detector, history and raw-record
+sizes grow with duration; batches bound the number of shot rows kept in memory.
+
+```python
+from examples.knill_memory_three_patch_reuse import build_explicit_three_patch_knill
+from examples.knill_memory_offline_decoding import prepare_compiled, analyze_knill
+
+compiled = build_explicit_three_patch_knill(distance=3, teleportations=3)
+experiment = prepare_compiled(compiled)
+raw = compiled.circuit.compile_sampler(seed=7).sample(shots=64)
+baseline = analyze_knill(experiment, raw)
+# Reuse raw and experiment with your boundary_decoders/readout_decoders mappings.
+assert baseline.errors == 0
+```
+
+`explicit_three_patch_program` also accepts a caller-supplied per-cycle schedule;
+manually written BindPatch/KnillEC sequences work with the standard compiler.
+Open outputs use `allow_open_outputs=True`; LER runs require final readout.
+The original M6-D fresh-resource example remains separate. Both use the same
+restricted external MWPM/capacity adapters, with no decoder in the converter.
+Reports include actual use tables, epoch/stage/view provenance, canonical DEM
+identity, honest final-readout failure labels and separate wall phases.
+See [the physical-use and verification guide](docs/three_patch_knill.md).

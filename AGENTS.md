@@ -83,7 +83,7 @@ logical names reserve explicitly selected available patches. Reject stale aliase
 pending-reservation conflicts and parallel physical overlap. Keep historical
 readouts/observables and persistent data slots through relocation; reset retired
 internal tableau slots before assigning fresh states. Decoder policies across
-epochs are implemented in M7-B; full three-patch Knill decoding remains M7-C work.
+epochs are implemented in M7-B; the explicit three-patch example is M7-C.
 
 M7-B scopes detector anchors/sources, active time layers, preparation ancestry,
 boundary/conditional requests and correction maps to BlockUseId or unique module
@@ -93,3 +93,12 @@ of real interactions/relocations, never coordinate reuse alone. Reset removes ol
 physical frames but preserves legitimate teleported/classical dependencies.
 Fingerprint schema v3 includes use histories and requires cached v1/v2 artifacts
 to be regenerated. Preserve exact physical instructions, noise and raw samples.
+
+M7-C authors a visible P0/P1/P2 binding schedule in examples, using existing
+KnillEC primitives and M6-D external adapters. It bounds physical-state width,
+not circuit/record/history size. Sample one static circuit once per bounded
+batch; never execute stages again for decoder hypotheses. Preserve the separate
+M6-D fresh-resource behavior and its result format. Report corrected physical
+readout XOR intended state, honest restricted-decoder limitations and separate
+setup/sampling/events/decoding/frame/report wall phases. Keep orchestration,
+PyMatching and plotting outside the installed runtime package.
