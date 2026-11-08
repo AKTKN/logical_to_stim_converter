@@ -25,10 +25,72 @@ with one ancilla per independent generator, connectivity, and N/Z CNOT order.
 `LogicalBlock` scopes local D/X/Z keys to a stable physical block. Its global site
 identity is `(block_id, local_key)`, and its geometry is an independent translated
 coordinate. Stim indices are another mapping entirely. `CompilerContext` records
-logical-ID-to-block bindings; current memory is one slot per block. Final exported
+logical-ID-to-block bindings; live tableau slots are bounded by registered patches. Final exported
 indices are recovered from the assembled circuit's QUBIT_COORDS, because stimflow
 reorders qubits. Observable names are `(logical_id, basis)` until assembly; stable
 final observable IDs follow sorted logical IDs, independent of block registration.
+
+## Identity and lifecycle glossary (M7-A)
+
+| Identity | Physical or semantic meaning |
+| --- | --- |
+| PhysicalBlockId (`str`) | Fixed placed patch: data/ancilla sites, layout and coordinates. |
+| GlobalSiteId (`tuple[str, str]`) | Physical block plus local qubit key; stable across reuse. |
+| Stim qubit index (`int`) | Final global wire index recovered after assembly; never an epoch. |
+| BlockUseId | Immutable `(block_id, epoch)` for one reset-to-release occupancy. |
+| epoch (`int >= 0`) | Per-patch occupancy generation, starting at the first actual reset. |
+| LogicalStateId (`str`) | Persistent state identity through teleportation, or a fresh temporary resource name. |
+| ModuleId (`str`) | Unique executed primitive, including its physical gates. |
+| StageId (`str` or `None`) | Semantic protocol region, such as resource preparation or Bell readout. |
+| TimeLayer | Physical interval between adjacent TICKs, with a zero-based index. |
+| MeasurementKey | Physical block, local qubit, kind, per-use check round and trailing epoch. |
+| Stim measurement index (`int`) | Absolute zero-based physical record position, increasing across all uses. |
+
+`BindPatch(logical_id, physical_block_id)` is a compile-time reservation, separate
+from OperationModule. It specifies exactly one patch and has zero duration/noise.
+The initial injective mapping may reserve every patch as before, or a subset;
+omitting the mapping retains block-named reservations. A pending reservation is
+occupied for binding validation, although its physical status is UNINITIALIZED.
+An unreserved patch is explicitly listed in `available_blocks`. After destructive
+readout the final-use status remains MEASURED until a new binding reserves it.
+Binding sets UNINITIALIZED without advancing epoch or creating a preparation.
+Only the following LogicalInit resets data and advances that patch's epoch.
+
+Retired aliases cannot execute, and retired names cannot be rebound. Historical
+name-to-slot and readout dictionaries retain facts about prior measurements; they
+do not confer permission to access a newly occupying state. Unrebound measured
+aliases remain in the final mapping for compatibility. Rebinding removes the old
+alias from that location map. Tableau capacity remains the registered patch count:
+fresh aliases reuse retired internal slots and LogicalInit resets those slots.
+The persistent data slot stays fixed during Knill relocation. Temporary A/B names
+retire independently from physical release; B's active use acquires D as owner.
+
+`block_uses` is an immutable tuple of BlockUseInfo, in reset execution order. Each
+entry records reset/terminal ModuleIds, logical-owner events, and half-open global
+measurement/TimeLayer intervals. Active uses have no terminal/stop fields.
+Intervals describe positions in the full circuit and may include concurrent
+spectator records. Preparations/readouts/fragments, observables and Bell/relocation
+records retain explicit use identities. Every raw measurement keeps its producer
+ModuleId and historical logical owner. Syndrome round counters restart per use;
+physical site keys never change. Both deterministic readouts of a recycled site
+remain distinct observables, canonically numbered by historical logical name.
+
+Planning yields one user entry at a time and resolves composites using the
+current mapping after earlier reservations/relocations. Parallel groups validate
+physical operands before applying bindings, so bind/use/readout/reset overlap is
+rejected even under different names. Independent bindings may share a user layer
+with disjoint physical work and add no TICK or idle exposure. Physical flow ports
+terminate at readout and restart at reset using public stimflow boundaries. The
+global circuit retains all deterministic detectors, physical noise and raw order.
+Independent metadata validation reconstructs use epochs and ownership from reset,
+readout and relocation events rather than trusting final mappings.
+
+This stage proves sequential independent patch reuse and relocation/binding
+composition. It does not establish epoch-aware decoder selection, conditional
+multi-use Knill decoding or a production patch allocator (M7-B/M7-C remain separate).
+Pinned stimflow `ChunkCompiler.o2i` assigns named observables by first encounter;
+the compiler remaps their final Stim IDs to historical logical-name order after
+lazy planning. Physical instructions and signed flow verification are unchanged.
 
 ## Physical and flow boundaries
 
@@ -74,8 +136,9 @@ and more general asynchronous scheduling remain future work.
 
 ## Metadata and lifecycle
 
-Each compilation has fresh state. A block transitions uninitialized -> active ->
-measured and cannot be reused. Closed memory compilation retains its completion
+Each compilation has fresh state. A physical use transitions uninitialized -> active ->
+measured. A later explicit BindPatch reserves the same physical patch for a fresh
+logical name; only its subsequent LogicalInit starts a new use. Closed compilation retains its completion
 check; `allow_open_outputs=True` permits active outputs and unused blocks. Readout
 defaults to deterministic under the intended logical Clifford circuit. Its basis
 may differ from preparation after H. Explicit random readout produces classical
@@ -321,7 +384,8 @@ are built. Local operations retain their operand history. A physical transversal
 CNOT conservatively unions the two actual operand histories onto both outputs;
 it does not bring in unrelated earlier or parallel preparations. A destructive
 readout records consumption without creating a new preparation source. Historical
-block ancestry remains available for auditing; measured blocks cannot be reused.
+block ancestry remains available for auditing; a new reset replaces the current
+patch ancestry while preserving historical preparation events and use records.
 
 Knill relocation unions the data and relevant resource histories onto the surviving
 physical block and persistent logical identity. Resource logical identities leave

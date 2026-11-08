@@ -22,3 +22,7 @@ OfflineFramePlan/Batch, FrameBoundary, CorrectionBatch, StageInputs/Result/Decod
 BoundaryRequest/ReadoutRequest/StageRequests, ConditionalReadoutModel/PauliFault,
 and stage/conditional factories. Algorithms remain in examples; ideal boundary
 probes remain model-only, and canonical raw records/noise stay unchanged.
+
+M7-A exports BindPatch, BlockUseId, BlockUseInfo, PatchBindingEvent and UseOwnerEvent.
+Bindings are compiler directives, separate from OperationModule. Physical-use
+history and per-use measurement keys survive resource retirement/rebinding.

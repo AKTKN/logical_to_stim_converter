@@ -2,7 +2,83 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M6_D_IMPLEMENTED` (restricted modular Knill memory demonstration)
+**Overall state:** `M7_A_IMPLEMENTED` (explicit physical-patch reuse and use identities)
+
+## M7-A explicit binding and physical-use lifecycle — 2026-11-08
+
+Baseline: `e296705c963be3d63762526231ab25570ef4a433` (M6-D). Its four-job
+Ubuntu/Windows Python 3.11/3.12 CI run `42427365557` passed before this task.
+Existing uncommitted circuit-export/example/report changes are preserved and
+excluded from the M7-A commit.
+
+- Public BindPatch(logical_id, physical_block_id) is a compile-time reservation,
+  separate from physical OperationModule. It has zero gates, records, TICKs,
+  reset and noise. Active/reserved/unknown targets, reused logical names, stale
+  handles and parallel bind/use/reset/readout overlap fail explicitly. Initial
+  mappings may now reserve a subset of registered patches, including none.
+- BlockUseId(block_id, epoch) identifies an immutable reset-to-release occupancy
+  on fixed physical sites. The first actual LogicalInit starts epoch 0; binding
+  never advances it. Measured status remains until reservation changes it to
+  uninitialized. LogicalInit performs the sole data reset. Physical indices and
+  layouts stay fixed. available_blocks reports unreserved bindable patches.
+- MeasurementKey has a backward-compatible trailing epoch=0; local check rounds
+  restart per use while global raw indices increase. All preparation/readout
+  records, signed deterministic observables and module identities remain
+  addressable after retirement. BlockUseInfo retains reset/terminal modules,
+  half-open global record/layer intervals and logical-owner history. Fragments,
+  preparations, readouts, observables, Bell results and relocations carry use IDs.
+- Planning resolves each user entry after preceding bindings/relocations. Knill
+  preserves persistent data identity and slot on its surviving resource use;
+  measured patches become explicitly bindable and both temporary names retire.
+  Fresh aliases reset/reuse retired tableau slots within a fixed registered-patch
+  capacity; 13 occupancies on one patch retain one simulator slot.
+- Global physical flows/detectors/noise retain their canonical semantics. Fresh
+  reset boundaries prevent inherited stabilizer/frame/sector state. Independent
+  provenance validation reconstructs epochs, intervals and owner events rather
+  than trusting final mappings. Source docstrings, architecture glossary, README
+  example and affected AGENTS/STATUS ledgers describe these contracts.
+
+### M7-A verification
+
+Local Linux/WSL2 Python 3.12.7; commands use `.venv/bin/python` (equivalent to
+activating the existing environment). Stim 1.15.0, stimflow 1.17.dev0 at
+ffe0d043598ed5df0851a3e6b4920359a23fafbd, PyMatching 2.3.1, NumPy 2.5.4,
+SciPy 1.18.1, pytest 9.2.0, Ruff 0.17.4 and build 1.6.1. No pin/upstream change.
+Inspected installed named-observable allocation/o2i mapping, ChunkCompiler,
+reset/readout Chunk boundaries, ChunkReflow and signed Stim flow behavior.
+
+- Baseline `python -m pytest`: **440 passed in 374.81 s**.
+- Final `python -m pytest`: **493 passed in 430.94 s**, retaining all 440
+  pre-existing tests unchanged and adding 53 focused reuse/physics tests.
+- Incremental lifecycle checkpoint: **21 passed in 5.62 s**, in addition to the
+  32 passing physical replay cases.
+- `python -m pytest tests/test_patch_reuse.py tests/test_knill_teleportation.py -q`:
+  **77 passed in 122.94 s** (53 new tests plus all 24 old Knill tests).
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: **source distribution and wheel built successfully**.
+- The exact staged Git tree also builds in a temporary source checkout. Its
+  installed wheel passes two-use replay, an initially unreserved patch, public
+  availability, corrupted-ledger rejection and global DEM construction with
+  PyMatching/Matplotlib/test/reference imports blocked. Pinned dependencies are
+  shared read-only; package code is loaded from the isolated wheel installation.
+- All six CI example commands pass: two_patch_memory.py,
+  two_patch_bell_roundtrip.py, knill_ec_single_round.py, offline_dem_views.py,
+  memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731,
+  knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732.
+- `python -m pip check`: **no broken requirements**. `git diff --check` passes.
+
+Tests independently read reset targets, semantic keys and global rec offsets;
+verify d=3/5 X/Z both signed input bits with physical/virtual Paulis, two distinct
+observables on one fixed patch, ideal/noisy DEMs and zero noiseless event flips;
+reject an added cross-reset physical stabilizer flow; and check independent
+spectators, registration order, retirement and open-output Knill rebinding.
+No existing assertion/test is removed or weakened.
+
+Implemented but unverified: no additional behavior is claimed. Epoch-aware local
+DEM/stage request policies and a full three-patch multiple-cycle Knill decoding
+proof remain M7-B/M7-C. There is no automatic allocator or production decoder.
+The unchanged Ubuntu/Windows Python 3.11/3.12 matrix runs on push; final remote
+results are reported after observing that run, with no local Windows claim.
 
 ## M6-D implemented and verified — 2026-11-08
 

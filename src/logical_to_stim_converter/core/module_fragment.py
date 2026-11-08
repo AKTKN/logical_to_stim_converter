@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 import stimflow as sf
 
+from .lifecycle import BlockUseId
+
 if TYPE_CHECKING:
     from ..noise.model import NoiseOverride
     from .compiler_context import MeasurementInfo
@@ -14,6 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class OperationContext:
+    """Primitive module identity and logical-to-physical code orientations."""
     module_id: str
     orientations: Mapping[str, int] = field(default_factory=dict)
 
@@ -25,6 +28,7 @@ class OperationContext:
 
 @dataclass(frozen=True)
 class ModuleFragment:
+    """Verified physical primitives and historical ordered operand/use identities."""
     module_id: str
     operation_type: str
     logical_ids: tuple[str, ...]
@@ -40,6 +44,7 @@ class ModuleFragment:
     logical_action: str = "I"
     readout_mode: str = "deterministic"
     composite_ids: tuple[str, ...] = ()
+    block_use_ids: tuple[BlockUseId, ...] = ()
 
     def __post_init__(self):
         # Scalar construction remains accepted for the original one-block wrappers.
@@ -56,26 +61,31 @@ class ModuleFragment:
 
     @property
     def logical_id(self) -> str:
+        """Single logical operand; multi-block callers use logical_ids."""
         if len(self.logical_ids) != 1:
             raise ValueError("A multi-operand fragment has logical_ids, not one logical_id")
         return self.logical_ids[0]
 
     @property
     def block_id(self) -> str:
+        """Single fixed physical patch; independent of its current epoch."""
         if len(self.block_ids) != 1:
             raise ValueError("A multi-operand fragment has block_ids, not one block_id")
         return self.block_ids[0]
 
     @property
     def input_logicals(self) -> tuple[str, ...]:
+        """State identities consumed or transported by this primitive."""
         return () if self.frame_transition == "initialize" else self.logical_ids
 
     @property
     def output_logicals(self) -> tuple[str, ...]:
+        """State identities created or transported by this primitive."""
         return () if self.frame_transition == "terminate" else self.logical_ids
 
     @property
     def interface_positions(self) -> frozenset[complex]:
+        """Physical coordinates declared by flow interfaces, including passive sites."""
         return frozenset(q for step in self.steps() if isinstance(step, sf.Chunk) for q in step.q2i)
 
     @property
@@ -101,11 +111,14 @@ class ModuleFragment:
         return frozenset(positions)
 
     def verify(self) -> None:
+        """Verify each physical flow/reflow with the pinned public stimflow API."""
         for component in self.components:
             component.verify()
 
     def steps(self):
+        """Expand loops in execution order without changing primitive identity."""
         def expand(component):
+            """Recursively expand nested repetitions without duplicating wrappers."""
             if isinstance(component, sf.ChunkLoop):
                 for _ in range(component.repetitions):
                     for child in component.chunks:
@@ -116,4 +129,5 @@ class ModuleFragment:
         return tuple(step for component in self.components for step in expand(component))
 
     def chunks(self) -> tuple[sf.Chunk, ...]:
+        """Return physical chunks in order, omitting zero-duration reflows."""
         return tuple(step for step in self.steps() if isinstance(step, sf.Chunk))

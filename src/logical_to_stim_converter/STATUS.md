@@ -1,5 +1,14 @@
 # STATUS — Package root
 
+## M7-A update — 2026-11-08
+
+Public exports add BindPatch, BlockUseId, BlockUseInfo, PatchBindingEvent and
+UseOwnerEvent. CompiledCircuit exports block_uses, binding_history and available
+blocks alongside historical readouts/preparations/observables. Epoch-aware raw
+keys and explicit use IDs distinguish repeated physical occupancies without new
+physical qubits. See core/compiler ledgers and root STATUS for exact verification.
+No automatic allocator, dependency change, runtime decoder or M7-B/C claim.
+
 ## M6-D update — 2026-11-08
 
 CompiledCircuit.make_frame_plan now exports verified sparse batch physical-frame

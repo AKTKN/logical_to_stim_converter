@@ -24,6 +24,7 @@ ANNOTATIONS = {"QUBIT_COORDS", "DETECTOR", "OBSERVABLE_INCLUDE", "SHIFT_COORDS"}
 def extract_metadata(
     circuit: stim.Circuit, context: CompilerContext, fragments: tuple[ModuleFragment, ...], backend
 ):
+    """Read exact physical record order, per-use rounds and global annotations."""
     final_coords = circuit.get_final_qubit_coordinates()
     position_to_index = {complex(*coords[:2]): i for i, coords in final_coords.items()}
     physical_map = {site: position_to_index[pos] for site, pos in context.site_positions.items()}
@@ -63,14 +64,15 @@ def extract_metadata(
                     block = context.blocks[block_id]
                     fragment = by_module[instruction.tag]
                     logical_id = fragment.logical_ids[fragment.block_ids.index(block_id)]
+                    use = fragment.block_use_ids[fragment.block_ids.index(block_id)]
                     basis = "X" if instruction.name == "MX" else "Z"
                     if local_id in block.layout.ancilla_ids:
                         kind = "syndrome"
-                        round_index = rounds[(block_id, local_id)]
-                        rounds[(block_id, local_id)] += 1
+                        round_index = rounds[(use, local_id)]
+                        rounds[(use, local_id)] += 1
                     else:
                         kind, round_index = "readout", None
-                    key = MeasurementKey(block_id, local_id, kind, round_index)
+                    key = MeasurementKey(block_id, local_id, kind, round_index, use.epoch)
                     measurements.append(
                         MeasurementInfo(
                             key, len(measurements), logical_id, basis, instruction.tag, layer_index,
@@ -151,7 +153,7 @@ def extract_metadata(
         readout = {
             m.key.local_id: m.index
             for m in measurements
-            if m.key.block_id == block_id and m.key.kind == "readout"
+            if m.key.block_use_id == context.readout_uses[logical] and m.key.kind == "readout"
         }
         readout_indices = tuple(sorted(readout[positions[q]] for q in representative))
         observable_info.append(
@@ -164,11 +166,26 @@ def extract_metadata(
                 readout_indices,
                 correction,
                 context.expected_outputs[logical],
+                context.readout_uses[logical],
             )
         )
     context.measurements = tuple(measurements)
     context.detectors = tuple(detectors)
     context.layers = tuple(layers)
+    # Reset instructions precede the first check records; include that layer in
+    # the half-open occupancy interval instead of inferring start from records.
+    module_layers = defaultdict(list)
+    for layer in layers:
+        for module in set(layer.operation_by_block.values()):
+            module_layers[module].append(layer.index)
+    for use, info in context.block_uses.items():
+        records = [m.index for m in measurements if m.key.block_use_id == use]
+        context.block_uses[use] = replace(
+            info, measurement_start=min(records),
+            measurement_stop=max(records) + 1 if info.terminal_module_id else None,
+            time_layer_start=min(module_layers[info.reset_module_id]),
+            time_layer_stop=(max(module_layers[info.terminal_module_id]) + 1
+                             if info.terminal_module_id else None))
     context.frames = {
         logical: replace(
             context.frames[logical], preparation_syndromes=tuple(dict.fromkeys(
@@ -181,6 +198,7 @@ def extract_metadata(
 
 
 def protocol_metadata(context, fragments, backend):
+    """Build historical preparation/readout snapshots from their producer modules."""
     preparations, readouts = [], []
     for f in fragments:
         if f.operation_type not in ("LogicalInit", "LogicalMeasure"):
@@ -200,7 +218,7 @@ def protocol_metadata(context, fragments, backend):
             preparations.append(PreparationInfo(
                 f.module_id, f.block_id, f.logical_id, f.stage,
                 context.prepared_basis[f.logical_id], orientation, data, checks,
-                *logical_supports))
+                *logical_supports, f.block_use_ids[0]))
         else:
             from ..core.compiler_context import ParityExpression
 
@@ -210,7 +228,7 @@ def protocol_metadata(context, fragments, backend):
                 f.module_id, f.logical_id, f.block_id, basis, orientation,
                 f.readout_mode, f.stage, tuple(by_local[q] for q in data),
                 ParityExpression(tuple(by_local[q] for q in logical_supports[basis == "Z"])),
-                checks))
+                checks, f.block_use_ids[0]))
     return tuple(preparations), tuple(readouts)
 
 
@@ -240,6 +258,7 @@ def stage_separated_circuit(circuit, detectors):
 
 
 def detector_boundary_candidates(detectors):
+    """Retain global IDs for relations crossing semantic stage boundaries."""
     return tuple(SuppressedDetector(d.index, d.measurement_indices, d.source_stage_ids)
                  for d in detectors if d.crosses_decoder_boundary)
 
@@ -263,6 +282,7 @@ def separate_detector_regions(circuit, fragments):
 
 
 def validate_detector_regions(detectors, measurements):
+    """Validate a caller-requested stage partition, never the canonical circuit."""
     for detector in detectors:
         stages = {measurements[i].stage_id for i in detector.measurement_indices}
         if len(stages) > 1 or (stages and detector.stage_id not in stages):

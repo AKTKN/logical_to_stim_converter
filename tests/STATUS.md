@@ -1,5 +1,24 @@
 # STATUS — Tests
 
+## M7-A update — 2026-11-08
+
+Added 53 tests in test_patch_reuse.py; all 440 prior tests are retained unchanged.
+32 replay cases cover d=3/5, X/Z, both intended bits independently in each use,
+and physical/virtual logical Paulis. They verify fixed qubit/site mappings, actual
+data resets, per-use syndrome counters, all raw/global rec positions, independent
+signed observables, exact noiseless parities, global ideal/noisy DEMs and repeat
+determinism. Other cases cover immutable strict epoch identities, binding-only
+zero time/noise, uninitialized/active/reserved/retired/unknown/conflicting aliases,
+rejected cross-reset stabilizer flows, spectators/registration order, Knill owner
+history plus fresh preparations/late-bound resources, 13 uses in one logical slot,
+continued H/CNOT/random readout and corrupted measurement-key rejection.
+
+Focused reuse plus prior Knill suite: 77 passed in 122.94 s. Incremental lifecycle
+checkpoint: 21 passed in 5.62 s (32 replay cases separately passed). Baseline:
+440 passed in 374.81 s. Root STATUS records final full tests, lint, build, examples
+and supported platform matrix. No test oracle or decoder entered runtime code.
+Final `python -m pytest`: **493 passed in 430.94 s**.
+
 ## M6-D update — 2026-11-08
 
 Added 46 integration/physics tests (24 memory and 22 decoder-view tests), retaining

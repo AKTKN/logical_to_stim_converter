@@ -2,15 +2,18 @@
 
 import json
 from collections import defaultdict
+from dataclasses import replace
 
 import stim
 
-from ..core.compiler_context import MeasurementKey
+from ..core.compiler_context import BlockStatus, MeasurementKey
+from ..core.lifecycle import BlockUseId, BlockUseInfo, UseOwnerEvent
 from ._metadata import detector_boundary_candidates, ordered_stages
 from ._parallel import moments
 
 
 def validate_metadata(compiled):
+    """Independently read canonical annotations, raw order and occupancy keys."""
     circuit = compiled.ideal_circuit
     measurements = compiled.measurements
     detectors = compiled.detectors
@@ -35,11 +38,12 @@ def validate_metadata(compiled):
                 for target in inst.targets_copy():
                     bid, local = sites[target.value]
                     is_check = local in blocks[bid].layout.ancilla_ids
-                    round_index = rounds[(bid, local)] if is_check else None
+                    use = fragment.block_use_ids[fragment.block_ids.index(bid)]
+                    round_index = rounds[(use, local)] if is_check else None
                     if is_check:
-                        rounds[(bid, local)] += 1
+                        rounds[(use, local)] += 1
                     key = MeasurementKey(bid, local, "syndrome" if is_check else "readout",
-                                         round_index)
+                                         round_index, use.epoch)
                     m = measurements[cursor]
                     if (m.key != key or m.module_id != inst.tag or m.stage_id != fragment.stage
                             or m.time_layer != layer_index
@@ -93,9 +97,60 @@ def validate_metadata(compiled):
     if compiled.detector_boundary_candidates != detector_boundary_candidates(detectors):
         raise ValueError("Detector boundary candidate provenance disagrees")
     validate_ancestry(compiled)
+    validate_block_uses(compiled)
+
+
+def validate_block_uses(compiled):
+    """Rebuild reset/release/owner history independently of final alias mappings."""
+    fragments = {f.module_id: f for f in compiled.fragments}
+    relocations = {r.composite_id: r for r in compiled.relocation_history}
+    epochs = defaultdict(lambda: -1)
+    uses, active = {}, {}
+    module_layers = defaultdict(list)
+    for layer in compiled.time_layers:
+        for module in set(layer.operation_by_block.values()):
+            module_layers[module].append(layer.index)
+    for event in compiled.ancestry_events:
+        if event.operation_type == "KnillEC":
+            r = relocations[event.event_id]
+            use = active[r.output_block_id]
+            if (r.output_use_id != use
+                    or r.source_use_id != BlockUseId(r.source_block_id, epochs[r.source_block_id])):
+                raise ValueError("Relocation physical-use identity disagrees")
+            uses[use] = replace(uses[use], logical_owner_history=(
+                *uses[use].logical_owner_history, UseOwnerEvent(r.composite_id, r.logical_id)))
+            continue
+        f = fragments[event.event_id]
+        if f.operation_type == "LogicalInit":
+            bid = f.block_id
+            if bid in active:
+                raise ValueError("Physical-use reset overlaps an active occupancy")
+            epochs[bid] += 1
+            use = BlockUseId(bid, epochs[bid])
+            active[bid] = use
+            uses[use] = BlockUseInfo(
+                use, f.module_id, logical_owner_history=(UseOwnerEvent(f.module_id, f.logical_id),),
+                measurement_start=min(m.index for m in compiled.measurements
+                                      if m.module_id == f.module_id),
+                time_layer_start=min(module_layers[f.module_id]))
+        if f.block_use_ids != tuple(active.get(b) for b in f.block_ids):
+            raise ValueError("Fragment physical-use identity disagrees with reset history")
+        if f.operation_type == "LogicalMeasure":
+            use = active.pop(f.block_id)
+            uses[use] = replace(
+                uses[use], terminal_module_id=f.module_id,
+                measurement_stop=max(m.index for m in compiled.measurements
+                                     if m.module_id == f.module_id) + 1,
+                time_layer_stop=max(module_layers[f.module_id]) + 1)
+    if tuple(uses.values()) != compiled.block_uses:
+        raise ValueError("Physical-use ledger disagrees with reset/readout/owner history")
+    for info in (*compiled.preparations, *compiled.readouts):
+        if info.block_use_id != fragments[info.module_id].block_use_ids[0]:
+            raise ValueError("Preparation/readout physical-use identity disagrees")
 
 
 def validate_ancestry(compiled):
+    """Reconstruct preparation dependencies at actual operand/reset boundaries."""
     fragments = {f.module_id: f for f in compiled.fragments}
     preps = {p.module_id: p for p in compiled.preparations}
     bells = {b.composite_id: b for b in compiled.bell_measurements}
@@ -147,7 +202,8 @@ def validate_ancestry(compiled):
     if (seen_fragments != list(fragments) or seen_bells != list(bells)
             or histories != dict(compiled.block_preparation_dependencies)):
         raise ValueError("Incomplete or reordered preparation ancestry events")
-    expected = {q: histories[b] for q, b in compiled.logical_to_block.items() if b in histories}
+    expected = {q: histories[b] for q, b in compiled.logical_to_block.items()
+                if b in histories and compiled.block_status[b] != BlockStatus.UNINITIALIZED}
     if dict(compiled.preparation_dependencies) != expected:
         raise ValueError("Final logical preparation ancestry disagrees")
     for q, frame in compiled.frames.items():

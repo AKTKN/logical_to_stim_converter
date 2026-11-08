@@ -75,3 +75,12 @@ model-only targets, never sampled canonical measurements or decoder truth. Raw
 Bell checks are conditional offline syndromes, not new deterministic detectors.
 Preserve exclusive groups and survivor actions in conditional fault models.
 Record phase wall times outside the shot loop and state baseline approximations.
+
+M7-A adds explicit BindPatch reservations and immutable BlockUseId/BlockUseInfo
+history. Physical block/site identities never change on reuse. Only LogicalInit
+starts/increments an epoch; bindings have no physical duration/reset/noise. Fresh
+logical names reserve explicitly selected available patches. Reject stale aliases,
+pending-reservation conflicts and parallel physical overlap. Keep historical
+readouts/observables and persistent data slots through relocation; reset retired
+internal tableau slots before assigning fresh states. Decoder policies across
+epochs and full three-patch Knill decoding remain M7-B/M7-C work.

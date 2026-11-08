@@ -20,6 +20,7 @@ from ..core.compiler_context import (
     PauliFrame,
     TimeLayer,
 )
+from ..core.lifecycle import BlockUseId, BlockUseInfo, PatchBindingEvent
 from ..core.logical_block import GlobalSiteId, LogicalBlock
 from ..core.module_fragment import ModuleFragment, OperationContext
 from ..core.protocol import (
@@ -34,6 +35,7 @@ from ..core.protocol import (
 from ..noise.injector import NoiseInjector
 from ..noise.model import NoiseModel
 from ..operations.base import OperationModule
+from ..operations.binding import BindPatch
 from ._logical import LogicalFlowTracker, detector_metadata, prepare_part
 from ._metadata import (
     detector_boundary_candidates,
@@ -49,6 +51,7 @@ from ._teleport import ProtocolAssembly
 
 @dataclass(frozen=True)
 class CompiledCircuit:
+    """Static physical circuits, canonical records and immutable occupancy history."""
     ideal_circuit: stim.Circuit
     noisy_circuit: stim.Circuit | None
     physical_qubit_map: Mapping[GlobalSiteId, int]
@@ -72,6 +75,9 @@ class CompiledCircuit:
     preparation_dependencies: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     block_preparation_dependencies: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     ancestry_events: tuple[PreparationDependencyEvent, ...] = ()
+    block_uses: tuple[BlockUseInfo, ...] = ()
+    binding_history: tuple[PatchBindingEvent, ...] = ()
+    available_blocks: tuple[str, ...] = ()
     _evaluation_steps: tuple = field(default=(), repr=False, compare=False)
     _compiler: object = field(default=None, repr=False, compare=False)
     _program: tuple = field(default=(), repr=False, compare=False)
@@ -92,6 +98,7 @@ class CompiledCircuit:
 
     @property
     def circuit(self) -> stim.Circuit:
+        """Physical noisy circuit if requested, otherwise the verified ideal circuit."""
         return self.noisy_circuit if self.noisy_circuit is not None else self.ideal_circuit
 
     @property
@@ -117,6 +124,7 @@ class CompiledCircuit:
 
     @property
     def stage_separated_detector_indices(self):
+        """Map explicit legacy stage-view detector indices to canonical IDs."""
         return tuple(d.index for d in self.detectors if not d.crosses_decoder_boundary)
 
     def validate_metadata(self):
@@ -139,6 +147,7 @@ class CompiledCircuit:
 
     def interpreted_measurements(self, measurements, *, preparation_corrections=None,
                                  validation="noiseless"):
+        """Return shot-by-observable logical bits, retaining historical readouts."""
         if preparation_corrections is not None:
             return self.evaluate_frames(
                 measurements, preparation_corrections, validation=validation).logical_outputs
@@ -200,6 +209,7 @@ class CircuitCompiler:
         logical_to_block: Mapping[str, str] | None = None,
         backend: CodeBackend | None = None,
     ):
+        """Register fixed physical patches; mappings reserve explicitly named states."""
         self.blocks = tuple(blocks)
         context = CompilerContext(self.blocks, logical_to_block)
         self.logical_to_block = dict(context.logical_to_block)
@@ -207,44 +217,50 @@ class CircuitCompiler:
 
     def compile(
         self,
-        operations: Sequence[OperationModule | Sequence[OperationModule]],
+        operations: Sequence[OperationModule | BindPatch | Sequence[OperationModule | BindPatch]],
         *,
         noise_model: NoiseModel | None = None,
         allow_open_outputs: bool = False,
     ) -> CompiledCircuit:
+        """Compile explicit barriers/reservations into a verified static experiment.
+
+        Binding reserves a named fixed patch. Only LogicalInit emits a reset and
+        starts a use. Output observables are ordered by historical logical name.
+        """
         context = CompilerContext(self.blocks, self.logical_to_block)
-        program = tuple(entry if isinstance(entry, OperationModule) else tuple(entry)
+        program = tuple(entry if isinstance(entry, (OperationModule, BindPatch)) else tuple(entry)
                         for entry in operations)
-        plan = plan_program(program, context)
+        plan = plan_program(program, lambda: context)
         compiler = sf.ChunkCompiler(metadata_func=detector_metadata)
         compiler.ensure_qubits_included(context.site_positions.values())
-        readout_bases = {
-            logical: planned.operation.basis
-            for step in plan for planned in step.operations
-            if planned.operation.operation_type == "LogicalMeasure"
-            and planned.operation.mode == "deterministic"
-            for logical in planned.operation.targets
-        }
-        context.output_ids = {q: i for i, q in enumerate(sorted(readout_bases))}
-        compiler.ensure_observables_included([(q, readout_bases[q]) for q in sorted(readout_bases)])
+        readout_bases = {}
         tracker = LogicalFlowTracker(self.backend, context)
         protocol = ProtocolAssembly(self.backend)
         all_fragments = []
         evaluation_steps = []
         sequence = 0
         for step in plan:
+            if step.bindings:
+                trial = context.copy()
+                for directive in step.bindings:
+                    trial = trial.bind_patch(directive, f"bind{len(trial.binding_history):04d}")
+                context = trial
+                tracker.context = context
             for boundary in step.before:
                 protocol.begin(boundary, context)
             target_ids = [t for planned in step.operations for t in planned.operation.targets]
-            target_blocks = [context.block_for(t).block_id for t in target_ids]
+            target_blocks = [context.validate_operand(t).block_id for t in target_ids]
             if len(set(target_blocks)) != len(target_blocks):
                 raise ValueError("A parallel layer operates on the same physical block twice")
             trial = context.copy()
             fragments = []
             for planned in step.operations:
                 op, identity = planned.operation, planned.identity
+                if op.operation_type == "LogicalMeasure" and op.mode == "deterministic":
+                    readout_bases.update(dict.fromkeys(op.targets, op.basis))
                 operand_groups = [op.targets] if op.coupled else [(q,) for q in sorted(op.targets)]
                 for logical_ids in operand_groups:
+                    trial.validate_operation(op.operation_type, logical_ids)
                     operands = {q: trial.block_for(q) for q in logical_ids}
                     module_id = f"module{len(all_fragments) + len(fragments):04d}"
                     build_context = OperationContext(module_id, trial.orientations)
@@ -252,6 +268,10 @@ class CircuitCompiler:
                         op.build(self.backend, operands, build_context), operation_id=identity,
                         composite_ids=planned.parents,
                         stage=planned.stage or ("post_teleportation" if protocol.bells else None),
+                        block_use_ids=tuple(BlockUseId(
+                            b.block_id,
+                            trial.epochs[b.block_id] + (op.operation_type == "LogicalInit")
+                        ) for b in operands.values()),
                     )
                     trial = trial.advanced(op, fragment, self.backend)
                     protocol.record_fragment(fragment)
@@ -310,6 +330,21 @@ class CircuitCompiler:
                 q2i={q: i for i, q in enumerate(sf.sorted_complex(frontier.used_set))},
                 discarded_inputs=frontier.ports | frontier.discards))
         ideal = exporter.finish_circuit()
+        context.output_ids = {q: i for i, q in enumerate(sorted(readout_bases))}
+        # The public pinned compiler assigns named observables on first encounter.
+        # Canonicalize IDs after lazy planning so old alphabetical ordering stays
+        # stable even when a future logical handle has not yet been bound.
+        output_map = {compiler.o2i[(q, readout_bases[q])]: i
+                      for q, i in context.output_ids.items()}
+        if any(old != new for old, new in output_map.items()):
+            reordered = stim.Circuit()
+            for inst in ideal:
+                if inst.name == "OBSERVABLE_INCLUDE":
+                    reordered.append(inst.name, inst.targets_copy(),
+                                     output_map[int(inst.gate_args_copy()[0])], tag=inst.tag)
+                else:
+                    reordered.append(inst)
+            ideal = reordered
         # This checks deterministic detectors and observables independently of Chunk flows.
         ideal.detector_error_model()
         fragment_tuple = tuple(all_fragments)
@@ -319,7 +354,8 @@ class CircuitCompiler:
         by_prep = {p.module_id: p for p in preparations}
         dependencies = {q: protocol.block_dependencies[b]
                         for q, b in context.logical_to_block.items()
-                        if b in protocol.block_dependencies}
+                        if b in protocol.block_dependencies
+                        and context.status[b] != BlockStatus.UNINITIALIZED}
         context.frames = {q: replace(f, preparation_syndromes=tuple(
             k for p in dependencies.get(q, ()) for k in by_prep[p].gauge_measurements))
             for q, f in context.frames.items()}
@@ -364,6 +400,9 @@ class CircuitCompiler:
             preparation_dependencies=dependencies,
             block_preparation_dependencies=protocol.block_dependencies,
             ancestry_events=tuple(protocol.ancestry_events),
+            block_uses=tuple(context.block_uses.values()),
+            binding_history=context.binding_history,
+            available_blocks=context.available_blocks,
             _evaluation_steps=tuple(evaluation_steps), _compiler=self,
             _program=program, _noise_model=noise_model,
         )

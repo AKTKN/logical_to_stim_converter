@@ -36,3 +36,9 @@ Ancestry is causal source metadata, never a replacement for symplectic values.
 M6-B: DetectorInfo.basis is the physical anchor check basis, including orientation;
 physical_support contains stable data sites underlying every contributing record.
 Selectors must not infer X/Z from a check ID prefix or restrict scope to an anchor.
+
+M7-A: lifecycle.py owns immutable physical occupancy IDs, reset/release intervals,
+binding events and logical-owner history. CompilerContext separates fixed sites,
+current reservations, retired logical aliases and bounded reusable tableau slots.
+MeasurementKey has a trailing epoch=0 field. ModuleFragment/protocol records carry
+historical BlockUseIds. Only a physical initialization starts a new epoch.

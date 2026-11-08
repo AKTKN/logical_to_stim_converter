@@ -5,6 +5,7 @@ from dataclasses import replace
 import stim
 
 from ..core.compiler_context import BlockStatus, MeasurementKey, ParityExpression, PauliFrame
+from ..core.lifecycle import BlockUseId, UseOwnerEvent
 from ..core.protocol import (
     BellMeasurementResult,
     CompositeInfo,
@@ -17,7 +18,9 @@ from ..operations.knill_ec import KnillEC
 
 
 class ProtocolAssembly:
+    """Track causal preparation sources and rename surviving Knill output states."""
     def __init__(self, backend):
+        """Start empty per-compilation composite and causal-history registries."""
         self.backend = backend
         self.starts = {}
         self.composites = []
@@ -38,6 +41,7 @@ class ProtocolAssembly:
             fragment.module_id, fragment.operation_type, inputs, outputs, dependencies))
 
     def begin(self, boundary, context):
+        """Validate current resources and snapshot the input frame at entry."""
         op = boundary.operation
         blocks = tuple(context.block_for(q).block_id for q in op.targets)
         if isinstance(op, BellStatePrep):
@@ -51,7 +55,7 @@ class ProtocolAssembly:
                 raise ValueError(f"KnillEC resources must be {expected.value}")
             if not op.prepare_resource:
                 for axis in "XZ":
-                    p = stim.PauliString(len(context.observable_ids))
+                    p = stim.PauliString(context.num_logical_slots)
                     for q in op.targets[1:]:
                         p[context.observable_ids[q]] = axis
                     if context.logical_state.peek_observable_expectation(p) != 1:
@@ -59,6 +63,7 @@ class ProtocolAssembly:
         self.starts[boundary.identity] = (blocks, context.frames[op.targets[0]])
 
     def end(self, boundary, context, tracker, fragments):
+        """Record completed children and transfer persistent data identity onto B."""
         op, identity = boundary.operation, boundary.identity
         children = tuple(dict.fromkeys(f.operation_id for f in fragments
                                       if identity in f.composite_ids))
@@ -80,7 +85,8 @@ class ProtocolAssembly:
             at = {block.position(local): local for local in block.layout.data_ids}
             p = self.backend.logical_pauli(block, q, axis, f.orientations_before[0])
             parities.append(ParityExpression(tuple(
-                MeasurementKey(bid, at[pos], "readout") for pos in p)))
+                MeasurementKey(bid, at[pos], "readout", epoch=f.block_use_ids[0].epoch)
+                for pos in p)))
         mx, mz = parities
         fd, fa, fb = (context.frames[q] for q in (d, a, b))
         output_frame = replace(fd.with_parities(fa.x ^ fb.x ^ mz, fd.z ^ fb.z ^ mx),
@@ -99,16 +105,26 @@ class ProtocolAssembly:
                      incoming_frame=incoming,
                      raw_byproduct=PauliFrame().with_parities(mz, mx),
                      output_orientation=orientation, logical_output_frame=output_frame,
-                     preparation_dependencies=dependencies)
+                     preparation_dependencies=dependencies,
+                     data_use_id=readouts[0].block_use_ids[0],
+                     first_resource_use_id=readouts[1].block_use_ids[0],
+                     output_use_id=BlockUseId(bb, context.epochs[bb]))
         self.bells.append(draft)
-        self.relocations.append(RelocationRecord(identity, d, db, bb, (a, b)))
+        output_use = BlockUseId(bb, context.epochs[bb])
+        self.relocations.append(RelocationRecord(
+            identity, d, db, bb, (a, b), readouts[0].block_use_ids[0], output_use))
         # The semantic channel on the persistent input is identity. Undo only
         # the internal ideal Bell-measurement CX in the intended-state oracle;
         # unrelated concurrent computation and reference entanglement survive.
         context.logical_state.cx(context.observable_ids[d], context.observable_ids[a])
         for q in (a, b):
             del context.logical_to_block[q]
+        context.retired_logicals = (context.retired_logicals | {a, b}) - {d}
         context.logical_to_block[d] = bb
+        context.block_uses[output_use] = replace(
+            context.block_uses[output_use],
+            logical_owner_history=context.block_uses[output_use].logical_owner_history
+            + (UseOwnerEvent(identity, d),))
         context.frames[d] = output_frame
         context.orientations[d] = orientation
         # The physical-state tracker followed the actual measurement branches.
@@ -120,6 +136,7 @@ class ProtocolAssembly:
         return draft
 
     def finalize(self, preparations, readouts):
+        """Resolve historical module references without consulting live ownership."""
         by_module = {r.module_id: r for r in readouts}
         preps = {p.module_id: p for p in preparations}
         return tuple(BellMeasurementResult(

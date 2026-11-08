@@ -13,6 +13,7 @@ from .core.compiler_context import (
     ParityExpression,
     PauliFrame,
 )
+from .core.lifecycle import BlockUseId, BlockUseInfo, PatchBindingEvent, UseOwnerEvent
 from .core.logical_block import LogicalBlock
 from .core.module_fragment import ModuleFragment, OperationContext
 from .core.physical_layout import PhysicalLayout
@@ -39,6 +40,7 @@ from .noise.injector import NoiseInjector
 from .noise.model import NoiseModel, NoiseOverride, NoiseParameters
 from .operations.base import OperationModule
 from .operations.bell_preparation import BellStatePrep
+from .operations.binding import BindPatch
 from .operations.composite import CompositeOperation
 from .operations.initialization import LogicalInit
 from .operations.knill_ec import KnillEC
@@ -48,6 +50,11 @@ from .operations.syndrome_extraction import SyndromeExtraction
 from .operations.transversal import TransversalCNOT, TransversalH
 
 __all__ = [
+    "BindPatch",
+    "BlockUseId",
+    "BlockUseInfo",
+    "PatchBindingEvent",
+    "UseOwnerEvent",
     "CircuitCompiler",
     "CodeBackend",
     "CodeSpec",

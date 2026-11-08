@@ -1,5 +1,15 @@
 # STATUS — Operations
 
+## M7-A update — 2026-11-08
+
+binding.py adds public immutable BindPatch(logical_id, physical_block_id), a
+zero-duration compiler directive separate from physical OperationModule builds.
+It validates names and reserves an explicit patch; LogicalInit alone resets and
+starts the occupancy. Primitive/composite physical implementations are unchanged.
+Verified active/reserved/retired/unknown/conflicting binding rejection, zero gate/
+record/TICK/noise effect, independent reuse and Knill relocation followed by fresh
+resource bindings. Root STATUS records complete test/build/example/CI evidence.
+
 ## M5 update — 2026-11-07
 
 BellStatePrep and KnillEC now implement CompositeOperation expansion into staged

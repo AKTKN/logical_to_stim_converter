@@ -6,10 +6,12 @@ import numpy as np
 
 from .code_frame import validate_orientation
 from .compiler_context import MeasurementKey, ParityExpression, PauliFrame
+from .lifecycle import BlockUseId
 
 
 @dataclass(frozen=True)
 class CheckHistory:
+    """Physical check support/basis and its per-use ordered raw measurement keys."""
     check_id: str
     basis: str
     support: tuple[str, ...]
@@ -49,11 +51,13 @@ class PhysicalPauliFrame:
 
     @property
     def resolved(self):
+        """Whether an external caller has selected both physical Pauli supports."""
         return self.x_support is not None
 
 
 @dataclass(frozen=True)
 class PreparationInfo:
+    """Historical reset/SE preparation, addressable after its logical owner retires."""
     module_id: str
     block_id: str
     logical_id: str
@@ -64,21 +68,26 @@ class PreparationInfo:
     checks: tuple[CheckHistory, ...]
     logical_x: tuple[str, ...]
     logical_z: tuple[str, ...]
+    block_use_id: BlockUseId | None = None
 
     @property
     def rounds(self):
+        """Number of physical syndrome rounds in this preparation primitive."""
         return len(self.checks[0].measurements)
 
     @property
     def gauge_measurements(self):
+        """First-round conjugate-basis outcomes; these are random sector labels."""
         return tuple(c.measurements[0] for c in self.checks if c.basis != self.basis)
 
     @property
     def unresolved_frame(self):
+        """External correction boundary tied to this preparation's final checks."""
         return PhysicalPauliFrame(self.block_id, self.orientation, self.module_id,
                                   self.stage_id, tuple(c.measurements[-1] for c in self.checks))
 
     def check_matrix(self, basis):
+        """Return binary check rows in physical data_ids column order."""
         return np.array([[q in c.support for q in self.data_ids]
                          for c in self.checks if c.basis == basis], dtype=np.uint8)
 
@@ -100,6 +109,7 @@ class PreparationInfo:
 
 @dataclass(frozen=True)
 class LogicalReadout:
+    """Historical destructive readout with raw keys from exactly one patch use."""
     module_id: str
     logical_id: str
     block_id: str
@@ -110,14 +120,17 @@ class LogicalReadout:
     records: tuple[MeasurementKey, ...]
     logical_parity: ParityExpression
     checks: tuple[CheckHistory, ...]
+    block_use_id: BlockUseId | None = None
 
     def check_matrix(self, basis):
+        """Return readout check incidence in records order for the requested basis."""
         return np.array([[k.local_id in c.support for k in self.records]
                          for c in self.checks if c.basis == basis], dtype=np.uint8)
 
 
 @dataclass(frozen=True)
 class BellMeasurementResult:
+    """Raw Bell outcomes and frame/ancestry snapshots at one teleportation."""
     composite_id: str
     logical_id: str
     data_block_id: str
@@ -131,27 +144,36 @@ class BellMeasurementResult:
     output_orientation: int
     logical_output_frame: PauliFrame
     physical_output_frame: PhysicalPauliFrame
+    data_use_id: BlockUseId | None = None
+    first_resource_use_id: BlockUseId | None = None
+    output_use_id: BlockUseId | None = None
 
     @property
     def raw_x_records(self):
+        """Physical X-readout keys on the consumed data use."""
         return self.x_readout.records
 
     @property
     def raw_z_records(self):
+        """Physical Z-readout keys on the consumed first-resource use."""
         return self.z_readout.records
 
 
 @dataclass(frozen=True)
 class RelocationRecord:
+    """Persistent logical state moves from a measured use onto an active output."""
     composite_id: str
     logical_id: str
     source_block_id: str
     output_block_id: str
     retired_logical_ids: tuple[str, ...]
+    source_use_id: BlockUseId | None = None
+    output_use_id: BlockUseId | None = None
 
 
 @dataclass(frozen=True)
 class CompositeInfo:
+    """Semantic composite contract and the unique executed child-operation IDs."""
     composite_id: str
     operation_type: str
     logical_inputs: tuple[str, ...]
@@ -188,10 +210,12 @@ class DetectorBoundaryCandidate:
 
     @property
     def global_index(self):
+        """Canonical detector ID, including in a derived annotation view."""
         return self.original_index
 
     @property
     def source_stage_ids(self):
+        """Semantic source regions; unrelated to TICK intervals or block epochs."""
         return self.stage_ids
 
 

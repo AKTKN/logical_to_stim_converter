@@ -1,5 +1,24 @@
 # STATUS — Compiler
 
+## M7-A update — 2026-11-08
+
+Planning now yields each user entry against the context after preceding bindings
+and relocations. BindPatch bypasses OperationModule and emits no physical step.
+Physical overlap checks cover reservations and execution before any same-layer
+bindings take effect. Named output IDs are canonicalized after lazy assembly,
+retaining old logical-name ordering and all historical deterministic readouts.
+Metadata readers restart check counters per use, retain exact raw ordering and
+export immutable reset/readout/owner intervals. Independent provenance validation
+reconstructs epochs/ownership from physical fragments and relocation events.
+
+Inspected installed stimflow ChunkCompiler.ensure_observables_included, public
+o2i named-observable mapping, and existing reset/readout/ChunkReflow APIs at
+ffe0d043598ed5df0851a3e6b4920359a23fafbd (1.17.dev0), with Stim 1.15.0.
+Pins and external sources remain unchanged. All touched public/nontrivial helper
+docstrings reviewed. Focused reuse plus old Knill tests: 77 passed; root STATUS
+records full regressions/build/examples/CI. Global circuit flows and DEMs remain
+verified; cross-epoch local decoder contracts remain M7-B work.
+
 ## M6-D update — 2026-11-08
 
 CompiledCircuit.make_frame_plan delegates to _frame_plan.py. One symbolic basis

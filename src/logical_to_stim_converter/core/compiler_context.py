@@ -9,10 +9,12 @@ from types import MappingProxyType
 import numpy as np
 import stim
 
+from .lifecycle import BlockUseId, BlockUseInfo, PatchBindingEvent, UseOwnerEvent
 from .logical_block import GlobalSiteId, LogicalBlock
 
 
 class BlockStatus(str, Enum):
+    """Last physical-use state; MEASURED remains until a fresh use is reserved."""
     UNINITIALIZED = "uninitialized"
     ACTIVE = "active"
     MEASURED = "measured"
@@ -20,10 +22,21 @@ class BlockStatus(str, Enum):
 
 @dataclass(frozen=True)
 class MeasurementKey:
+    """Raw-record identity within one patch occupancy, independent of rec offset."""
+
     block_id: str
     local_id: str
     kind: str
     round_index: int | None = None
+    epoch: int = 0
+
+    def __post_init__(self):
+        BlockUseId(self.block_id, self.epoch)
+
+    @property
+    def block_use_id(self):
+        """Return the reset interval that produced this physical measurement."""
+        return BlockUseId(self.block_id, self.epoch)
 
 
 @dataclass(frozen=True)
@@ -45,6 +58,7 @@ class ParityExpression:
         object.__setattr__(self, "constant", bool(self.constant))
 
     def __xor__(self, other):
+        """Combine symbolic classical parities, cancelling repeated raw keys."""
         if isinstance(other, (bool, int)):
             other = ParityExpression(constant=other)
         if not isinstance(other, ParityExpression):
@@ -52,6 +66,7 @@ class ParityExpression:
         return ParityExpression(self.terms + other.terms, self.constant ^ other.constant)
 
     def evaluate(self, measurements, key_to_index):
+        """Evaluate a bit or batch parity using explicit semantic-to-record indices."""
         samples = np.asarray(measurements, dtype=np.bool_)
         result = np.full(samples.shape[:-1], self.constant, dtype=np.bool_)
         for key in self.terms:
@@ -61,6 +76,7 @@ class ParityExpression:
 
 @dataclass(frozen=True)
 class MeasurementInfo:
+    """Historical raw measurement and its absolute zero-based Stim record index."""
     key: MeasurementKey
     index: int
     logical_id: str
@@ -72,6 +88,7 @@ class MeasurementInfo:
 
 @dataclass(frozen=True)
 class DetectorInfo:
+    """Canonical deterministic parity with physical and semantic provenance."""
     index: int
     coordinates: tuple[float, ...]
     measurement_indices: tuple[int, ...]
@@ -88,15 +105,18 @@ class DetectorInfo:
 
     @property
     def anchor_block_id(self):
+        """Physical patch whose latest check anchors this deterministic relation."""
         return self.block_id
 
     @property
     def anchor_check_id(self):
+        """Local check ID at the semantic detector anchor."""
         return self.check_id
 
 
 @dataclass(frozen=True)
 class ObservableInfo:
+    """Deterministic logical readout, independent of subsequent patch occupancy."""
     index: int
     logical_id: str
     block_id: str
@@ -105,6 +125,7 @@ class ObservableInfo:
     readout_measurement_indices: tuple[int, ...] = ()
     frame_correction: ParityExpression = ParityExpression()
     expected_value: int = 0
+    block_use_id: BlockUseId | None = None
 
 
 @dataclass(frozen=True)
@@ -134,13 +155,16 @@ class PauliFrame:
 
     @property
     def x(self):
+        """Classical parity controlling the logical X correction."""
         return ParityExpression(self.x_terms, self.x_constant)
 
     @property
     def z(self):
+        """Classical parity controlling the logical Z correction."""
         return ParityExpression(self.z_terms, self.z_constant)
 
     def with_parities(self, x, z):
+        """Replace correction parities while retaining preparation provenance."""
         return replace(
             self, x_terms=x.terms, z_terms=z.terms, x_constant=x.constant, z_constant=z.constant
         )
@@ -148,6 +172,7 @@ class PauliFrame:
 
 @dataclass(frozen=True)
 class TimeLayer:
+    """One physical TICK interval; its integer index is not a protocol stage."""
     index: int
     active_blocks: tuple[str, ...]
     operation_by_block: Mapping[str, str]
@@ -160,11 +185,18 @@ class TimeLayer:
 
 
 class CompilerContext:
-    """Fresh state for each compile; one logical slot per physical memory block."""
+    """Per-compilation ownership, historical aliases and bounded logical slots.
+
+    Measured final aliases remain in logical_to_block for compatibility until
+    their physical site is rebound. retired_logicals prevents their execution.
+    observable_ids is the historical name-to-tableau-slot map, not output IDs;
+    retired slots can be reset and reused without growing the tableau dimension.
+    """
 
     def __init__(
         self, blocks: Sequence[LogicalBlock], logical_to_block: Mapping[str, str] | None = None
     ):
+        """Register fixed patches and optional injective logical reservations."""
         self.blocks = {b.block_id: b for b in blocks}
         if not blocks or len(self.blocks) != len(blocks):
             raise ValueError("Register at least one block, with distinct block IDs")
@@ -174,12 +206,11 @@ class CompilerContext:
             else {b.block_id: b.block_id for b in blocks}
         )
         if (
-            not self.logical_to_block
-            or any(not isinstance(k, str) or not k for k in self.logical_to_block)
-            or set(self.logical_to_block.values()) != set(self.blocks)
-            or len(self.logical_to_block) != len(self.blocks)
+            any(not isinstance(k, str) or not k for k in self.logical_to_block)
+            or not set(self.logical_to_block.values()) <= set(self.blocks)
+            or len(set(self.logical_to_block.values())) != len(self.logical_to_block)
         ):
-            raise ValueError("Memory requires a one-to-one logical ID to registered block mapping")
+            raise ValueError("Logical IDs require a one-to-one mapping into registered blocks")
         self.site_positions: dict[GlobalSiteId, complex] = {}
         for block in blocks:
             if block.code.k != 1:
@@ -189,6 +220,11 @@ class CompilerContext:
         if len(set(self.site_positions.values())) != len(self.site_positions):
             raise ValueError("Registered patches have overlapping physical coordinates")
         self.status = dict.fromkeys(self.blocks, BlockStatus.UNINITIALIZED)
+        self.retired_logicals = frozenset()
+        self.epochs = dict.fromkeys(self.blocks, -1)
+        self.block_uses = {}
+        self.binding_history = ()
+        self.num_logical_slots = len(self.blocks)
         self.prepared_basis: dict[str, str] = {}
         self.observable_ids = {
             logical: i for i, logical in enumerate(sorted(self.logical_to_block))
@@ -203,19 +239,69 @@ class CompilerContext:
         self.readout_orientations = {}
         self.readout_blocks = {}
         self.readout_modes = {}
+        self.readout_uses = {}
         self.output_ids = {}
         self.logical_state = stim.TableauSimulator()
-        self.logical_state.set_num_qubits(len(self.logical_to_block))
+        self.logical_state.set_num_qubits(self.num_logical_slots)
         self.measurements: tuple[MeasurementInfo, ...] = ()
         self.detectors: tuple[DetectorInfo, ...] = ()
         self.layers: tuple[TimeLayer, ...] = ()
 
     def block_for(self, logical_id: str) -> LogicalBlock:
+        """Resolve a current/historical alias for assembly; execution validates liveness."""
         if logical_id not in self.logical_to_block:
             raise ValueError(f"Unknown logical qubit {logical_id!r}")
         return self.blocks[self.logical_to_block[logical_id]]
 
+    def validate_operand(self, logical_id):
+        """Reject stale aliases even when a different state now occupies their patch."""
+        if logical_id in self.retired_logicals:
+            raise ValueError(f"Unknown live logical qubit {logical_id!r}: "
+                             "Retired logical handle; bind a fresh logical ID")
+        return self.block_for(logical_id)
+
+    def validate_operation(self, operation_type, logical_ids):
+        """Validate reset/active-state requirements before building physical gates."""
+        blocks = [self.validate_operand(q) for q in logical_ids]
+        expected = (BlockStatus.UNINITIALIZED if operation_type == "LogicalInit"
+                    else BlockStatus.ACTIVE)
+        if any(self.status[b.block_id] != expected for b in blocks):
+            raise ValueError(f"{operation_type} operands must be {expected.value}")
+        return blocks
+
+    @property
+    def available_blocks(self):
+        """Unreserved patches eligible for an explicit binding, in stable ID order."""
+        reserved = {b for q, b in self.logical_to_block.items() if q not in self.retired_logicals}
+        return tuple(sorted(set(self.blocks) - reserved))
+
+    def bind_patch(self, directive, event_id):
+        """Atomically reserve exactly the caller's patch, without starting an epoch."""
+        logical, bid = directive.logical_id, directive.physical_block_id
+        if bid not in self.blocks:
+            raise ValueError(f"Unknown physical block ID {bid!r}")
+        if logical in self.observable_ids:
+            state = "retired" if logical in self.retired_logicals else "live"
+            raise ValueError(f"Logical ID {logical!r} is already {state}; use a fresh logical ID")
+        if any(b == bid and q not in self.retired_logicals
+               for q, b in self.logical_to_block.items()):
+            raise ValueError(f"Physical block {bid!r} is active or reserved")
+        trial = self.copy()
+        trial.logical_to_block = {q: b for q, b in trial.logical_to_block.items() if b != bid}
+        trial.logical_to_block[logical] = bid
+        occupied = {slot for q, slot in trial.observable_ids.items()
+                    if q not in trial.retired_logicals}
+        slot = next(i for i in range(trial.num_logical_slots) if i not in occupied)
+        trial.observable_ids[logical] = slot
+        trial.frames[logical] = PauliFrame()
+        trial.orientations[logical] = 0
+        trial.status[bid] = BlockStatus.UNINITIALIZED
+        previous = BlockUseId(bid, trial.epochs[bid]) if trial.epochs[bid] >= 0 else None
+        trial.binding_history += (PatchBindingEvent(event_id, logical, bid, previous),)
+        return trial
+
     def transition(self, operation_type: str, logical_id: str, basis: str | None) -> None:
+        """Legacy memory-only status validation; compilation uses advanced instead."""
         block = self.block_for(logical_id)
         status = self.status[block.block_id]
         if operation_type == "LogicalInit":
@@ -234,6 +320,7 @@ class CompilerContext:
             raise ValueError(f"Unsupported memory operation {operation_type!r}")
 
     def copy(self):
+        """Copy mutable compile registries and the intended-state tableau atomically."""
         result = copy.copy(self)
         for name, value in vars(self).items():
             if isinstance(value, dict):
@@ -242,6 +329,7 @@ class CompilerContext:
         return result
 
     def propagate_frames(self, action, logical_ids, corrections=None):
+        """Transport affine logical X/Z parities through physical H or CNOT."""
         if action == "H":
             logical = logical_ids[0]
             old = self.frames[logical]
@@ -259,15 +347,20 @@ class CompilerContext:
         """Validate/build before returning a new atomic operation state."""
         trial = self.copy()
         logical_ids = fragment.logical_ids
-        blocks = [trial.block_for(q) for q in logical_ids]
         kind = operation.operation_type
-        expected = BlockStatus.UNINITIALIZED if kind == "LogicalInit" else BlockStatus.ACTIVE
-        if any(trial.status[b.block_id] != expected for b in blocks):
-            raise ValueError(f"{kind} operands must be {expected.value}")
+        blocks = trial.validate_operation(kind, logical_ids)
         indices = [trial.observable_ids[q] for q in logical_ids]
         if kind == "LogicalInit":
             for logical, block, index in zip(logical_ids, blocks, indices, strict=True):
                 trial.status[block.block_id] = BlockStatus.ACTIVE
+                bid = block.block_id
+                trial.epochs[bid] += 1
+                use = BlockUseId(bid, trial.epochs[bid])
+                trial.block_uses[use] = BlockUseInfo(
+                    use, fragment.module_id,
+                    logical_owner_history=(UseOwnerEvent(fragment.module_id, logical),))
+                trial.round_counts = {k: v for k, v in trial.round_counts.items() if k[0] != bid}
+                trial.syndromes = {k: v for k, v in trial.syndromes.items() if k[0] != bid}
                 trial.prepared_basis[logical] = operation.basis
                 trial.logical_state.reset(index)
                 if operation.basis == "X":
@@ -320,7 +413,7 @@ class CompilerContext:
                     trial.frames[logical] = frame.with_parities(x, z)
         elif kind == "LogicalMeasure":
             for logical, block, index in zip(logical_ids, blocks, indices, strict=True):
-                pauli = stim.PauliString(len(trial.observable_ids))
+                pauli = stim.PauliString(trial.num_logical_slots)
                 pauli[index] = operation.basis
                 expectation = trial.logical_state.peek_observable_expectation(pauli)
                 if expectation == 0 and operation.mode == "deterministic":
@@ -332,6 +425,11 @@ class CompilerContext:
                 trial.readout_orientations[logical] = trial.orientations[logical]
                 trial.readout_blocks[logical] = block.block_id
                 trial.readout_modes[logical] = operation.mode
+                use = BlockUseId(block.block_id, trial.epochs[block.block_id])
+                trial.readout_uses[logical] = use
+                trial.block_uses[use] = replace(
+                    trial.block_uses[use], terminal_module_id=fragment.module_id)
+                trial.retired_logicals |= {logical}
                 trial.status[block.block_id] = BlockStatus.MEASURED
         elif kind != "SyndromeExtraction":
             raise ValueError(f"Unsupported operation {kind}")
@@ -339,6 +437,7 @@ class CompilerContext:
         return trial
 
     def record_syndromes(self, fragment):
+        """Track the latest per-use check outcomes and first-round random sectors."""
         site_at = {position: site for site, position in self.site_positions.items()}
         for chunk in fragment.chunks():
             i2q = {i: q for q, i in chunk.q2i.items()}
@@ -350,7 +449,8 @@ class CompilerContext:
                     if local not in self.blocks[block_id].layout.ancilla_ids:
                         continue
                     round_index = self.round_counts.get((block_id, local), 0)
-                    key = MeasurementKey(block_id, local, "syndrome", round_index)
+                    key = MeasurementKey(
+                        block_id, local, "syndrome", round_index, self.epochs[block_id])
                     self.round_counts[(block_id, local)] = round_index + 1
                     self.syndromes[(block_id, local)] = ParityExpression((key,))
                     if (fragment.operation_type == "LogicalInit" and round_index == 0

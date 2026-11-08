@@ -1,5 +1,25 @@
 # STATUS — Core
 
+## M7-A update — 2026-11-08
+
+lifecycle.py adds immutable BlockUseId, BlockUseInfo, PatchBindingEvent and
+UseOwnerEvent. MeasurementKey adds a backward-compatible trailing epoch=0.
+CompilerContext accepts partial explicit initial reservations, validates retired
+aliases, reserves specified free patches atomically, starts epochs only at reset,
+and reuses retired tableau slots within a fixed physical-patch-sized capacity.
+Measured status is historical until a binding reserves the patch as uninitialized.
+Preparation/readout/observable/fragment/Bell/relocation metadata carries use IDs;
+physical site and Stim wire identities remain unchanged. Docstrings reviewed for
+all public objects and significant helpers in touched source modules.
+
+Verified: d=3/5 X/Z both signed bits, physical/virtual Paulis, exact per-use rounds
+and raw indices, independent observable history, malformed/overlapping/reserved/
+retired bindings, reset flow rejection, spectator isolation, open Knill relocation
+and fresh preparation, and 13 consecutive uses in one tableau slot. Focused reuse
+plus old Knill suite: 77 passed. Root STATUS records final complete checks.
+Epoch-aware decoder policies and repeated three-patch Knill decoding remain
+M7-B/M7-C work; no allocator or decoder is introduced.
+
 ## M6-B update — 2026-11-08
 
 DetectorInfo adds actual physical check basis at its semantic anchor and stable

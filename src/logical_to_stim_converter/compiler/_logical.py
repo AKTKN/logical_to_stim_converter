@@ -14,6 +14,7 @@ from ..core.code_frame import transformed_pauli
 
 
 def detector_metadata(flow):
+    """Preserve the latest check's module/block identity in a Stim detector tag."""
     if flow.obs_name is not None:
         return sf.FlowMetadata()
     anchors = [f for f in flow.flags if isinstance(f, tuple) and f[0] == "anchor"]
@@ -24,12 +25,14 @@ def detector_metadata(flow):
 
 
 def check_maps(backend, block, logical, orientation):
+    """Map physical stabilizer supports to local check IDs in the current basis."""
     code = backend.stabilizer_code(block, logical, orientation)
     at = {block.position(c.ancilla): c.check_id for c in block.layout.checks}
     return {tile.to_pauli_map(): at[tile.measure_qubit] for tile in code.tiles}
 
 
 def prepare_part(chunk, fragment, backend, blocks, sequence):
+    """Attach check anchors and defer logical-state flow management to the tracker."""
     flows = []
     lookup = {}
     for logical, block_id, orientation in zip(
@@ -61,7 +64,13 @@ def prepare_part(chunk, fragment, backend, blocks, sequence):
 
 
 class LogicalFlowTracker:
+    """Bounded intended-state tableau and actual physical known-state ports.
+
+    Persistent logical slots survive relocation. Fresh aliases reset retired
+    slots before reuse, so destroyed state information cannot enter new ports.
+    """
     def __init__(self, backend, context):
+        """Allocate one internal logical tableau slot per registered physical patch."""
         self.backend = backend
         self.context = context
         self.ports = set()
@@ -74,10 +83,11 @@ class LogicalFlowTracker:
         # parallel group (e.g. readout A concurrently with H on B). Affine signs
         # stay in CompilerContext; they do not change this stabilizer basis.
         self.logical_state = stim.TableauSimulator()
-        self.logical_state.set_num_qubits(len(context.observable_ids))
+        self.logical_state.set_num_qubits(context.num_logical_slots)
         self.q2i = {q: i for i, q in enumerate(sf.sorted_complex(context.site_positions.values()))}
 
     def lift(self, logical_pauli):
+        """Lift active logical-slot Pauli support onto fixed physical patch sites."""
         result = sf.PauliMap()
         for logical in sorted(self.active):
             index = self.context.observable_ids[logical]
@@ -90,6 +100,7 @@ class LogicalFlowTracker:
         return result
 
     def before_readout(self, compiler, fragments):
+        """Separate named deterministic outputs or project random Bell readouts."""
         selected = {f.logical_id for f in fragments if f.operation_type == "LogicalMeasure"}
         if not selected:
             return
@@ -152,7 +163,7 @@ class LogicalFlowTracker:
                 self.context.blocks[f.block_id], q, basis, self.orientations[q]))
             if f.readout_mode == "deterministic":
                 named.append(measured[-1].with_obs_name((q, basis)))
-            p = stim.PauliString(len(self.context.observable_ids))
+            p = stim.PauliString(self.context.num_logical_slots)
             p[self.context.observable_ids[q]] = basis
             expectation = self.logical_state.peek_observable_expectation(p)
             self.logical_state.postselect_observable(p, desired_value=expectation == -1)
@@ -197,6 +208,7 @@ class LogicalFlowTracker:
         self.active = remaining
 
     def through(self, parts):
+        """Transport signed ports through one concurrent physical component layer."""
         managed = (set(self.ports) | {p for p, _ in self.pending_readout}
                    | self.discarded_readout_ports)
         unitary = stim.Circuit()

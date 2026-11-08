@@ -76,6 +76,53 @@ compiler does not automatically move operations across them. Mixed X/Z bases,
 different SE round counts, and waiting patches are supported. A memory experiment
 is a composition of these three primitives; there is no dedicated experiment class.
 
+## Explicit reuse of one physical patch (M7-A)
+
+`BindPatch` reserves an explicitly selected available patch for a fresh logical
+name. It adds no gates, reset, measurements, noise or physical time. The following
+`LogicalInit` performs the actual reset and starts the next occupancy generation:
+
+```python
+from logical_to_stim_converter import (
+    BindPatch, BlockUseId, CircuitCompiler, CodeSpec, LogicalBlock,
+    LogicalInit, LogicalMeasure,
+)
+
+patch = LogicalBlock.placed("P0", CodeSpec.rotated_surface(3))
+result = CircuitCompiler([patch], logical_to_block={"first": "P0"}).compile([
+    LogicalInit("first", "Z", rounds=3),
+    LogicalMeasure("first", "Z"),
+    BindPatch("second", "P0"),
+    LogicalInit("second", "X", rounds=3),
+    LogicalMeasure("second", "X"),
+])
+assert result.circuit.num_qubits == 17
+assert result.circuit.num_observables == 2
+assert [u.use_id for u in result.block_uses] == [BlockUseId("P0", 0), BlockUseId("P0", 1)]
+```
+
+Physical qubits, layout and `GlobalSiteId` stay fixed. `MeasurementKey.epoch`
+distinguishes repeated check and destructive-readout records; check round indices
+restart at zero. Global raw-record indices keep increasing. `block_uses` retains
+immutable reset/readout module IDs, half-open record/layer intervals and owner
+history. `binding_history`, `preparations`, `readouts`, observables and relocation
+records remain addressable after retirement. Observable IDs follow sorted logical
+names across the complete program, including historical readouts.
+
+An active state or pending reservation prevents rebinding. Retired logical names
+cannot execute again; use fresh resource names. `available_blocks` reports patches
+eligible for an explicit bind. A measured patch keeps `MEASURED` status until a
+binding reserves it as `UNINITIALIZED`; binding itself never advances the epoch.
+An explicit partial initial mapping (including `{}`) leaves other patches
+unreserved. Closed compilation still requires every registered patch to finish
+measured; use `allow_open_outputs=True` for pending reservations and active outputs.
+
+Knill relocation preserves the data logical identity on the output patch use,
+retires both temporary resource handles and releases the two measured patches.
+Later bindings/composites resolve against that updated mapping. Automatic patch
+allocation is outside the package. Epoch-aware local decoder policies and a full
+three-patch repeated-Knill decoding proof remain M7-B/M7-C work.
+
 ## Interfaces and metadata
 
 - `CodeSpec(name, n, k, d, H_X, H_Z, L_X, L_Z, metadata=...)` validates binary CSS
@@ -147,7 +194,8 @@ round counts, signed flows, corrupted-gate/flow rejection, exact measurement
 parities, circuit distance, final mappings, lifecycle rules, and exact noise sites.
 See [STATUS.md](STATUS.md) for executed checks and platform coverage.
 
-Current restrictions: one logical slot per block; physical blocks cannot be reused.
+Current restrictions: one live logical slot per block; patch reuse requires an
+explicit BindPatch and a fresh logical name before initialization.
 Readouts default to deterministic X/Z under the intended logical circuit. Use
 `LogicalMeasure(..., mode="random")` for a random classical outcome without a
 deterministic observable. Use `compile(..., allow_open_outputs=True)` to retain

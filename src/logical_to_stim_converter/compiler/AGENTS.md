@@ -40,3 +40,9 @@ into immutable sparse batch maps once. It may read private verified assembly;
 external examples must use make_frame_plan instead. Keep per-shot state and
 concrete decoders outside the compiler. Existing evaluate_frames and strict
 noiseless validation remain independent regression references.
+
+M7-A: _plan.py yields user entries lazily against the updated binding context.
+BindPatch has no physical fragment/time. _provenance.py independently reconstructs
+reset/release epochs and owner changes; observable history includes retired names.
+Keep source-bound decoder policies across epochs for M7-B; do not infer that a
+bare physical block names one unique preparation/readout after reuse.

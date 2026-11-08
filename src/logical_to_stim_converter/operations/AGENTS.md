@@ -25,3 +25,7 @@ Abstract logical operation type, requested primitives, and composite Bell/Knill 
 Memory, TransversalH/CNOT, and physical/virtual LogicalPauli operations are implemented and flow verified. BellStatePrep/KnillEC expand into staged verified primitives through CompositeOperation. They retain child provenance and never inject noise. LogicalMeasure has deterministic/random modes. Update this folder's `STATUS.md` and root status after changes.
 
 Use ordered operands and OperationContext for multi-block builds. Preserve CNOT control/target order. Independent multi-target memory operations retain their compatibility decomposition. Virtual Paulis have zero physical duration.
+
+M7-A: binding.py defines BindPatch as a zero-duration compiler directive, not an
+OperationModule. It accepts a fresh logical ID and an explicit physical block ID;
+the following LogicalInit supplies the physical reset and starts the use epoch.
