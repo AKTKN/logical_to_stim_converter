@@ -1,5 +1,39 @@
 # STATUS — `decoding`
 
+## M7-B update — 2026-11-08
+
+DetectorSelector adds independent BlockUseId filters with anchor/touching/strict
+membership. SelectionAudit records requested/retained uses; observable-local
+regions use real interaction/relocation/verified-relation edges between uses.
+Physical-block selectors keep all epochs. DecoderView schema v3 intentionally
+fingerprints use/binding/owner, timing, Bell and ancestry histories; regenerate
+v1/v2 identities. Existing exact instruction/DEM snapshots retain full double
+precision, repeats/shifts, correlated components and hyperedges on Windows/Linux.
+
+Boundary/readout requests resolve source preparations by actual use and expose
+that source. The temporal model retains strict module-local observations with
+model-only ideal probes. Signed sector transfer tracks current use/orientation
+and surviving prior-sector expressions through H/CNOT, instead of a last/first
+preparation per site. Conditional Bell models select the actual output-use prep
+and resource-use CNOT window, including already prepared Bell resources. Public
+window/use/module IDs audit categorical atoms, exclusivity and survivor actions.
+
+Frame boundaries carry their use. CorrectionBatch optionally declares use and
+input labels; wrong use/order/source/shots/shape fail before mutation. Unique
+modules permit legitimate updates to multiple epochs, while duplicate updates
+fail. Physical resets extinguish old supports without deleting Bell history.
+records.py was audited: its global-key/source-bound batched maps already have no
+site-preparation lookup and require no implementation change. All touched public
+classes/functions and significant helpers have English physical API docstrings.
+
+Focused new suite: 50 passed in 53.63 s. Retained view/ancestry checkpoint:
+110 passed in 49.05 s; stage/strict-frame checkpoint: 33 passed in 39.77 s;
+final frame/record checkpoint: 27 passed in 26.08 s. Root STATUS records complete
+regression/examples/build/CI, direct fault, marginal and physical replay evidence.
+No runtime decoder, automatic allocation or multicycle Knill LER claim.
+Final full suite: 544 passed in 568.60 s; final new/negative checkpoint:
+52 passed in 57.19 s. See root STATUS for complete command/platform evidence.
+
 ## M6-D update — 2026-11-08
 
 frames.py adds source-bound CorrectionBatch/FrameBoundary/OfflineFramePlan and

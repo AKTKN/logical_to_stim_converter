@@ -64,7 +64,7 @@ other code families and production decoder result/algorithm interfaces remain de
 M6-C keeps PyMatching and Matplotlib in the dev/example layer. Memory LER uses one
 raw batch and externally decoded reference-relative observable flips. Canonical
 DEMs preserve physical correlations; graphlike matching conversion is explicit
-and rejects unsupported hyperedges. DecoderView schema v2 uses immutable exact
+and rejects unsupported hyperedges. DecoderView schema v3 uses immutable exact
 instruction snapshots, never lossy Stim text, for probabilities and source identity.
 
 
@@ -83,4 +83,13 @@ logical names reserve explicitly selected available patches. Reject stale aliase
 pending-reservation conflicts and parallel physical overlap. Keep historical
 readouts/observables and persistent data slots through relocation; reset retired
 internal tableau slots before assigning fresh states. Decoder policies across
-epochs and full three-patch Knill decoding remain M7-B/M7-C work.
+epochs are implemented in M7-B; full three-patch Knill decoding remains M7-C work.
+
+M7-B scopes detector anchors/sources, active time layers, preparation ancestry,
+boundary/conditional requests and correction maps to BlockUseId or unique module
+IDs. Physical-block selectors include all epochs; use selectors distinguish
+anchor/touching/strict membership. Observable locality uses a time-expanded graph
+of real interactions/relocations, never coordinate reuse alone. Reset removes old
+physical frames but preserves legitimate teleported/classical dependencies.
+Fingerprint schema v3 includes use histories and requires cached v1/v2 artifacts
+to be regenerated. Preserve exact physical instructions, noise and raw samples.

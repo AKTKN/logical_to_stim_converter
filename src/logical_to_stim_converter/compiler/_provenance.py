@@ -75,6 +75,9 @@ def validate_metadata(compiled):
                     or d.crosses_decoder_boundary != (len(stages) > 1)):
                 raise ValueError("Detector anchor/stage attribution disagrees")
             if (d.supporting_block_ids != tuple(sorted({k.block_id for k in keys}))
+                    or d.source_use_ids != tuple(sorted({k.block_use_id for k in keys}))
+                    or d.anchor_use_id != fragments[d.anchor_module_id].block_use_ids[
+                        fragments[d.anchor_module_id].block_ids.index(d.block_id)]
                     or d.coordinates != tuple(coords[detector_index])):
                 raise ValueError("Detector physical provenance disagrees")
             f = fragments[d.anchor_module_id]
@@ -147,6 +150,13 @@ def validate_block_uses(compiled):
     for info in (*compiled.preparations, *compiled.readouts):
         if info.block_use_id != fragments[info.module_id].block_use_ids[0]:
             raise ValueError("Preparation/readout physical-use identity disagrees")
+    for layer in compiled.time_layers:
+        expected = tuple(sorted(
+            u.use_id for u in compiled.block_uses
+            if u.time_layer_start <= layer.index
+            and (u.time_layer_stop is None or layer.index < u.time_layer_stop)))
+        if layer.active_use_ids != expected:
+            raise ValueError("Time-layer active uses disagree with reset/readout intervals")
 
 
 def validate_ancestry(compiled):
@@ -155,7 +165,7 @@ def validate_ancestry(compiled):
     preps = {p.module_id: p for p in compiled.preparations}
     bells = {b.composite_id: b for b in compiled.bell_measurements}
     relocations = {r.composite_id: r for r in compiled.relocation_history}
-    histories = {}
+    histories, use_histories = {}, {}
     seen_fragments, seen_bells = [], []
     for event in compiled.ancestry_events:
         if event.operation_type == "KnillEC":
@@ -163,6 +173,8 @@ def validate_ancestry(compiled):
             r = relocations[event.event_id]
             inputs = (bell.data_block_id, bell.first_resource_block_id, bell.output_block_id)
             outputs = (bell.output_block_id,)
+            input_uses = (bell.data_use_id, bell.first_resource_use_id, bell.output_use_id)
+            output_uses = (bell.output_use_id,)
             if (r.logical_id, r.source_block_id, r.output_block_id) != (
                     bell.logical_id, inputs[0], outputs[0]):
                 raise ValueError("Relocation ancestry disagrees with Bell metadata")
@@ -173,9 +185,13 @@ def validate_ancestry(compiled):
                 raise ValueError("Ancestry operation disagrees with physical fragment")
             inputs = () if f.operation_type == "LogicalInit" else f.block_ids
             outputs = () if f.operation_type == "LogicalMeasure" else f.block_ids
+            input_uses = () if not inputs else f.block_use_ids
+            output_uses = () if not outputs else f.block_use_ids
             seen_fragments.append(f.module_id)
         if (event.input_block_ids, event.output_block_ids) != (inputs, outputs):
             raise ValueError("Ancestry edge disagrees with actual operands")
+        if (event.input_use_ids, event.output_use_ids) != (input_uses, output_uses):
+            raise ValueError("Ancestry physical-use edge disagrees with actual operands")
         if not inputs:
             prep = preps[event.event_id]
             f = fragments[event.event_id]
@@ -184,23 +200,27 @@ def validate_ancestry(compiled):
                 raise ValueError("Preparation event identity disagrees")
             dependencies = (event.event_id,)
         else:
-            if any(b not in histories for b in inputs):
+            if any(u not in use_histories for u in input_uses):
                 raise ValueError("Ancestry edge precedes its source preparation")
-            dependencies = tuple(sorted({p for b in inputs for p in histories[b]}))
+            dependencies = tuple(sorted({p for u in input_uses for p in use_histories[u]}))
         if event.preparation_dependencies != dependencies:
             raise ValueError("Ancestry dependencies disagree with causal inputs")
         for b in outputs:
             histories[b] = dependencies
+        for u in output_uses:
+            use_histories[u] = dependencies
         if event.operation_type == "KnillEC":
             sources = tuple(k for p in dependencies
                             for k in preps[p].unresolved_frame.source_syndromes)
             gauges = tuple(k for p in dependencies for k in preps[p].gauge_measurements)
             if (bell.preparation_dependencies != dependencies
+                    or bell.physical_output_frame.block_use_id != bell.output_use_id
                     or bell.physical_output_frame.source_syndromes != sources
                     or bell.logical_output_frame.preparation_syndromes != gauges):
                 raise ValueError("Bell preparation ancestry disagrees")
     if (seen_fragments != list(fragments) or seen_bells != list(bells)
-            or histories != dict(compiled.block_preparation_dependencies)):
+            or histories != dict(compiled.block_preparation_dependencies)
+            or use_histories != dict(compiled.use_preparation_dependencies)):
         raise ValueError("Incomplete or reordered preparation ancestry events")
     expected = {q: histories[b] for q, b in compiled.logical_to_block.items()
                 if b in histories and compiled.block_status[b] != BlockStatus.UNINITIALIZED}

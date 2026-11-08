@@ -16,12 +16,14 @@ from ..core.protocol import PhysicalPauliFrame
 
 
 def readonly(a):
+    """Freeze a binary array without retaining mutable caller storage."""
     a = np.asarray(a, dtype=np.bool_)
     return np.frombuffer(a.tobytes(), dtype=np.bool_).reshape(a.shape)
 
 
 @dataclass(frozen=True)
 class EvaluatedBellMeasurement:
+    """Evaluated historical Bell bits and selected survivor-use physical frames."""
     corrected_x: np.ndarray
     corrected_z: np.ndarray
     byproduct_x: np.ndarray
@@ -31,6 +33,7 @@ class EvaluatedBellMeasurement:
 
 @dataclass(frozen=True)
 class FrameEvaluation:
+    """Offline interpreted records/readouts and residual open physical frames."""
     corrected_measurements: np.ndarray
     logical_outputs: np.ndarray
     readout_values: Mapping[str, np.ndarray]
@@ -51,6 +54,7 @@ def correction_vectors(compiled, measurements, corrections, *, validation):
     records = {m.key: m.index for m in compiled.measurements}
 
     def vectors(prep, values):
+        """Check source/use/support and optionally prove noiseless sector equations."""
         if isinstance(values, PhysicalPauliFrame):
             values = (values,) * len(raw)
         if len(values) != len(raw):
@@ -59,6 +63,8 @@ def correction_vectors(compiled, measurements, corrections, *, validation):
         expected = prep.unresolved_frame
         for frame in values:
             if (not isinstance(frame, PhysicalPauliFrame) or not frame.resolved
+                    or (frame.block_use_id is not None
+                        and frame.block_use_id != prep.block_use_id)
                     or (frame.block_id, frame.orientation, frame.preparation_module_id,
                         frame.stage_id, frame.source_syndromes)
                     != (expected.block_id, expected.orientation, expected.preparation_module_id,
@@ -92,6 +98,11 @@ def correction_vectors(compiled, measurements, corrections, *, validation):
 
 
 def evaluate_frames(compiled, measurements, corrections, *, validation="noiseless"):
+    """Replay module-specific preparation hypotheses through actual physical resets.
+
+    Old physical supports terminate at reset/measurement; interpreted Bell bits
+    can still affect a teleported state on another use. No decoder truth is used.
+    """
     resolved = correction_vectors(compiled, measurements, corrections, validation=validation)
     raw = np.asarray(measurements, dtype=np.bool_)
     preps = {p.module_id: p for p in compiled.preparations}
@@ -107,6 +118,7 @@ def evaluate_frames(compiled, measurements, corrections, *, validation="noiseles
     evaluated_bells = {}
 
     def toggle(pauli, condition=True):
+        """Apply one logical representative to its actual physical frame support."""
         for position, axis in pauli.items():
             index = positions[position]
             if axis in "XY":
@@ -114,7 +126,8 @@ def evaluate_frames(compiled, measurements, corrections, *, validation="noiseles
             if axis in "ZY":
                 z[:, index] ^= condition
 
-    def output_frames(block_id, logical, orientation, source, dependencies, stage=None):
+    def output_frames(block_id, logical, orientation, source, dependencies, stage=None, use=None):
+        """Snapshot a survivor's current physical frame with historical source/use IDs."""
         block = blocks[block_id]
         ix = [compiled.physical_qubit_map[(block_id, q)] for q in block.layout.data_ids]
         lx = backend.logical_pauli(block, logical, "X", orientation)
@@ -126,7 +139,7 @@ def evaluate_frames(compiled, measurements, corrections, *, validation="noiseles
             tuple(k for p in dependencies for k in preps[p].unresolved_frame.source_syndromes),
             tuple(q for q, bit in zip(block.layout.data_ids, x[s, ix], strict=True) if bit),
             tuple(q for q, bit in zip(block.layout.data_ids, z[s, ix], strict=True) if bit),
-            PauliFrame(x_constant=int(fx[s]), z_constant=int(fz[s]))) for s in range(len(raw)))
+            PauliFrame(x_constant=int(fx[s]), z_constant=int(fz[s])), use) for s in range(len(raw)))
 
     bells = {b.composite_id: b for b in compiled.bell_measurements}
     for kind, value in compiled._evaluation_steps:
@@ -173,7 +186,7 @@ def evaluate_frames(compiled, measurements, corrections, *, validation="noiseles
             frames = output_frames(bell.output_block_id, bell.logical_id,
                                    bell.output_orientation, bell.composite_id,
                                    bell.preparation_dependencies,
-                                   bell.physical_output_frame.stage_id)
+                                   bell.physical_output_frame.stage_id, bell.output_use_id)
             evaluated_bells[bell.composite_id] = EvaluatedBellMeasurement(
                 readonly(mx), readonly(mz), readonly(mz), readonly(mx), frames)
         else:
@@ -186,8 +199,10 @@ def evaluate_frames(compiled, measurements, corrections, *, validation="noiseles
     for o in compiled.observables:
         outputs[:, o.index] = np.bitwise_xor.reduce(
             interpreted[:, o.readout_measurement_indices], axis=1)
+    active_uses = {u.use_id.block_id: u.use_id for u in compiled.block_uses
+                   if u.terminal_module_id is None}
     final = {q: output_frames(b, q, compiled.orientations[q], "open_output",
-                              compiled.preparation_dependencies[q])
+                              compiled.preparation_dependencies[q], use=active_uses[b])
              for q, b in compiled.logical_to_block.items()
              if compiled.block_status[b] == BlockStatus.ACTIVE}
     return FrameEvaluation(readonly(interpreted), readonly(outputs),

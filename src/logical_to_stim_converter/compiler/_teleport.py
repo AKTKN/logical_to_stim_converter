@@ -27,18 +27,23 @@ class ProtocolAssembly:
         self.relocations = []
         self.bells = []
         self.block_dependencies = {}
+        self.use_dependencies = {}
         self.ancestry_events = []
 
     def record_fragment(self, fragment):
         """Join histories only across an actual physical operation's operands."""
         inputs = () if fragment.operation_type == "LogicalInit" else fragment.block_ids
         outputs = () if fragment.operation_type == "LogicalMeasure" else fragment.block_ids
+        input_uses = () if not inputs else fragment.block_use_ids
+        output_uses = () if not outputs else fragment.block_use_ids
         dependencies = ((fragment.module_id,) if not inputs else tuple(sorted({
-            p for b in inputs for p in self.block_dependencies[b]})))
-        for b in outputs:
-            self.block_dependencies[b] = dependencies
+            p for u in input_uses for p in self.use_dependencies[u]})))
+        for use in output_uses:
+            self.block_dependencies[use.block_id] = dependencies
+            self.use_dependencies[use] = dependencies
         self.ancestry_events.append(PreparationDependencyEvent(
-            fragment.module_id, fragment.operation_type, inputs, outputs, dependencies))
+            fragment.module_id, fragment.operation_type, inputs, outputs, dependencies,
+            input_uses, output_uses))
 
     def begin(self, boundary, context):
         """Validate current resources and snapshot the input frame at entry."""
@@ -94,11 +99,12 @@ class ProtocolAssembly:
                                    fd.preparation_syndromes + fa.preparation_syndromes
                                    + fb.preparation_syndromes)))
         orientation = context.orientations[b]
-        dependencies = tuple(sorted({p for block in (db, ab, bb)
-                                     for p in self.block_dependencies[block]}))
+        uses = tuple(context.current_use(block) for block in (db, ab, bb))
+        dependencies = tuple(sorted({p for use in uses for p in self.use_dependencies[use]}))
         self.block_dependencies[bb] = dependencies
+        self.use_dependencies[uses[2]] = dependencies
         self.ancestry_events.append(PreparationDependencyEvent(
-            identity, "KnillEC", (db, ab, bb), (bb,), dependencies))
+            identity, "KnillEC", (db, ab, bb), (bb,), dependencies, uses, uses[2:]))
         draft = dict(composite_id=identity, logical_id=d, data_block_id=db,
                      first_resource_block_id=ab, output_block_id=bb,
                      x_readout=readouts[0].module_id, z_readout=readouts[1].module_id,
@@ -149,5 +155,6 @@ class ProtocolAssembly:
                 draft["output_block_id"], draft["output_orientation"], draft["composite_id"],
                 draft["composite_id"] + "/teleportation",
                 tuple(k for p in draft["preparation_dependencies"]
-                      for k in preps[p].unresolved_frame.source_syndromes)))
+                      for k in preps[p].unresolved_frame.source_syndromes),
+                block_use_id=draft["output_use_id"]))
             for draft in self.bells)

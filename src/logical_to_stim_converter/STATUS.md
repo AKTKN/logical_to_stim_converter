@@ -1,5 +1,17 @@
 # STATUS — Package root
 
+## M7-B update — 2026-11-08
+
+Decoder-neutral reuse now carries explicit use provenance through detectors,
+physical-time layers, causal preparation histories, views, temporal/readout/Bell
+requests and software frames. DetectorSelector accepts use_ids/use_membership;
+physical-block selection still spans all epochs. Observable locality connects
+interacting uses rather than shared physical coordinates. Fingerprints migrate
+intentionally to decoder-view-v3; regenerate v1/v2 cached views/plans. Existing
+class exports remain valid; CorrectionBatch adds optional use/column labels.
+Root/compiler/core/decoding/noise ledgers record exact independent verification.
+M7-C LER demonstration, automatic allocation and production decoding remain separate.
+
 ## M7-A update — 2026-11-08
 
 Public exports add BindPatch, BlockUseId, BlockUseInfo, PatchBindingEvent and

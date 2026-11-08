@@ -2,7 +2,120 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M7_A_IMPLEMENTED` (explicit physical-patch reuse and use identities)
+**Overall state:** `M7_B_IMPLEMENTED` (use-aware physical models and offline frames)
+
+## M7-B epoch-aware flows, noise, views and offline frames — 2026-11-08
+
+Baseline: `2577b7f1f3aac2efd4938368945768e8174bfb88` (M7-A), merged on main
+and independently verified in all four Ubuntu/Windows Python 3.11/3.12 jobs of
+CI run `42467020421`. Existing uncommitted export/example/report changes are
+preserved and excluded from this implementation's commit.
+
+- DetectorInfo exports anchor_use_id/source_use_ids separately from immutable
+  physical-support sites and existing (x,y,t) coordinates. Metadata reconstructs
+  these from actual producer fragments. Current check sectors/round counters
+  are use-keyed. Signed reset/readout flow boundaries and all canonical global
+  detectors remain; no physical gate or deterministic relation is removed.
+- TimeLayer.active_use_ids identifies inclusive reset-through-destructive-readout
+  occupancy. The noise pass derives idle sites from each active use, including
+  check ancillas; measured/available/reserved gaps are excluded. Global/primitive/
+  instance rules, explicit zero, waiting blocks, composite inheritance and
+  once-only gate/idle noise are unchanged. BindPatch remains zero duration/noise.
+- PreparationDependencyEvent carries actual input/output use edges; immutable
+  use_preparation_dependencies retains each historical use's latest ancestry.
+  New resets start independent sources. Already teleported information retains
+  legitimate previous-use preparation dependencies on the surviving state.
+- DetectorSelector adds independent use_ids/use_membership filters with anchor,
+  touching and strict semantics; physical-block filters still include all epochs.
+  SelectionAudit exports requested and contributing uses. Default observable
+  locality connects actual interacting/relocated/signed-relation uses, not all
+  occupants of the same coordinates. Explicit observing-region overrides remain.
+- DecoderView intentionally migrates to schema v3, fingerprinting exact physical
+  circuits plus use/binding/owner, Bell, ancestry and timing histories. Regenerate
+  cached v1/v2 fingerprints/views/plans. Lossless exact instruction/DEM snapshots,
+  arbitrary index order, signed references, hyperedges, correlated separators and
+  physical-circuit re-extraction remain intact. Local views never delete faults.
+- BoundaryRequest/ReadoutRequest identify their actual use/source_preparation;
+  optional preparation still means the initialization's prepared-logical target.
+  Check histories, temporal models and sector transfer use the correct reset
+  and current orientation through real H/CNOT. Model-only MPP targets never enter
+  canonical measurements/decoder truth. Conditional Bell models use the actual
+  output-use preparation and resource-use CNOT window, including existing Bell
+  resources in either CNOT direction. Window/use/module IDs expose categorical
+  atoms, exclusive groups and correlated readout/check/logical/survivor actions.
+- Every physical preparation/SE/readout module has a use-labelled FrameBoundary.
+  CorrectionBatch adds optional block_use_id/input_ids without breaking the
+  three-argument API. Explicit use/order/source/shape/shot mismatches fail before
+  mutation; each unique module can update once. Physical resets extinguish old
+  supports while earlier Bell records can affect later teleported data. Raw
+  samples remain immutable; current events recompute after software frame edits.
+- Audited unchanged _logical.py, _parallel.py, planning and records.py: existing
+  signed flow/reset boundaries and global-key batched transforms need no physical
+  implementation change. All modified source APIs/significant helpers have
+  English physical/identity/order docstrings; README/architecture and affected
+  policy/status ledgers document use selection and migration.
+
+### M7-B verification
+
+Linux/WSL2 Python 3.12.7; commands use `.venv/bin/python`. Unchanged pins:
+Stim 1.15.0, stimflow 1.17.dev0 at ffe0d043598ed5df0851a3e6b4920359a23fafbd,
+PyMatching 2.3.1 (dev only), pytest 9.2.0, Ruff 0.17.4, build 1.6.1. Inspected
+installed Chunk.verify/reset/readout/ChunkCompiler, NoiseModel.noisy_circuit and
+Stim FlipSimulator/DEM APIs; no external source or dependency pin was changed.
+
+- Baseline `python -m pytest`: **493 passed in 474.32 s**.
+- Final `python -m pytest`: **544 passed in 568.60 s**, retaining all 493
+  previous checks and adding 51 M7-B cases.
+- Incremental memory/lifecycle/noise checkpoint: **29 passed in 9.34 s**.
+- View/ancestry checkpoint: **110 passed in 49.05 s**.
+- Stage/strict-frame checkpoint: **33 passed in 39.77 s**.
+- Initial new suite: **50 passed in 53.63 s**; the later reversed-resource test
+  adds one further case. Frame/record checkpoint: **27 passed in 26.08 s**.
+- Final new suite plus retained missing-byproduct physics test:
+  `python -m pytest tests/test_epoch_views_noise.py tests/test_epoch_stages_frames.py
+  tests/test_knill_memory_offline_decoding.py::test_missing_bell_hypothesis_breaks_logical_memory -q`
+  -> **52 passed in 57.19 s**.
+- The v3 full-run migration initially rejected an old missing-byproduct test's
+  deliberately corrupted Bell source paired with stale original requests.
+  Its harness now explicitly checks that source rejection, rebuilds all requests
+  from the corrupted source, and retains the original physical failure assertion.
+  Migration plus both existing-resource directions: **3 passed in 2.51 s**.
+  The initial full run had **542 passed, 1 failed in 532.66 s**, solely this
+  now-corrected source-binding test harness; no physics assertion was removed.
+- `python -m ruff check src tests examples`: **all checks passed**.
+- `python -m build`: **source distribution and wheel built successfully**.
+- Isolated installed wheel: use selectors/v3 snapshots, recycled preparation/
+  SE/Bell models, all frame boundaries and static DEMs pass with PyMatching,
+  Matplotlib, test/helper and reference imports blocked. Pinned dependencies are
+  shared read-only; package code is loaded from the isolated wheel installation.
+  The exact staged Git tree independently builds and passes these wheel checks.
+- README use-selection and boundary/correction snippets execute successfully;
+  all modified source public/significant helper docstrings pass the audit.
+- All six CI examples passed: two_patch_memory.py, two_patch_bell_roundtrip.py,
+  knill_ec_single_round.py, offline_dem_views.py,
+  memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731,
+  knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732.
+- Independent parent/current exact-instruction hashes agree for ideal/noisy
+  memory/Clifford, Knill and M7-A reuse programs, including double probabilities,
+  physical coordinates/wire maps and raw measurement keys/order.
+- `python -m pip check`: **no broken requirements**. `git diff --check` passes.
+
+The 51 new cases verify d=3/5 signed mixed X/Z repeated memories, raw/annotation
+parities, exact noise tables and occupancy gaps; use-specific/block/joint/default
+local views and physical fault marginals with excluded-region output effects;
+hyperedges, correlated components and precise repeat/SHIFT_COORDS snapshots;
+temporal early/late result targets at both P0 uses; actual signed H/CNOT sector
+transfer across an old site's reset; all Bell atoms against independent Stim
+Pauli propagation; explicit physical correction execution, M5 replay and open
+outputs with two spectators; old physical-frame extinction plus surviving
+teleported feedback; and stale epoch/key/source/order/support/shot rejection.
+No hidden fault/tableau truth enters normal decoder inputs.
+
+Implemented but unverified: no additional behavior is claimed. Full three-patch
+multiple-cycle Knill LER comparison remains M7-C. Automatic allocation, scheduling
+optimization, production/joint decoders and adaptive physical execution remain
+outside scope. The unchanged four-environment CI matrix runs after push, and
+its observed results are reported separately from local evidence.
 
 ## M7-A explicit binding and physical-use lifecycle — 2026-11-08
 

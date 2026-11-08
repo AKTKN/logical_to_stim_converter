@@ -88,7 +88,7 @@ class MeasurementInfo:
 
 @dataclass(frozen=True)
 class DetectorInfo:
-    """Canonical deterministic parity with physical and semantic provenance."""
+    """Canonical parity; source uses name reset intervals, not coordinates."""
     index: int
     coordinates: tuple[float, ...]
     measurement_indices: tuple[int, ...]
@@ -102,6 +102,17 @@ class DetectorInfo:
     anchor_module_id: str = ""
     basis: str = ""
     physical_support: tuple[GlobalSiteId, ...] = ()
+    anchor_use_id: BlockUseId | None = None
+    source_use_ids: tuple[BlockUseId, ...] = ()
+
+    def __post_init__(self):
+        sources = tuple(sorted({key.block_use_id for key in self.measurement_keys}))
+        if not self.source_use_ids:
+            object.__setattr__(self, "source_use_ids", sources)
+        if self.anchor_use_id is None:
+            candidates = [u for u in sources if u.block_id == self.block_id]
+            if len(candidates) == 1:
+                object.__setattr__(self, "anchor_use_id", candidates[0])
 
     @property
     def anchor_block_id(self):
@@ -177,8 +188,15 @@ class TimeLayer:
     active_blocks: tuple[str, ...]
     operation_by_block: Mapping[str, str]
     used_qubits: frozenset[int]
+    active_use_ids: tuple[BlockUseId, ...] = ()
 
     def __post_init__(self) -> None:
+        uses = self.active_use_ids or tuple(BlockUseId(b) for b in self.active_blocks)
+        if (any(not isinstance(u, BlockUseId) for u in uses)
+                or len({u.block_id for u in uses}) != len(uses)
+                or set(u.block_id for u in uses) != set(self.active_blocks)):
+            raise ValueError("A time layer must contain one active use per active physical block")
+        object.__setattr__(self, "active_use_ids", tuple(sorted(uses)))
         object.__setattr__(
             self, "operation_by_block", MappingProxyType(dict(self.operation_by_block))
         )
@@ -189,6 +207,8 @@ class CompilerContext:
 
     Measured final aliases remain in logical_to_block for compatibility until
     their physical site is rebound. retired_logicals prevents their execution.
+    prepared_basis records each fresh handle's unique LogicalInit, not the
+    preparation of whatever state currently occupies its former physical site.
     observable_ids is the historical name-to-tableau-slot map, not output IDs;
     retired slots can be reset and reused without growing the tableau dimension.
     """
@@ -231,8 +251,8 @@ class CompilerContext:
         }
         self.frames = {logical: PauliFrame() for logical in self.logical_to_block}
         self.orientations = dict.fromkeys(self.logical_to_block, 0)
-        self.syndromes: dict[tuple[str, str], ParityExpression] = {}
-        self.round_counts: dict[tuple[str, str], int] = {}
+        self.syndromes: dict[tuple[BlockUseId, str], ParityExpression] = {}
+        self.round_counts: dict[tuple[BlockUseId, str], int] = {}
         self.measurement_bases = {}
         self.expected_outputs = {}
         self.readout_frames = {}
@@ -268,6 +288,10 @@ class CompilerContext:
         if any(self.status[b.block_id] != expected for b in blocks):
             raise ValueError(f"{operation_type} operands must be {expected.value}")
         return blocks
+
+    def current_use(self, block_id):
+        """Current/last reset interval; never construct a use for an unreset patch."""
+        return BlockUseId(block_id, self.epochs[block_id])
 
     @property
     def available_blocks(self):
@@ -359,8 +383,6 @@ class CompilerContext:
                 trial.block_uses[use] = BlockUseInfo(
                     use, fragment.module_id,
                     logical_owner_history=(UseOwnerEvent(fragment.module_id, logical),))
-                trial.round_counts = {k: v for k, v in trial.round_counts.items() if k[0] != bid}
-                trial.syndromes = {k: v for k, v in trial.syndromes.items() if k[0] != bid}
                 trial.prepared_basis[logical] = operation.basis
                 trial.logical_state.reset(index)
                 if operation.basis == "X":
@@ -372,7 +394,7 @@ class CompilerContext:
             for axis in "XZ":
                 value = ParityExpression()
                 for check in correction[axis]:
-                    value ^= trial.syndromes[(block.block_id, check)]
+                    value ^= trial.syndromes[(trial.current_use(block.block_id), check)]
                 expressions[axis] = value
             trial.propagate_frames("H", logical_ids, (expressions["Z"], expressions["X"]))
             trial.orientations[logical] ^= 1
@@ -389,7 +411,7 @@ class CompilerContext:
                     original = tile.to_pauli_map()
                     flow = next(f for f in chunk.flows if f.start == original)
                     source_values[flow.end] = trial.syndromes[
-                        (block.block_id, check_at[tile.measure_qubit])
+                        (trial.current_use(block.block_id), check_at[tile.measure_qubit])
                     ]
             for logical, block, orientation in zip(
                 logical_ids, blocks, fragment.orientations_after, strict=True
@@ -400,7 +422,9 @@ class CompilerContext:
                     expression = ParityExpression()
                     for source in reflow.out2in[tile.to_pauli_map()]:
                         expression ^= source_values[source]
-                    trial.syndromes[(block.block_id, check_at[tile.measure_qubit])] = expression
+                    trial.syndromes[
+                        (trial.current_use(block.block_id), check_at[tile.measure_qubit])
+                    ] = expression
             trial.propagate_frames("CX", logical_ids)
             trial.logical_state.cx(*indices)
         elif kind == "LogicalPauli":
@@ -448,11 +472,12 @@ class CompilerContext:
                     block_id, local = site_at[i2q[target.value]]
                     if local not in self.blocks[block_id].layout.ancilla_ids:
                         continue
-                    round_index = self.round_counts.get((block_id, local), 0)
+                    use = self.current_use(block_id)
+                    round_index = self.round_counts.get((use, local), 0)
                     key = MeasurementKey(
                         block_id, local, "syndrome", round_index, self.epochs[block_id])
-                    self.round_counts[(block_id, local)] = round_index + 1
-                    self.syndromes[(block_id, local)] = ParityExpression((key,))
+                    self.round_counts[(use, local)] = round_index + 1
+                    self.syndromes[(use, local)] = ParityExpression((key,))
                     if (fragment.operation_type == "LogicalInit" and round_index == 0
                             and ("X" if instruction.name == "MX" else "Z")
                             != self.prepared_basis[fragment.logical_id]):

@@ -35,10 +35,10 @@ def extract_metadata(
     observables = defaultdict(set)
     rounds = defaultdict(int)
     layers = []
-    active = set()
+    active = {}
     preparation_syndromes = defaultdict(list)
     detector_coords = circuit.get_detector_coordinates()
-    causal_graph = {block: {block} for block in context.blocks}
+    causal_graph = {use: {use} for use in context.block_uses}
     for layer_index, instructions in enumerate(moments(circuit)):
         operation_by_block = {}
         used = set()
@@ -50,11 +50,12 @@ def extract_metadata(
                     operation_by_block[block_id] = fragment.module_id
                 used.update(t.value for t in instruction.targets_copy())
                 if fragment.operation_type == "LogicalInit":
-                    active.update(fragment.block_ids)
+                    for use in fragment.block_use_ids:
+                        active[use.block_id] = use
                 if fragment.operation_type == "LogicalMeasure":
                     retiring.update(fragment.block_ids)
                 if fragment.operation_type == "TransversalCNOT":
-                    c, t = fragment.block_ids
+                    c, t = fragment.block_use_ids
                     connected = causal_graph[c] | causal_graph[t]
                     for block in connected:
                         causal_graph[block] = set(connected)
@@ -100,9 +101,11 @@ def extract_metadata(
                     context.blocks[block_id].layout.check_for_ancilla(check_id)
                     keys = tuple(measurements[i].key for i in sorted(indices))
                     support = tuple(sorted({key.block_id for key in keys}))
-                    if block_id not in support or not set(support) <= causal_graph[block_id]:
-                        raise ValueError("Detector records have invalid cross-block provenance")
                     anchor = by_module[module_id]
+                    anchor_use = anchor.block_use_ids[anchor.block_ids.index(block_id)]
+                    source_uses = tuple(sorted({key.block_use_id for key in keys}))
+                    if block_id not in support or not set(source_uses) <= causal_graph[anchor_use]:
+                        raise ValueError("Detector records have invalid cross-use provenance")
                     orientation = anchor.orientations_before[anchor.block_ids.index(block_id)]
                     check = context.blocks[block_id].layout.check_for_ancilla(check_id)
                     basis = ("Z" if check.basis == "X" else "X") if orientation else check.basis
@@ -127,14 +130,18 @@ def extract_metadata(
                             module_id,
                             basis,
                             tuple(sorted(physical_support)),
+                            anchor_use,
+                            source_uses,
                         )
                     )
                 else:
                     observables[int(instruction.gate_args_copy()[0])] ^= indices
         layers.append(
-            TimeLayer(layer_index, tuple(sorted(active)), operation_by_block, frozenset(used))
+            TimeLayer(layer_index, tuple(sorted(active)), operation_by_block, frozenset(used),
+                      tuple(active.values()))
         )
-        active -= retiring
+        for bid in retiring:
+            del active[bid]
     observable_info = []
     for logical, index in sorted(context.output_ids.items(), key=lambda item: item[1]):
         block_id = context.readout_blocks[logical]

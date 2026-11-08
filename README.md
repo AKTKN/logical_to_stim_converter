@@ -120,8 +120,89 @@ measured; use `allow_open_outputs=True` for pending reservations and active outp
 Knill relocation preserves the data logical identity on the output patch use,
 retires both temporary resource handles and releases the two measured patches.
 Later bindings/composites resolve against that updated mapping. Automatic patch
-allocation is outside the package. Epoch-aware local decoder policies and a full
-three-patch repeated-Knill decoding proof remain M7-B/M7-C work.
+allocation is outside the package. M7-B adds use-specific offline models below;
+the full three-patch repeated-Knill decoding/LER demonstration remains M7-C work.
+
+## Select and interpret one physical occupancy (M7-B)
+
+Physical-block selection includes every epoch at that site. Select a particular
+reset-to-readout use explicitly, independently of block/stage filters:
+
+```python
+from logical_to_stim_converter import BlockUseId, DetectorSelector, observable_local_views
+
+use = BlockUseId("P0", 1)
+view = result.make_decoder_view(
+    detector_selector=DetectorSelector(use_ids=(use,), use_membership="strict"),
+    observable_selector=("second",),
+    measurement_selector=lambda m: m.key.block_use_id == use,
+)
+assert view.audit.region_use_ids == (use,)
+local_views = observable_local_views(result)
+```
+
+`use_membership="anchor"` selects the anchored check's use; `"touching"` selects
+any contributing use; `"strict"` requires every source use in the selected set.
+Pass several BlockUseIds to form a joint region. The filters intersect with
+existing block, stage and basis filters. Observable and measurement selections
+remain independent; detector selection never implicitly removes physical records
+or faults. Audit metadata distinguishes requested uses from actual source uses.
+
+`DetectorInfo.anchor_use_id` and `source_use_ids` distinguish detector history
+without changing `(x,y,t)` coordinates or `physical_support` site IDs.
+`TimeLayer.active_use_ids` audits reset-through-readout idle eligibility; pending
+reservations and measured gaps have no idle exposure. Historical
+`use_preparation_dependencies[use]` retains that use's latest causal ancestry;
+`ancestry_events` additionally records use-specific input/output edges at each
+boundary. New resets start independent ancestry, while a previously teleported
+state retains its real earlier sources on another use.
+
+Default observable-local regions use actual CNOT/relocation/check-flow connections
+between BlockUseIds. Reusing coordinates alone does not connect independent
+memories. A caller may still supply `region_selector(observable_info)` explicitly.
+Every view keeps the full physical gates, resets, measurements and exact noise;
+Stim re-extracts its DEM with correlations/hyperedges intact.
+
+```python
+import numpy as np
+from logical_to_stim_converter.decoding import CorrectionBatch, make_stage_requests
+
+requests = make_stage_requests(result)
+request = next(r for r in requests.boundaries
+               if r.block_use_id == use and r.preparation is not None)
+assert request.source_preparation.block_use_id == use
+plan = result.make_frame_plan()
+raw = result.circuit.compile_sampler(seed=71).sample(8)
+state = plan.start(raw, source_fingerprint=plan.source_fingerprint)
+boundary = plan.boundary_by_id[request.module_id]
+# Identity hypothesis illustrates the declared X(data), then Z(data) ordering.
+bits = np.zeros((len(raw), len(boundary.input_ids)), dtype=bool)
+state.apply(CorrectionBatch(plan.source_fingerprint, boundary.boundary_id, bits,
+                            block_use_id=use, input_ids=boundary.input_ids))
+current_events = state.events(view)
+```
+
+Boundary/readout requests identify their actual use and `source_preparation`.
+`preparation` remains the optional prepared-logical target on initialization
+requests; ordinary SE has no such target. `StageRequests.order` is causal offline
+module order. Boundary MPP probes occur only in temporal models, never canonical
+samples or decoder inputs. Conditional Bell models expose `data_use_id`,
+`first_resource_use_id`, `output_use_id`, `output_preparation_module_id` and the
+actual `resource_entangling_module_id`; each model retains its own fault window,
+exclusive noise alternatives and physical survivor actions, including existing
+Bell resources prepared before KnillEC.
+
+Frame boundaries are unique module IDs even when sites are reused. Optional
+CorrectionBatch use/column labels reject stale epochs and swapped X/Z ordering;
+the original three-argument API keeps the plan's declared order. Each boundary
+can be applied once. Actual reset removes old physical X/Z support; earlier Bell
+records can still affect the surviving logical state's later interpretation.
+Raw batches stay immutable, and `events(view)` always uses current records.
+
+`DecoderView.schema_version` is now **`decoder-view-v3`**. Regenerate v1/v2
+fingerprints, cached views and frame plans: v3 includes exact use, ownership,
+ancestry and timing metadata. Lossless instruction snapshots and exact double
+probabilities remain unchanged. This API supplies no decoder or adaptive gates.
 
 ## Interfaces and metadata
 
@@ -499,8 +580,8 @@ or noise requiring disjoint-error approximation raise `DEMConstructionError`.
 Gauge elimination, silent MWPM approximation and direct global-DEM rewriting are
 unsupported. Public circuit/DEM properties return independent copies. Exact
 instruction snapshots preserve full floating-point arguments, tags and repeats
-on Linux and Windows; `schema_version` is now `decoder-view-v2`. Fingerprints
-include full argument precision, so earlier v1 fingerprints must be regenerated.
+on Linux and Windows; `schema_version` is now `decoder-view-v3`. Fingerprints
+include full argument precision and use histories; regenerate v1/v2 fingerprints.
 
 `project_detection_events`, `project_observable_flips`, and
 `project_raw_measurements` slice already sampled global batches. `events_from_raw`

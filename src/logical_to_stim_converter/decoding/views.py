@@ -8,6 +8,7 @@ from types import MappingProxyType
 import numpy as np
 import stim
 
+from ..core.lifecycle import BlockUseId
 from .errors import (
     DecoderViewError,
     DEMConstructionError,
@@ -18,9 +19,12 @@ from .errors import (
 from .records import GF2Map, RecordFlipMap, apply_record_flips, binary_batch, ordered_ids
 from .selectors import DetectorSelector
 
+SCHEMA_VERSION = "decoder-view-v3"
+
 
 @dataclass(frozen=True)
 class IndexMap:
+    """Exact caller-ordered selection of globally numbered records or annotations."""
     global_size: int
     global_ids: tuple[int, ...]
 
@@ -33,17 +37,21 @@ class IndexMap:
 
     @property
     def local_to_global(self):
+        """Canonical global IDs in local-array column order."""
         return self.global_ids
 
     @property
     def global_to_local(self):
+        """Immutable reverse mapping; excluded global IDs have no local column."""
         return MappingProxyType({g: i for i, g in enumerate(self.global_ids)})
 
     @property
     def local_ids(self):
+        """Contiguous local columns for this selection."""
         return tuple(range(len(self.global_ids)))
 
     def project(self, values):
+        """Copy selected binary columns from a global shot batch."""
         return binary_batch(values, self.global_size)[:, self.global_ids].copy()
 
 
@@ -61,6 +69,7 @@ class DEMOptions:
 
 @dataclass(frozen=True)
 class SelectionAudit:
+    """Requested/retained semantic scope; physical blocks include all their uses."""
     selector: str
     cross_region_policy: str
     requested_detector_ids: tuple[int, ...]
@@ -68,10 +77,13 @@ class SelectionAudit:
     crossing_detector_ids: tuple[int, ...]
     region_block_ids: tuple[str, ...]
     region_stage_ids: tuple[str | None, ...]
+    region_use_ids: tuple[BlockUseId, ...] = ()
+    requested_use_ids: tuple[BlockUseId, ...] | None = None
 
 
 @dataclass(frozen=True)
 class DecoderInputs:
+    """Immutable source-bound selected events/records and reference-relative labels."""
     source_fingerprint: str
     detection_events: np.ndarray
     observable_flips: np.ndarray
@@ -89,6 +101,7 @@ def _freeze_circuit(circuit):
 
 
 def _thaw_circuit(snapshot):
+    """Materialize an independent Stim circuit without a lossy text roundtrip."""
     circuit = stim.Circuit()
     for name, args, targets, tag in snapshot:
         if name == "REPEAT":
@@ -109,6 +122,7 @@ def _freeze_dem(model):
 
 
 def _thaw_dem(snapshot):
+    """Materialize a DEM retaining exact doubles and correlated separators."""
     model = stim.DetectorErrorModel()
     for instruction in snapshot:
         if instruction[0] == "repeat":
@@ -121,7 +135,11 @@ def _thaw_dem(snapshot):
 
 
 def source_fingerprint(compiled):
-    """Content identity (schema v2) covering both physical circuits and public metadata."""
+    """Schema v3 identity covering exact circuits, use histories and public metadata.
+
+    v2 fingerprints must be regenerated: use/ownership distinctions are part of
+    source identity even when the physical qubit names or gates are identical.
+    """
     metadata = {
         name: [asdict(v) for v in getattr(compiled, name)]
         for name in (
@@ -132,19 +150,29 @@ def source_fingerprint(compiled):
             "readouts",
             "relocation_history",
             "ancestry_events",
+            "block_uses",
+            "binding_history",
+            "bell_measurements",
         )
     }
     metadata["sites"] = sorted(compiled.physical_qubit_map.items())
     metadata["locations"] = sorted(compiled.logical_to_block.items())
     metadata["dependencies"] = sorted(compiled.preparation_dependencies.items())
+    metadata["use_dependencies"] = [(asdict(u), deps) for u, deps in sorted(
+        compiled.use_preparation_dependencies.items())]
+    metadata["time_layers"] = [
+        (t.index, tuple(asdict(u) for u in t.active_use_ids),
+         sorted(t.operation_by_block.items()), sorted(t.used_qubits))
+        for t in compiled.time_layers]
     metadata["operations"] = [
-        (f.module_id, f.operation_type, f.block_ids, f.orientations_before, f.stage)
+        (f.module_id, f.operation_type, f.block_ids, f.orientations_before, f.stage,
+         tuple(asdict(u) for u in f.block_use_ids))
         for f in compiled.fragments
     ]
     text = json.dumps(metadata, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(
         (
-            "decoder-view-v2\n"
+            SCHEMA_VERSION + "\n"
             + stim.__version__
             + "\n"
             + repr(_freeze_circuit(compiled.ideal_circuit))
@@ -168,6 +196,7 @@ def _instructions(circuit):
 
 
 def _parities(circuit):
+    """Independently extract global annotation parities through repeats/coordinate shifts."""
     cursor = 0
     detectors, observables = [], [set() for _ in range(circuit.num_observables)]
     for inst in _instructions(circuit):
@@ -188,6 +217,7 @@ def _parities(circuit):
 
 
 def _validate_source(compiled):
+    """Validate public raw/annotation/use provenance without private compiler state."""
     circuit = compiled.circuit
     for name, size in (
         ("measurements", circuit.num_measurements),
@@ -210,6 +240,8 @@ def _validate_source(compiled):
             or d.measurement_keys != tuple(compiled.measurements[i].key for i in parity)
             or d.coordinates != tuple(coordinates[d.index])
             or d.supporting_block_ids != tuple(sorted({k.block_id for k in d.measurement_keys}))
+            or d.source_use_ids != tuple(sorted({k.block_use_id for k in d.measurement_keys}))
+            or d.anchor_use_id is None or d.anchor_use_id.block_id != d.block_id
             or set(d.source_stage_ids) != {compiled.measurements[i].stage_id for i in parity}
             or d.basis not in ("X", "Z")
             or not d.anchor_module_id
@@ -219,9 +251,17 @@ def _validate_source(compiled):
             raise DecoderViewError("Missing or inconsistent detector provenance")
     if any(o.measurement_indices != parity for o, parity in zip(compiled.observables, obs)):
         raise DecoderViewError("Observable parity metadata disagrees with circuit")
+    uses = {m.key.block_use_id for m in compiled.measurements}
+    for o in compiled.observables:
+        if o.block_use_id is not None and (
+                o.block_use_id not in uses or o.block_use_id.block_id != o.block_id
+                or any(compiled.measurements[i].key.block_use_id != o.block_use_id
+                       for i in o.readout_measurement_indices)):
+            raise DecoderViewError("Observable readout physical-use provenance disagrees")
 
 
 def _select(selector, values, name):
+    """Resolve explicit order or canonical-order metadata predicates."""
     if selector is None:
         return tuple(range(len(values)))
     if callable(selector):
@@ -230,6 +270,7 @@ def _select(selector, values, name):
 
 
 def _observable_ids(compiled, selector):
+    """Resolve reliable historical readouts; random Bell results are never labels."""
     if selector is not None and not callable(selector):
         resolved = []
         for value in selector:
@@ -317,46 +358,57 @@ class DecoderView:
 
     @property
     def schema_version(self):
-        return "decoder-view-v2"
+        """Version of the exact snapshot and use-aware source identity contract."""
+        return SCHEMA_VERSION
 
     @property
     def source_circuit(self):
+        """Copy the complete original experiment including excluded annotations."""
         return _thaw_circuit(self._source_instructions)
 
     @property
     def circuit(self):
+        """Copy selected annotations on the unchanged physical gate/noise sequence."""
         return _thaw_circuit(self._circuit_instructions)
 
     @property
     def detector_error_model(self):
+        """Copy the exact physical marginal extracted by Stim."""
         return _thaw_dem(self._dem_instructions)
 
     @property
     def reference_sample(self):
+        """Immutable global noiseless record convention for signed parity conversion."""
         return np.frombuffer(self._reference_bytes, dtype=np.bool_)
 
     def assert_source(self, compiled):
+        """Reject mismatched physical circuits or historical use metadata."""
         self._check_fingerprint(source_fingerprint(compiled))
 
     def _check_fingerprint(self, fingerprint):
+        """Validate an explicitly supplied source identity before reading a batch."""
         if fingerprint is not None and fingerprint != self.source_fingerprint:
             raise SourceMismatchError(
                 "Decoder view belongs to a different circuit/metadata snapshot"
             )
 
     def project_detection_events(self, global_events, *, source_fingerprint=None):
+        """Copy original canonical events in the requested detector order."""
         self._check_fingerprint(source_fingerprint)
         return self.detector_map.project(global_events)
 
     def project_observable_flips(self, global_flips, *, source_fingerprint=None):
+        """Copy reference-relative observable flips in requested historical readout order."""
         self._check_fingerprint(source_fingerprint)
         return self.observable_map.project(global_flips)
 
     def project_raw_measurements(self, global_raw, *, source_fingerprint=None):
+        """Copy selected raw records; no site is implicitly replaced by its newest use."""
         self._check_fingerprint(source_fingerprint)
         return self.measurement_map.project(global_raw)
 
     def _reference(self, reference_sample):
+        """Validate global reference shape and deterministic selected parity signs."""
         ref = self.reference_sample if reference_sample is None else np.asarray(reference_sample)
         if ref.ndim != 1:
             raise DecoderViewError("Reference sample must be a global raw-record vector")
@@ -369,6 +421,7 @@ class DecoderView:
         return ref
 
     def events_from_raw(self, global_raw, *, reference_sample=None, source_fingerprint=None):
+        """Recompute current events from all global records, including software edits."""
         self._check_fingerprint(source_fingerprint)
         return self.detector_record_map.apply(global_raw) ^ self.detector_record_map.apply(
             self._reference(reference_sample)
@@ -377,6 +430,7 @@ class DecoderView:
     def observable_flips_from_raw(
         self, global_raw, *, reference_sample=None, source_fingerprint=None
     ):
+        """Evaluate reliable readout parities relative to the declared raw reference."""
         self._check_fingerprint(source_fingerprint)
         return self.observable_record_map.apply(global_raw) ^ self.observable_record_map.apply(
             self._reference(reference_sample)
@@ -391,6 +445,7 @@ class DecoderView:
         return events ^ flips
 
     def inputs_from_raw(self, global_raw, *, record_flips=None, source_fingerprint=None):
+        """Return immutable consumer arrays from one caller-owned physical batch."""
         self._check_fingerprint(source_fingerprint)
         raw = binary_batch(global_raw, self.measurement_map.global_size)
         if record_flips is not None:
@@ -425,7 +480,7 @@ def make_decoder_view(
     """Re-extract a detector/observable marginal without changing physical noise.
 
     Sequences specify exact local order; callbacks receive public metadata.
-    Cross-region means multiple supporting blocks or contributing stage IDs.
+    Cross-region means multiple supporting uses/blocks or contributing stage IDs.
     retain keeps selected crossings, omit removes them, joint keeps them and
     records the combined scope. No policy changes a gate, raw record, or fault.
     """
@@ -446,6 +501,7 @@ def make_decoder_view(
         i
         for i in requested
         if len(compiled.detectors[i].supporting_block_ids) > 1
+        or len(compiled.detectors[i].source_use_ids) > 1
         or compiled.detectors[i].crosses_decoder_boundary
     )
     omitted = crossing if cross_region_policy == "omit" else ()
@@ -484,6 +540,8 @@ def make_decoder_view(
                 key=lambda s: (s is not None, s or ""),
             )
         ),
+        tuple(sorted({u for d in detectors for u in d.source_use_ids})),
+        detector_selector.use_ids if isinstance(detector_selector, DetectorSelector) else None,
     )
     return DecoderView(
         fingerprint,
@@ -505,29 +563,42 @@ def make_decoder_view(
 
 
 def observable_local_views(compiled, *, observable_selector=None, region_selector=None, **options):
-    """One view per reliable observable, using conservative physical interaction components.
+    """One view per reliable observable using time-expanded use interaction components.
 
-    Seeds include every block in the observable's raw parity and its output block.
-    Actual CNOTs and relocations join components (also through retired blocks).
+    Seeds include raw parity uses and the readout use. Actual CNOTs, relocation
+    and signed detector relations join specific uses, including retired sources.
+    Independent reuse of the same coordinates never creates an interaction edge.
     A region_selector(observable_info) callback may override detector membership.
     This selection example supplies no decoder or guarantee of optimal locality.
     """
-    graph = {b: {b} for b, _ in compiled.physical_qubit_map}
-    edges = [f.block_ids for f in compiled.fragments if f.operation_type == "TransversalCNOT"]
-    edges += [(r.source_block_id, r.output_block_id) for r in compiled.relocation_history]
+    uses = {m.key.block_use_id for m in compiled.measurements}
+    graph = {u: {u} for u in uses}
+    edges = [f.block_use_ids for f in compiled.fragments
+             if f.operation_type == "TransversalCNOT"]
+    edges += [(r.source_use_id, r.output_use_id) for r in compiled.relocation_history]
+    edges += [d.source_use_ids for d in compiled.detectors]
     for edge in edges:
-        connected = set().union(*(graph[b] for b in edge))
-        for b in connected:
-            graph[b] = set(connected)
+        connected = set(edge)
+        for u in edge:
+            connected.update(graph.get(u, {u}))
+        for u in connected:
+            graph[u] = set(connected)
     result = []
     for i in _observable_ids(compiled, observable_selector):
         o = compiled.observables[i]
-        seeds = {o.block_id} | {
-            compiled.measurements[j].key.block_id for j in o.measurement_indices
+        seeds = {
+            compiled.measurements[j].key.block_use_id for j in o.measurement_indices
         }
-        blocks = set().union(*(graph[b] for b in seeds))
+        if o.block_use_id is not None:
+            seeds.add(o.block_use_id)
+        elif not seeds:
+            candidates = {u for u in uses if u.block_id == o.block_id}
+            if len(candidates) != 1:
+                raise DecoderViewError("Observable needs an unambiguous physical readout use")
+            seeds.update(candidates)
+        region = set().union(*(graph[u] for u in seeds))
         selector = (
-            DetectorSelector(block_ids=tuple(sorted(blocks)), block_membership="strict")
+            DetectorSelector(use_ids=tuple(sorted(region)), use_membership="strict")
             if region_selector is None
             else region_selector(o)
         )

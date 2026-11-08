@@ -11,6 +11,7 @@ from typing import Protocol
 import numpy as np
 import stim
 
+from ..core.lifecycle import BlockUseId
 from ..core.protocol import CheckHistory, LogicalReadout, PreparationInfo
 from .errors import DecoderViewError, DEMConstructionError
 from .frames import CorrectionBatch, readonly
@@ -26,6 +27,7 @@ from .views import (
 
 @dataclass(frozen=True)
 class StageInputs:
+    """Current interpreted events/records and predicted sectors, never hidden truth."""
     source_fingerprint: str
     events: np.ndarray
     records: np.ndarray
@@ -48,6 +50,7 @@ class StageInputs:
 
 @dataclass(frozen=True)
 class StageResult:
+    """External correction hypothesis plus optional temporal/sector predictions."""
     correction: CorrectionBatch
     predicted_record_errors: np.ndarray | None = None
     net_sector: np.ndarray | None = None
@@ -70,11 +73,18 @@ class StageResult:
 class StageDecoder(Protocol):
     """A caller-owned adapter. Correction selection never enters the compiler."""
 
-    def decode_batch(self, request, inputs: StageInputs) -> StageResult: ...
+    def decode_batch(self, request, inputs: StageInputs) -> StageResult:
+        """Select a source-bound hypothesis from current records/events in request order."""
+        ...
 
 
 @dataclass(frozen=True)
 class BoundaryRequest:
+    """One use-specific preparation/SE boundary and its temporal prediction model.
+
+    model_circuit adds ideal MPP targets to a physical prefix for model building
+    only. Decoder inputs remain the selected canonical events and raw records.
+    """
     module_id: str
     block_id: str
     orientation: int
@@ -85,16 +95,21 @@ class BoundaryRequest:
     view: DecoderView
     _model_circuit: tuple = field(repr=False)
     _model: tuple = field(repr=False)
+    block_use_id: BlockUseId | None = None
+    source_preparation: PreparationInfo | None = None
 
     @property
     def model_circuit(self):
+        """Copy the temporal model with ideal probes, never a sampled experiment."""
         return _thaw_circuit(self._model_circuit)
 
     @property
     def detector_error_model(self):
+        """Copy the exact temporal target DEM; this is not a new physical experiment."""
         return _thaw_dem(self._model)
 
     def check_matrix(self, basis):
+        """Physical check rows in data_ids column order at this boundary's orientation."""
         return np.array(
             [[q in c.support for q in self.data_ids] for c in self.checks if c.basis == basis],
             dtype=np.uint8,
@@ -102,32 +117,47 @@ class BoundaryRequest:
 
     @property
     def target_ids(self):
+        """Prediction targets: last-result errors, then optional prepared logical error."""
         ids = tuple(f"last_record_error:{c.check_id}" for c in self.checks)
         return ids + (("prepared_logical_error",) if self.preparation is not None else ())
 
 
 @dataclass(frozen=True)
 class ReadoutRequest:
+    """One historical destructive measurement with incoming predicted check sectors."""
     readout: LogicalReadout
     record_ids: tuple[int, ...]
     view: DecoderView
     # Inputs are net boundary sectors, in StageRequests.sector_input_ids order.
     sector_map: GF2Map
     sector_constant: tuple[bool, ...]
+    source_preparation: PreparationInfo | None = None
 
     @property
     def check_matrix(self):
+        """Measured-basis check rows in the declared raw readout-record order."""
         return self.readout.check_matrix(self.readout.basis)
 
     @property
     def logical_indices(self):
+        """Readout-record columns forming this use's logical representative."""
         return tuple(
             i for i, k in enumerate(self.readout.records) if k in self.readout.logical_parity.terms
         )
 
+    @property
+    def block_use_id(self):
+        """Physical reset-to-readout interval, independent of later site occupants."""
+        return self.readout.block_use_id
+
 
 @dataclass(frozen=True)
 class StageRequests:
+    """Causally ordered physical module boundaries over one static experiment.
+
+    order determines offline inference order. It neither schedules gates nor
+    samples independent experiments. sector_input_ids label module/check bits.
+    """
     boundaries: tuple[BoundaryRequest, ...]
     readouts: tuple[ReadoutRequest, ...]
     sector_input_ids: tuple[tuple[str, str], ...]
@@ -151,6 +181,7 @@ def module_end(circuit, module_id):
 
 
 def pauli_targets(compiled, block_id, support, basis):
+    """Build ideal MPP targets on stable physical sites for a boundary model."""
     targets = []
     for q in support:
         if targets:
@@ -161,9 +192,22 @@ def pauli_targets(compiled, block_id, support, basis):
 
 
 def make_boundary_request(compiled, fragment, prep):
-    original = next(p for p in compiled.preparations if p.block_id == fragment.block_id)
+    """Build one module-local temporal model using its actual physical-use preparation.
+
+    prep is the prepared-eigenvalue target for an initialization, and None for
+    ordinary SE. source_preparation always identifies the reset of this use.
+    """
+    use = fragment.block_use_ids[0]
+    matches = [p for p in compiled.preparations if p.block_use_id == use]
+    if len(matches) != 1:
+        raise DecoderViewError("Boundary needs exactly one preparation for its physical use")
+    original = matches[0]
+    if prep is not None and (prep != original or prep.module_id != fragment.module_id):
+        raise DecoderViewError("Prepared logical target belongs to a different module/use")
     orientation = fragment.orientations_after[0]
     records = [m for m in compiled.measurements if m.module_id == fragment.module_id]
+    if not records or any(m.key.block_use_id != use for m in records):
+        raise DecoderViewError("Boundary records disagree with the physical-use identity")
     checks = []
     for c in original.checks:
         history = tuple(m.key for m in records if m.key.local_id == c.measurements[0].local_id)
@@ -221,10 +265,13 @@ def make_boundary_request(compiled, fragment, prep):
         view,
         _freeze_circuit(model),
         _freeze_dem(dem),
+        use,
+        original,
     )
 
 
 def _support(p):
+    """Binary physical X-then-Z support for signed stabilizer elimination."""
     xs, zs = p.to_numpy()
     return np.concatenate((xs, zs))
 
@@ -279,51 +326,56 @@ def make_stage_requests(compiled):
     readout_by_id = {r.module_id: r for r in compiled.readouts}
     readouts, order = [], []
     # Check supports at a given orientation are physical; H swaps their axes.
-    original = {p.block_id: p for p in compiled.preparations}
-    orientations = {p.block_id: p.orientation for p in compiled.preparations}
+    original = {p.block_use_id: p for p in compiled.preparations}
+    orientations = {p.block_use_id: p.orientation for p in compiled.preparations}
     active = []
     nq = compiled.ideal_circuit.num_qubits
 
-    def checks_for(bid):
-        p = original[bid]
+    def checks_for(use):
+        """Physical checks of the currently occupied use, after actual H rotations."""
+        p = original[use]
         return tuple(
             (
                 c.support,
-                c.basis if orientations[bid] == p.orientation else ("Z" if c.basis == "X" else "X"),
+                c.basis if orientations[use] == p.orientation else ("Z" if c.basis == "X" else "X"),
             )
             for c in p.checks
         )
 
     def operator(bid, support, basis):
+        """Lift a boundary check onto the circuit's fixed global physical wires."""
         p = stim.PauliString(nq)
         for q in support:
             p[compiled.physical_qubit_map[bid, q]] = basis
         return p
 
     def rebase():
+        """Express current local checks through transported signed boundary sectors."""
         nonlocal bank, labels, expressions
         new, tags, values = [], [], []
-        for bid in active:
-            for support, basis in checks_for(bid):
-                p = operator(bid, support, basis)
+        for use in active:
+            for support, basis in checks_for(use):
+                p = operator(use.block_id, support, basis)
                 new.append(p)
-                tags.append(bid)
+                tags.append(use)
                 values.append(_express(p, bank, expressions))
         bank, labels = new, tags
         expressions = np.array(values, dtype=bool).reshape(len(new), width + 1)
 
     for f in compiled.fragments:
+        use = f.block_use_ids[0]
         if f.module_id in by_module:
             boundary = by_module[f.module_id]
-            keep = [i for i, bid in enumerate(labels) if bid != f.block_id]
+            keep = [i for i, previous in enumerate(labels) if previous != use]
             bank = [bank[i] for i in keep]
             labels = [labels[i] for i in keep]
             expressions = expressions[keep]
-            if f.block_id not in active:
-                active.append(f.block_id)
+            if use not in active:
+                active.append(use)
+            orientations[use] = boundary.orientation
             for c in boundary.checks:
                 bank.append(operator(f.block_id, c.support, c.basis))
-                labels.append(f.block_id)
+                labels.append(use)
                 row = np.zeros(width + 1, dtype=bool)
                 row[sector_ids.index((f.module_id, c.check_id))] = True
                 expressions = np.vstack((expressions, row))
@@ -335,7 +387,7 @@ def make_stage_requests(compiled):
                     unitary.append(inst)
             bank = [p.after(unitary) for p in bank]
             if f.operation_type == "TransversalH":
-                orientations[f.block_id] = f.orientations_after[0]
+                orientations[use] = f.orientations_after[0]
             rebase()
         elif f.module_id in readout_by_id:
             r = readout_by_id[f.module_id]
@@ -355,13 +407,14 @@ def make_stage_requests(compiled):
             )
             readouts.append(
                 ReadoutRequest(
-                    r, ids, view, GF2Map.from_matrix(matrix[:, :-1].T), tuple(matrix[:, -1])
+                    r, ids, view, GF2Map.from_matrix(matrix[:, :-1].T), tuple(matrix[:, -1]),
+                    original[r.block_use_id],
                 )
             )
-            keep = [i for i, bid in enumerate(labels) if bid != r.block_id]
+            keep = [i for i, previous in enumerate(labels) if previous != r.block_use_id]
             bank = [bank[i] for i in keep]
             labels = [labels[i] for i in keep]
             expressions = expressions[keep]
-            active.remove(r.block_id)
+            active.remove(r.block_use_id)
             order.append(("readout", f.module_id))
     return StageRequests(boundaries, tuple(readouts), sector_ids, tuple(order))

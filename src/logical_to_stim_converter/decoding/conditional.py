@@ -11,7 +11,8 @@ from itertools import product
 import numpy as np
 import stim
 
-from .errors import UnsupportedProjectionError
+from ..core.lifecycle import BlockUseId
+from .errors import DecoderViewError, UnsupportedProjectionError
 from .records import GF2Map
 from .stages import module_end
 from .views import source_fingerprint
@@ -19,6 +20,7 @@ from .views import source_fingerprint
 
 @dataclass(frozen=True)
 class PauliFault:
+    """One categorical Pauli/result-error atom at a global physical instruction."""
     instruction_index: int
     channel: str
     exclusive_group: tuple[int, int]
@@ -29,6 +31,11 @@ class PauliFault:
 
 @dataclass(frozen=True)
 class ConditionalReadoutModel:
+    """Bell-interval fault distribution conditional on incoming sector/frame hypotheses.
+
+    Rows are mutually exclusive within each channel group. Readout flips and
+    surviving physical X/Z actions retain correlations; this is not a Bell DEM.
+    """
     source_fingerprint: str
     composite_id: str
     start_instruction: int
@@ -43,6 +50,11 @@ class ConditionalReadoutModel:
     x_syndrome_map: GF2Map
     z_syndrome_map: GF2Map
     logical_flip_map: GF2Map
+    data_use_id: BlockUseId | None = None
+    first_resource_use_id: BlockUseId | None = None
+    output_use_id: BlockUseId | None = None
+    output_preparation_module_id: str = ""
+    resource_entangling_module_id: str = ""
 
 
 def make_conditional_readout_model(compiled, bell):
@@ -52,21 +64,26 @@ def make_conditional_readout_model(compiled, bell):
     sector/frame hypothesis, whose accuracy is not asserted. Model construction
     never samples or consults a hidden physical error record.
     """
-    resource = next(
-        f
-        for f in compiled.fragments
-        if f.operation_type == "TransversalCNOT"
-        and bell.composite_id in f.composite_ids
-        and f.stage
-        and f.stage.endswith("resource_entangling")
-    )
+    if not any(b == bell for b in compiled.bell_measurements):
+        raise DecoderViewError("Bell instance/use does not belong to this physical source")
+    readout_position = next(i for i, f in enumerate(compiled.fragments)
+                            if f.module_id == bell.x_readout.module_id)
+    candidates = [f for f in compiled.fragments[:readout_position]
+                  if f.operation_type == "TransversalCNOT"
+                  and set(f.block_use_ids) == {bell.first_resource_use_id, bell.output_use_id}]
+    if not candidates:
+        raise DecoderViewError("Bell resource uses have no verified resource-entangling CNOT")
+    resource = candidates[-1]
     circuit = compiled.circuit
     start = next(i for i, inst in enumerate(circuit) if inst.tag == resource.module_id)
     end = module_end(circuit, bell.z_readout.module_id)
     keys = compiled.measurement_index_by_key
     readouts = (bell.x_readout, bell.z_readout)
     record_ids = tuple(keys[k] for r in readouts for k in r.records)
-    prep = next(p for p in compiled.preparations if p.block_id == bell.output_block_id)
+    matches = [p for p in compiled.preparations if p.block_use_id == bell.output_use_id]
+    if len(matches) != 1:
+        raise DecoderViewError("Bell output needs exactly one preparation for its physical use")
+    prep = matches[0]
     output_ids = prep.data_ids
     output_indices = [compiled.physical_qubit_map[bell.output_block_id, q] for q in output_ids]
     faults, at_instruction = [], {}
@@ -179,4 +196,9 @@ def make_conditional_readout_model(compiled, bell):
         GF2Map.from_matrix(z[:, output_indices]),
         *(GF2Map.from_matrix(a) for a in syndromes),
         GF2Map.from_matrix(np.array(logical, dtype=np.uint8).T),
+        bell.data_use_id,
+        bell.first_resource_use_id,
+        bell.output_use_id,
+        prep.module_id,
+        resource.module_id,
     )

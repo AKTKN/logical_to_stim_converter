@@ -537,7 +537,7 @@ def test_view_preserves_exact_probabilities_and_fingerprints(monkeypatch):
     assert view.detector_error_model == expected
     assert view.detector_error_model[0].args_copy() == [probability]
     assert view.detector_error_model[0].tag == "fault]tag"
-    assert view.schema_version == "decoder-view-v2"
+    assert view.schema_version == "decoder-view-v3"
     other = circuit[:1]
     other.append("X_ERROR", [0], probability + 1e-10, tag="fault]tag")
     other += circuit[2:]

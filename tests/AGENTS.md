@@ -26,3 +26,11 @@ exclusive groups, survivor frames and actual injected physical fault signatures.
 Frame edits must change later current events exactly once while preserving raw
 physical batches. Test decoder replacement, chunking, spectators and no hidden
 truth in stage requests. Wall timings are reported without performance thresholds.
+
+M7-B tests use actual reset intervals, not bare block names. Check every physical
+noise location and use-scoped DEM marginal, including excluded-region output
+faults, exact probabilities, hyperedges and correlated components. Verify temporal
+targets with independent faults, all Bell atoms with Stim, sector transfer through
+real H/CNOT, and frame replay against explicit physical corrections across resets.
+Keep the M7-A regression physics. v3 negative tests must rebind deliberately
+corrupted Bell semantics after first checking rejection of stale source requests.

@@ -78,6 +78,7 @@ class CompiledCircuit:
     block_uses: tuple[BlockUseInfo, ...] = ()
     binding_history: tuple[PatchBindingEvent, ...] = ()
     available_blocks: tuple[str, ...] = ()
+    use_preparation_dependencies: Mapping[BlockUseId, tuple[str, ...]] = field(default_factory=dict)
     _evaluation_steps: tuple = field(default=(), repr=False, compare=False)
     _compiler: object = field(default=None, repr=False, compare=False)
     _program: tuple = field(default=(), repr=False, compare=False)
@@ -93,6 +94,7 @@ class CompiledCircuit:
             "open_logical_outputs",
             "preparation_dependencies",
             "block_preparation_dependencies",
+            "use_preparation_dependencies",
         ):
             object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
 
@@ -403,6 +405,7 @@ class CircuitCompiler:
             block_uses=tuple(context.block_uses.values()),
             binding_history=context.binding_history,
             available_blocks=context.available_blocks,
+            use_preparation_dependencies=protocol.use_dependencies,
             _evaluation_steps=tuple(evaluation_steps), _compiler=self,
             _program=program, _noise_model=noise_model,
         )

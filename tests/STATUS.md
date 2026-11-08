@@ -1,5 +1,35 @@
 # STATUS — Tests
 
+## M7-B update — 2026-11-08
+
+Added 51 tests across test_epoch_views_noise.py and test_epoch_stages_frames.py.
+All 493 M1–M7-A checks remain. The schema assertion migrates from v2 to v3;
+the missing-byproduct negative test now first rejects stale v3 requests, then
+rebinds all models to the corrupted source and retains its original physical
+failure assertion. No physics assertion is weakened.
+Baseline: 493 passed in 474.32 s. New focused suite: 50 passed in 53.63 s.
+
+At d=3/5 the tests independently verify three-use mixed X/Z signed memories,
+global raw/annotation parity and use provenance; exact physical noise locations
+through available/reserved gaps and re-entry, parallel operations/composites,
+explicit zero/inheritance and no reinjection; strict/touching/anchor use views,
+physical-block unions, isolated default locality and explicit order; physical
+X/Y/Z/CX/reset/result fault marginals, excluded-region output effects, exact DEM
+characteristic functions, hyperedges/correlated separators and precision/repeat/
+SHIFT_COORDS snapshots; temporal early/late result targets for both P0 uses and
+SE; source prep/orientation histories and actual H/CNOT signed sector transfer;
+all Bell atoms/exclusive groups/survivor actions against Stim FlipSimulator in
+two gadgets with recycled roles and an existing resource; reset extinction plus
+surviving Bell feedback; bounded-batch M5 replay and actual physical corrections,
+open outputs, H after relocation, two spectators and stale use/key/order/source/
+support/shot rejection. Reference probes/fault truth remain test/model-only.
+
+Retained checkpoints: view/ancestry 110 passed in 49.05 s; stage/strict-frame
+33 passed in 39.77 s; final frame/record 27 passed in 26.08 s. Root STATUS records
+the final full suite, lint/build/examples, isolated wheel and CI matrix.
+Final `python -m pytest`: **544 passed in 568.60 s**. Final new tests plus the
+retained missing-byproduct physical test: **52 passed in 57.19 s**.
+
 ## M7-A update — 2026-11-08
 
 Added 53 tests in test_patch_reuse.py; all 440 prior tests are retained unchanged.

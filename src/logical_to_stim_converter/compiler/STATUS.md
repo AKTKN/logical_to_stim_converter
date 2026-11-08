@@ -1,5 +1,23 @@
 # STATUS — Compiler
 
+## M7-B update — 2026-11-08
+
+Metadata/provenance reconstruct detector anchor/source uses, active-layer uses
+and per-use ancestry from actual fragments. Physical-support coordinates and
+canonical signed flow/noise gates are unchanged. ProtocolAssembly joins only
+actual use histories and exports use_preparation_dependencies; reset starts a
+new source. Frame plans label every preparation/SE/readout module/use, validate
+physical input/output ordering, and propagate old physical frames only until
+their actual reset/readout. Bell records still affect legitimate future outputs.
+Physical frame replay also exports and validates explicit target-use identities.
+
+Inspected installed Stim 1.15.0/stimflow 1.17.dev0 (ffe0d043) verification/noise/
+reset/flow APIs. _logical.py, _parallel.py and planning already supply verified
+reset boundaries and require no physical change. Focused tests compare maps with
+M5 replay plus independent physical correction execution, signed sector transfer,
+cross-use ancestry and malformed hypotheses. Root STATUS has exact commands and
+final regression/build/CI evidence. No decoder, allocator or adaptive gate added.
+
 ## M7-A update — 2026-11-08
 
 Planning now yields each user entry against the context after preceding bindings

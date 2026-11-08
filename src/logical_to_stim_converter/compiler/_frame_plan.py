@@ -8,11 +8,17 @@ from ..decoding.views import source_fingerprint
 
 
 def make_frame_plan(compiled):
+    """Precompute future record flips/residual physical frames, never quantum feedback.
+
+    Unique module IDs scope every input to its historical use. Actual resets
+    extinguish old physical supports while classical Bell records remain causal.
+    """
     if compiled._compiler is None:
         raise ValueError("A physical assembly history is required for frame propagation")
     records = compiled.measurement_index_by_key
     nq, nm = compiled.ideal_circuit.num_qubits, len(records)
     blocks = {b.block_id: b for b in compiled._compiler.blocks}
+    use_by_module = {f.module_id: f.block_use_ids[0] for f in compiled.fragments}
     positions = {
         b.position(q): compiled.physical_qubit_map[b.block_id, q]
         for b in blocks.values()
@@ -68,6 +74,7 @@ def make_frame_plan(compiled):
     cursor = 0
 
     def toggle(pauli, condition):
+        """Apply an affine logical Pauli to its actual physical representative."""
         for position, axis in pauli.items():
             target = positions[position]
             if axis in "XY":
@@ -76,6 +83,7 @@ def make_frame_plan(compiled):
                 z[:, target] ^= condition
 
     def inject(key):
+        """Insert a module-specific X-then-Z physical basis batch after its boundary."""
         _, _, bid, _, data = spec_by_key[key]
         a, b = offsets[key]
         indices = [compiled.physical_qubit_map[bid, q] for q in data]
@@ -160,6 +168,7 @@ def make_frame_plan(compiled):
                 GF2Map.from_matrix(interpreted[a:b]),
                 GF2Map.from_matrix(x[a:b]),
                 GF2Map.from_matrix(z[a:b]),
+                use_by_module[key],
             )
         )
     return OfflineFramePlan(

@@ -12,6 +12,7 @@ from .model import NoiseModel
 
 
 class NoiseInjector:
+    """Apply primitive gate rules and one idle channel per eligible physical site."""
     def apply(
         self,
         ideal: stim.Circuit,
@@ -21,6 +22,11 @@ class NoiseInjector:
         layers: tuple[TimeLayer, ...],
         fragments: tuple[ModuleFragment, ...],
     ) -> stim.Circuit:
+        """Return a noisy copy using inclusive reset-to-readout use intervals.
+
+        All data/check ancillas of active_use_ids are idle-eligible. Available or
+        reserved patches receive no idle channel until their next physical reset.
+        """
         if ideal != ideal.without_noise():
             raise ValueError("Noise must be applied once to a noiseless ideal circuit")
         by_module = {f.module_id: f for f in fragments}
@@ -34,8 +40,10 @@ class NoiseInjector:
         layer_index = 0
 
         def append_idle():
+            """Insert each active use's unused physical sites once for this TICK interval."""
             layer = layers[layer_index]
-            for block in layer.active_blocks:
+            for use in layer.active_use_ids:
+                block = use.block_id
                 module = layer.operation_by_block.get(block)
                 resolved = parameters[module] if module else model.default
                 idle = sorted(by_block[block] - layer.used_qubits)

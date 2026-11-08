@@ -85,12 +85,87 @@ global circuit retains all deterministic detectors, physical noise and raw order
 Independent metadata validation reconstructs use epochs and ownership from reset,
 readout and relocation events rather than trusting final mappings.
 
-This stage proves sequential independent patch reuse and relocation/binding
-composition. It does not establish epoch-aware decoder selection, conditional
-multi-use Knill decoding or a production patch allocator (M7-B/M7-C remain separate).
+M7-A proves sequential independent patch reuse and relocation/binding composition.
+M7-B extends the decoder-neutral contracts below across these uses; production
+allocation and the full M7-C three-patch Knill decoding demonstration remain separate.
 Pinned stimflow `ChunkCompiler.o2i` assigns named observables by first encounter;
 the compiler remaps their final Stim IDs to historical logical-name order after
 lazy planning. Physical instructions and signed flow verification are unchanged.
+
+## Use-aware models, timing and frame boundaries (M7-B)
+
+DetectorInfo carries anchor_use_id and sorted source_use_ids in addition to
+physical sites, module/stage IDs and raw parity. An anchor identifies the physical
+check's reset interval; sources identify the uses that produced its raw records.
+Neither is a coordinate. Compiler metadata validation checks these against actual
+producer fragments. A physical reset terminates local flow ports; verified global
+relations through interactions/teleportation remain, including legitimate earlier
+use dependencies. No detector is deleted to establish decoder independence.
+
+TimeLayer.active_use_ids is parallel to active_blocks, with at most one use for
+each physical block. Eligibility starts at the data reset layer and includes the
+terminal destructive-readout layer. Unused data and check ancillas receive one
+effective idle channel per active use; measured/available/reserved gaps receive
+none. NoiseInjector still runs after ideal signed-flow validation. Existing
+primitive/global/instance precedence and composite-child ownership are unchanged.
+
+PreparationDependencyEvent adds explicit input/output use tuples. The compiler's
+immutable use_preparation_dependencies retains latest ancestry for each historical
+use, while block_preparation_dependencies retains the compatibility latest-use
+view. Per-use syndrome/round dictionaries prevent stale check values at reset.
+Each LogicalInit creates only its own preparation source. Only actual operand
+interactions and relocation union source histories; old logical information that
+has already moved onto another use can legitimately survive the former site's reset.
+
+DetectorSelector.use_ids accepts immutable BlockUseIds independently of physical
+block and stage filters. Anchor, touching and strict membership respectively mean
+the anchored use, any source use or all source uses. Physical-block filters span
+all epochs. SelectionAudit records both requested_use_ids and retained
+region_use_ids. Each view preserves every physical instruction/noise probability
+and re-extracts its model with Stim, keeping excluded-region effects on retained
+outputs, hyperedges and correlated components. Snapshot schema v3 fingerprints
+include use histories, binding/owner events, Bell and ancestry snapshots and the
+physical-time provenance. v1/v2 identities must be regenerated. Exact immutable
+instruction snapshots remain in use, avoiding Windows floating-point text loss.
+
+observable_local_views uses nodes per BlockUseId. Actual CNOTs, explicit relocation
+and verified signed detector relations connect nodes; physical coordinate reuse
+alone never adds an edge. Observable seeds include every contributing raw-record
+use and the historical readout use. The resulting connected region is conservative;
+region_selector remains a caller override, with no decoder prescribed.
+
+BoundaryRequest.source_preparation identifies the reset of that boundary's use.
+Its preparation field still means an optional prepared-logical prediction target
+for LogicalInit; an ordinary SE request has none. CheckHistory, orientation,
+last-record IDs and strict temporal detectors are module/use scoped. Model-only
+ideal MPPs define last-noisy-record XOR actual-check targets; no probe or fault
+truth enters canonical samples or normal decoder inputs. ReadoutRequest exposes
+its source preparation and actual use. Signed sector transfer tracks a live bank
+per use, through real H/CNOT pairings. Reset creates a new bank; expressions on
+surviving other uses can still refer to earlier preparation sectors.
+
+ConditionalReadoutModel resolves the Bell instance's exact output-use preparation
+and actual resource-use CNOT, including pre-existing Bell resources. Public use,
+module and window IDs make this auditable. Each categorical Pauli/result-error
+atom retains its exclusive channel group, joint destructive-record/check/logical
+effects and physical survivor X/Z support. This is a conditional fault-action
+distribution under incoming hypotheses, not an unconditional deterministic Bell DEM.
+
+FrameBoundary exposes its historical block_use_id. CorrectionBatch optionally
+declares the use and input labels; explicitly wrong epochs, column order, source,
+shape or shot count fail before state mutation. Omitting those two optional fields
+retains the source/module-bound API with the plan's declared input order. Plans
+contain every preparation/SE/readout module and no per-shot state. Applying
+corrections edits only copies of classical records/residual frames, once per module.
+Actual resets extinguish old physical supports; already measured Bell feedback
+continues to the surviving data. StageRequests.order is offline causal boundary
+order, never a gate schedule. events(view) recomputes current reference-relative
+events after frame edits. Strict noiseless sector proofs remain independent from
+acceptance of well-formed, potentially incorrect noisy decoder hypotheses.
+
+The implementation adds no allocator, scheduler, decoder, sampling orchestrator
+or adaptive quantum feedback. Full multi-cycle three-patch LER comparison belongs
+to M7-C; generic conditional models do not promise optimal joint inference.
 
 ## Physical and flow boundaries
 
@@ -379,7 +454,7 @@ indices, coordinates and boundary candidates. It also checks causal event edges.
 
 Each LogicalInit creates a PreparationInfo event with stable module, logical and
 physical block identities, stage, basis, full check histories and physical frame.
-ProtocolAssembly tracks histories per physical block while primitive fragments
+ProtocolAssembly tracks histories per physical use while primitive fragments
 are built. Local operations retain their operand history. A physical transversal
 CNOT conservatively unions the two actual operand histories onto both outputs;
 it does not bring in unrelated earlier or parallel preparations. A destructive
@@ -397,7 +472,8 @@ relocations follow the same event rule.
 PreparationDependencyEvent records primitive and relocation input/output block
 edges and resulting preparation-module dependencies. Final
 `preparation_dependencies` covers initialized, currently bound logical identities
-(including measured outputs); `block_preparation_dependencies` retains physical history.
+(including measured outputs); `use_preparation_dependencies` retains use history,
+and `block_preparation_dependencies` is its compatibility latest-use view.
 Bell results snapshot dependencies at their own relocation boundary. Unresolved
 and evaluated physical frames list precisely those source preparations' final
 syndrome keys; affine frame provenance lists their gauge keys. Final open frames
@@ -423,8 +499,8 @@ version and relevant metadata, including semantic operation/relocation history.
 No per-shot state is retained. Source/derived circuits and DEMs use immutable exact instruction
 snapshots; properties materialize copies through public Stim append APIs. Text
 roundtrips are avoided: Stim 1.15 circuit text rounds arguments, and its Windows
-DEM printer can round double probabilities. Schema v2 fingerprints include exact
-circuit arguments; regenerate v1 fingerprints. Tags, targets, shifts, repeat
+DEM printer can round double probabilities. Schema v3 fingerprints include exact
+circuit arguments and use provenance; regenerate v1/v2 fingerprints. Tags, targets, shifts, repeat
 structure and correlated separators survive copying. Input arrays can optionally carry a
 separately stored fingerprint; their width alone cannot prove provenance.
 
@@ -440,11 +516,11 @@ bidirectional detector/observable/record maps with contiguous local IDs. Random
 Bell readouts are raw metadata, never reliable observable selectors.
 
 The default cross-region policy retains selected crossings. Omit explicitly drops
-any detector spanning multiple physical blocks or source stages. Joint retains
+any detector spanning multiple physical uses/blocks or source stages. Joint retains
 selected crossings with an auditable combined scope. These policies select
 annotations; they neither delete faults nor assert statistical independence.
 Observable-local default regions are conservative connected components of actual
-CNOT/relocation history, seeded by the output block and raw observable parity.
+CNOT/relocation/check-flow history between uses, seeded by the readout use and raw observable parity.
 A user region-selector callback may replace this choice. This supports the style
 of observable-local subgraphs without prescribing lomatching or another decoder.
 

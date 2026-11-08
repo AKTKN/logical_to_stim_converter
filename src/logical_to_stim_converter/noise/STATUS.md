@@ -1,5 +1,19 @@
 # STATUS — Noise
 
+## M7-B update — 2026-11-08
+
+NoiseInjector audits idle eligibility with TimeLayer.active_use_ids, preserving
+the existing inclusive reset-through-readout convention and all physical rules.
+Gate and idle channels remain inserted once after ideal signed-flow assembly.
+Available/reserved/retired gaps are excluded; later initialization re-enters with
+the new use. No BindPatch duration/noise or decoder-dependent rule is introduced.
+
+Independent d=3/5 sequential/parallel/composite tables compare every reset,
+measurement, 1q/2q and idle channel target/probability/layer, active uses, ancilla
+idles, zero overrides, inherited composite overrides, moved zero-time binds and
+reinjection rejection. Canonical DEMs pass. Installed pins and source references
+are unchanged; root STATUS records final full verification and exact API evidence.
+
 ## M5 verification — 2026-11-07
 
 The existing injector requires no second composite noise path. Every physical

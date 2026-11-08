@@ -25,6 +25,8 @@ class PhysicalPauliFrame:
     None supports mean unresolved. Empty supports mean a resolved identity.
     Supports use physical local data IDs, never Stim indices. Choosing these
     vectors is a decoder responsibility, separate from Clifford propagation.
+    block_use_id scopes the physical correction to one reset interval; old
+    measurement sources remain historical even after these sites are reset.
     """
 
     block_id: str
@@ -35,9 +37,14 @@ class PhysicalPauliFrame:
     x_support: tuple[str, ...] | None = None
     z_support: tuple[str, ...] | None = None
     logical_contribution: PauliFrame = PauliFrame()
+    block_use_id: BlockUseId | None = None
 
     def __post_init__(self):
         validate_orientation(self.orientation)
+        if self.block_use_id is not None and (
+                not isinstance(self.block_use_id, BlockUseId)
+                or self.block_use_id.block_id != self.block_id):
+            raise ValueError("Physical frame use disagrees with its physical block")
         object.__setattr__(self, "source_syndromes", tuple(self.source_syndromes))
         if (self.x_support is None) != (self.z_support is None):
             raise ValueError("Both physical correction supports must be resolved together")
@@ -84,7 +91,8 @@ class PreparationInfo:
     def unresolved_frame(self):
         """External correction boundary tied to this preparation's final checks."""
         return PhysicalPauliFrame(self.block_id, self.orientation, self.module_id,
-                                  self.stage_id, tuple(c.measurements[-1] for c in self.checks))
+                                  self.stage_id, tuple(c.measurements[-1] for c in self.checks),
+                                  block_use_id=self.block_use_id)
 
     def check_matrix(self, basis):
         """Return binary check rows in physical data_ids column order."""
@@ -104,7 +112,7 @@ class PreparationInfo:
                              z_constant=bool(len(set(zs) & set(self.logical_x)) % 2))
         return PhysicalPauliFrame(self.block_id, self.orientation, self.module_id,
                                   self.stage_id, self.unresolved_frame.source_syndromes,
-                                  xs, zs, logical)
+                                  xs, zs, logical, self.block_use_id)
 
 
 @dataclass(frozen=True)
@@ -187,6 +195,8 @@ class PreparationDependencyEvent:
 
     Preparation modules are historical sources, not live logical identities.
     Only actual operand histories are joined. Consumed blocks have no outputs.
+    input_use_ids/output_use_ids scope these edges to specific reset intervals;
+    bare block IDs are retained for the existing physical-site audit API.
     """
 
     event_id: str
@@ -194,6 +204,8 @@ class PreparationDependencyEvent:
     input_block_ids: tuple[str, ...]
     output_block_ids: tuple[str, ...]
     preparation_dependencies: tuple[str, ...]
+    input_use_ids: tuple[BlockUseId, ...] = ()
+    output_use_ids: tuple[BlockUseId, ...] = ()
 
 
 @dataclass(frozen=True)

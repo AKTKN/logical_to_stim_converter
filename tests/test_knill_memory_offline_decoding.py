@@ -16,7 +16,7 @@ from examples.knill_memory_offline_decoding import (
     save_report,
 )
 from logical_to_stim_converter import BellStatePrep, KnillEC
-from logical_to_stim_converter.decoding import StageInputs
+from logical_to_stim_converter.decoding import SourceMismatchError, StageInputs
 from tests.helpers.knill_physics import corrected_expectation, make_compiler, pauli, simulate
 
 
@@ -186,7 +186,12 @@ def test_missing_bell_hypothesis_breaks_logical_memory():
     )
     bad = replace(experiment.compiled, bell_measurements=(bad_bell,))
     bad_plan = bad.make_frame_plan()
-    broken = analyze_knill(replace(experiment, frame_plan=bad_plan), raw)
+    # v3 fingerprints include Bell semantics: stale requests must fail first.
+    with pytest.raises(SourceMismatchError):
+        analyze_knill(replace(experiment, frame_plan=bad_plan), raw)
+    # Rebind every request/model to the deliberately corrupted source, retaining
+    # the original physical missing-byproduct failure check on the same samples.
+    broken = analyze_knill(prepare_compiled(bad), raw)
     assert normal.errors == 0 and broken.errors > 0
 
 

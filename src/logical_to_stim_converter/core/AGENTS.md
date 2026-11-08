@@ -42,3 +42,8 @@ binding events and logical-owner history. CompilerContext separates fixed sites,
 current reservations, retired logical aliases and bounded reusable tableau slots.
 MeasurementKey has a trailing epoch=0 field. ModuleFragment/protocol records carry
 historical BlockUseIds. Only a physical initialization starts a new epoch.
+
+M7-B: DetectorInfo carries anchor/source uses separately from physical_support.
+TimeLayer.active_use_ids has one occupancy per active physical block. Syndrome
+state is use-keyed. PreparationDependencyEvent carries use edges, and physical
+Pauli frames declare their actual target use independently of historical sources.

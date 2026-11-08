@@ -44,3 +44,12 @@ enter canonical circuits or normal decoder input truth. Preserve physical noisy
 prefix instructions and every selected fault effect. Conditional Bell models
 retain correlated readout/survivor actions and exclusive categorical alternatives.
 Do not pretend raw random Bell parities are zero-expected global detectors.
+
+M7-B adds independent BlockUseId filters with anchor/touching/strict semantics.
+Physical-block filters span all epochs. Default observable locality connects
+actual interacting/relocated uses, never all occupants of the same coordinates.
+Boundary/readout requests resolve their preparation by use; conditional models
+use the Bell instance's actual resource uses/CNOT window, including existing
+resources. CorrectionBatch optionally labels its use and input ordering; explicit
+stale epochs/orderings fail. Schema v3 fingerprints include occupancy/timing/
+ancestry histories; regenerate old v1/v2 views/plans while keeping exact snapshots.

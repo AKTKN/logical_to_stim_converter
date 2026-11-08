@@ -1,5 +1,20 @@
 # STATUS — Core
 
+## M7-B update — 2026-11-08
+
+DetectorInfo adds anchor_use_id/source_use_ids, distinct from physical sites and
+coordinates. TimeLayer adds immutable active_use_ids with one use per active
+physical block. CompilerContext stores check sectors and round counts by use.
+PhysicalPauliFrame identifies its target use independently of historical sources;
+preparation resolve/unresolved APIs preserve it. PreparationDependencyEvent adds
+input/output use edges. Compiler artifacts retain immutable per-use ancestry.
+All touched APIs/helpers were reviewed for accurate English documentation.
+
+Verified at d=3/5: three independent mixed-basis signed memories, unique raw
+history, canonical detector/use provenance, H/reset orientation boundaries,
+actual relocated ancestry, frame resets and stale-use rejection. Existing APIs
+retain their default constructor fields; root STATUS records final full checks.
+
 ## M7-A update — 2026-11-08
 
 lifecycle.py adds immutable BlockUseId, BlockUseInfo, PatchBindingEvent and

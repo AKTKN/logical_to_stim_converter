@@ -44,5 +44,9 @@ noiseless validation remain independent regression references.
 M7-A: _plan.py yields user entries lazily against the updated binding context.
 BindPatch has no physical fragment/time. _provenance.py independently reconstructs
 reset/release epochs and owner changes; observable history includes retired names.
-Keep source-bound decoder policies across epochs for M7-B; do not infer that a
-bare physical block names one unique preparation/readout after reuse.
+Never infer that a bare physical block names one unique preparation/readout.
+
+M7-B: detector anchors/source uses and active TimeLayer uses come from actual
+physical fragments. Ancestry edges carry explicit input/output use IDs and retain
+historical use dependencies. Frame plans label each module/use boundary; old
+physical supports die at reset while earlier Bell feedback survives on real data.
