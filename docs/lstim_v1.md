@@ -1,9 +1,9 @@
 # LSTIM v1: Shared language and compiler contract
 
-**Status (2026-11-08):** M8-A syntax, M8-B static checking/lowering through the
-existing physical compiler and M8-C public text/file/formatter APIs are implemented.
-This tracked document is the canonical contract for M8-A through M8-D.
-Full noisy E2E certification (M8-D) remains future work. A successful
+**Status (2026-11-08):** M8-A syntax, M8-B checking/lowering, M8-C public APIs and
+M8-D independent physical/noisy simulation certification are implemented for the
+[documented test matrix](lstim_certification.md). This tracked document is the
+canonical contract for M8-A through M8-D. A successful
 syntax-only parse still establishes no semantic or quantum-state validity.
 
 **Repository:** `AKTKN/logical_to_stim_converter`. M8-A baseline is
@@ -279,8 +279,9 @@ these labels in successful compiled metadata, including labelled Knill children.
 M8-B certifies focused exact physical/DEM/metadata equivalence against independent
 Python references and unchanged compiler validation. M8-C adds the package-root
 parser, parse_logical_file, canonical formatter and installed public interface.
-Full raw-sample/decoder predictions and noisy LER equivalence across
-the complete example suite remain M8-D. No CLI, implicit allocator, physical
+M8-D verifies exact raw samples, decoder predictions, corrections, frames and
+failure/LER equivalence on the documented memory/three-patch matrix, using
+independently authored references and shared physical samples. No CLI, implicit allocator, physical
 scheduler, decoder, simulator or alternate physical compiler is introduced here.
 
 ## 9. Public files, canonical source and installation
@@ -318,3 +319,22 @@ the root API, checking real metadata/DEMs, source labels and independent noise.
 CI runs these checks on Ubuntu/Windows with Python 3.11/3.12; actual local and
 remote evidence is distinguished in STATUS.md. The [development guide](development.md)
 records dependency pins and the eight-worker pytest-xdist invocation.
+
+## 10. Physical and simulation certification
+
+The [M8-D evidence guide](lstim_certification.md) pairs source with explicit
+Python references and reports actual Stim/DEM/decode statistics. The tests compare
+exact circuits and DEMs, signed flows, all public canonical metadata, epochs,
+bindings, Bell windows, source fingerprints and decoder-view global/local maps.
+SourceSpan is frontend provenance only. Exact reference metadata requires the
+same authored BIND sequence, labels and initial empty logical mapping; a legacy
+runner's implicit initial reservations are not silently equated to source BINDs.
+
+Separate same-seed samplers match bitwise for identical experiments. Offline
+ordinary-memory and Knill decoding then consume shared raw records with quantum
+execution prohibited. Equality includes ordered causal stage inputs, sectors,
+corrections, interpreted records, physical X/Z frames, failure vectors, counts
+and LER. Batch slicing and replaceable external adapters are checked. Independent
+tableau/Bell-branch/reference and physical fault tests remain mandatory; decoder
+agreement alone does not establish physical correctness. Supported scope is the
+explicit matrix, with finite seeded batches and the existing restricted decoders.

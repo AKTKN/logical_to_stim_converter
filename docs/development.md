@@ -21,6 +21,7 @@ python examples/offline_dem_views.py
 python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
 python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
 python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733
+python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -46,7 +47,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and all seven circuit/view/ordinary-memory/Knill-memory examples. Tests use
+and all eight circuit/view/ordinary-memory/Knill-memory/LSTIM examples. Tests use
 pytest-xdist 3.8.0 (`.[dev]`) with eight workers; build tests use private source
 trees to avoid shared setuptools output. The isolated wheel test runs outside
 the checkout with optional/example/test/reference imports blocked, exercises

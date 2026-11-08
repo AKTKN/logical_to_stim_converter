@@ -3,6 +3,7 @@
 M8-A implements the grammar-backed lexer/parser and immutable syntax tree.
 M8-B adds semantic validation, bounded lowering and existing-compiler integration.
 M8-C adds package-root text/file APIs, typed file errors and canonical formatting.
+M8-D adds independent exact physical and same-raw offline-decoding certification.
 The canonical specification and complete examples are in [LSTIM v1](lstim_v1.md).
 The former R/TH/TCNOT sketch is superseded; those names are not accepted v1 syntax.
 
@@ -27,8 +28,8 @@ expanded occurrences before allocating patches or unrolling. `parse_logical_file
 reads UTF-8 and retains the path and original CRLF offsets. `format_logical_circuit`
 preserves the nested AST and all operation semantics, using four spaces, LF and
 a final newline, dropping comments/blank lines. See the [language guide](lstim.md)
-for installed API use and diagnostics. M8-D will independently certify full noisy
-physical, DEM and sample/decoder equivalence.
+for installed API use and diagnostics. The [M8-D certification matrix](lstim_certification.md)
+records verified physical/DEM/metadata and sample/decoder equivalence and its limits.
 
 Logical PARALLEL groups and REPEAT boundaries retain exact logical barriers. The existing
 physical compiler continues to own physical TICKs, scheduling, noise, flow

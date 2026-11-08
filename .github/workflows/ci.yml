@@ -41,3 +41,5 @@ jobs:
         run: python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
       - name: Three explicit patches, repeated Knill cycles and bounded offline batches
         run: python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733
+      - name: LSTIM source versus independent Python and same-raw offline decoding
+        run: python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826

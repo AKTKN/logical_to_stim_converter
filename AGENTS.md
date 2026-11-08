@@ -38,7 +38,11 @@ other code families and production decoder result/algorithm interfaces remain de
     BindPatch directives and compiles with an empty initial mapping. Formatting
     preserves all typed semantic fields, target/binding order and nested source
     groups; it never unrolls or compiles. UTF-8 file errors retain causes and
-    reliable locations. Full E2E certification (M8-D) and any CLI remain deferred.
+    reliable locations. M8-D certifies the bounded physical/simulation matrix in
+    docs/lstim_certification.md against independent public-operation references.
+    Keep exact source identity conditional on matched authored bindings/labels;
+    SourceSpan/comments are frontend provenance. Offline decoder replay shares
+    raw samples, never resamples, and stays in examples/tests. A CLI is deferred.
 11. Canonical ideal/noisy circuits retain every verified global detector. Stage
     separation is an explicit derived annotation view; metadata keeps global IDs.
     Join preparation ancestry only through actual operand interactions/relocation.

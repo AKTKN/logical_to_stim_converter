@@ -92,5 +92,7 @@ and Unicode UTF-8 comments; identifiers remain ASCII and case-sensitive.
 The [v1 opcode/default table and grammar contract](lstim_v1.md) lists all accepted
 forms. Physical Stim instructions, arbitrary expressions, runtime branching,
 automatic patch allocation, text-defined noise/decoders, non-Clifford gates,
-other code families and a CLI remain deferred. Full noisy sample/decoder E2E
-certification is M8-D; existing physical checks remain in force.
+other code families and a CLI remain deferred. M8-D certifies the
+[documented physical/noisy E2E matrix](lstim_certification.md) against independent
+Python programs and unchanged external decoder adapters. Existing physical checks
+remain in force; finite Monte Carlo agreement does not prove decoder optimality.

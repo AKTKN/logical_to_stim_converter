@@ -1,5 +1,28 @@
 # STATUS — LSTIM language
 
+## M8-D certification — 2026-11-08
+
+The existing frontend passes independent physical/simulation equivalence; no
+language Python or grammar change. Exact matched-reference circuits/DEMs, signed
+flows, public canonical metadata, binding/epoch/relocation histories, source
+fingerprints and views agree. Source file/comments/SourceSpan remain frontend
+provenance. Explicit bindings/labels and empty initial mappings match direct
+references; legacy implicit reservations are not silently equated.
+
+164 new checks: 98 physical, 38 ordinary/Knill simulation E2E, 28 safeguards.
+Together with all 1041 existing cases: 1205 passed in 260.96 s using -n 8.
+Same-seed records and same-raw external decoder stages/predictions/corrections/
+frames/failure labels agree for d=3/5 X/Z signed inputs, including three-cycle
+P0/P1/P2 reuse and replacement adapters. 257-shot replay matches 13/134/110
+slices without quantum execution. Independent encoded-reference/Bell-branch,
+executed-Pauli and fault/reset proofs also pass. Root STATUS records exact
+commands, final order-only Knill rerun, build/install evidence and limitations.
+No new runtime decoder or simulator. Deferred features remain explicit in the
+contract/certification guide; finite samples imply no universal LER guarantee.
+
+Exact staged frontend: 600 passed in 144.32 s; Ruff, wheel/sdist/isolated
+installed API and all eight CI examples pass. Root STATUS records commands.
+
 ## M8-C implemented — 2026-11-08
 
 formatter.py emits canonical nested source with four spaces, lowercase booleans,

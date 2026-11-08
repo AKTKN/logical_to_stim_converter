@@ -13,7 +13,7 @@ and loops -> physical-layer parallel adapter -> verified `stimflow.ChunkCompiler
 -> ideal circuit and final metadata -> `NoiseInjector` -> optional noisy circuit.
 The caller samples the circuit and may later supply a decoder.
 
-## LSTIM frontend boundary (M8-A/B/C)
+## LSTIM frontend boundary (M8-A/B/C/D)
 
 The separate M8-A `language/` frontend loads one packaged Lark grammar using
 LALR/contextual lexing. `parse_ast` produces frozen source-located declarations,
@@ -51,7 +51,23 @@ Only syntax/AST helpers remain subpackage-only; Lark internals are not root API.
 Installed-wheel tests compile both frozen source examples away from the checkout,
 with example/test/reference and optional decoder/plotting imports blocked. Builds
 use private temporary trees so eight pytest-xdist workers cannot race over
-setuptools output. Full noisy sample/decoder E2E certification remains M8-D.
+setuptools output.
+
+M8-D certifies the [bounded physical and simulation matrix](lstim_certification.md)
+against independently authored existing Python operations, with identical explicit
+bindings, labels, empty initial mapping and noise. Test-only comparison checks
+exact Stim objects/DEMs/double probabilities and every public artifact field,
+including verified signed chunks, use histories, causal metadata and source-bound
+decoder views. Same-seed raw records/m2d arrays match; one shared raw batch then
+feeds unchanged external ordinary-memory/Knill adapters. Stage inputs, predictions,
+corrections, interpreted records, final physical frames and failure labels match.
+Replay cannot sample quantum trajectories and commutes with batch slicing. Physical
+tableaux, actual correction execution and injected faults independently check Bell
+branches, reference entanglement and reset/classical-feedback behavior. No decoder,
+sampler, physical generator or alternate planner is added to the installed package.
+Explicit labels are matched metadata; comments/source-file spans never enter
+physical source identity. Legacy helpers with different initial bindings are
+separate physics regressions, without forced fingerprint/seed equivalence.
 
 ## Identity and data separation
 

@@ -1,7 +1,7 @@
 # logical_to_stim_converter
 
 **Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance,
-offline decoder views, ordinary/Knill decoding demos, and the LSTIM v1 Python API.**
+offline decoder views, ordinary/Knill decoding demos, and certified LSTIM v1 compilation.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -35,7 +35,7 @@ Stim commit `ffe0d043598ed5df0851a3e6b4920359a23fafbd`, subdirectory
 `glue/stimflow`. Installation needs network access to GitHub; no local
 `external_lib/` copies are required. See [development notes](docs/development.md).
 
-## LSTIM source API (M8-C)
+## LSTIM source API and certification (M8)
 
 Parse UTF-8 `.lstim` logical source from text or a file, inspect its immutable
 program, and format it canonically. Compilation uses the existing physical compiler:
@@ -88,12 +88,28 @@ wraps unreadable files or invalid UTF-8 with the original exception as cause.
 Compiler validation failures raise `LSTIMCompileError` with their original cause;
 they report the file without guessing a statement location. Explicit labels map
 through `program.label_spans` and existing fragment/composite operation IDs.
-Full noisy E2E certification remains M8-D. See the [language guide](docs/lstim.md),
+M8-D checks exact physical/DEM/provenance equivalence against independently
+authored Python programs and same-raw memory/Knill decoding, including d=3/5,
+X/Z states, reuse, replacement decoders and batch-independent replay. See the
+[certification matrix and limits](docs/lstim_certification.md), [language guide](docs/lstim.md),
 [opcode/version contract](docs/lstim_v1.md), and
 [three-patch source](examples/lstim/three_patch_knill_d3.lstim).
 LSTIM is logical source; generated Stim text describes physical gates/records.
 Lark 1.3.1 is a runtime dependency and its grammar ships in the wheel and sdist.
 The Python operation-object API remains available independently of LSTIM.
+
+With `.[dev]`, run both frozen source files beside their explicit Python
+references and compare physical circuits, DEMs, same-seed records and offline
+decoder outputs:
+
+```bash
+python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826
+```
+
+This reports 17 physical qubits/40 detectors for memory and 51 qubits/192
+detectors for three-cycle Knill memory. The three-cycle schedule has seven
+physical uses and ends on P0/epoch2. The restricted Knill decoder remains an
+approximation; finite sampled error counts do not establish a threshold.
 
 ## Two independent patches
 

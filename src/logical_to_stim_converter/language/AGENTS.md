@@ -19,6 +19,10 @@ grammar and compares every typed semantic field except spans; retain groups
 without unrolling or allocating physical objects. Drop comments/blank lines and
 use four spaces, lowercase booleans and LF/final newline. Packaged runtime checks
 must work away from the checkout with optional/repository imports blocked.
-M8-D owns full noisy E2E certification.
+M8-D tests certify the documented physical/noisy E2E matrix with independent
+Python references. Preserve exact physical/provenance identity under matched
+authored BindPatch directives and labels, without including SourceSpan/comments
+in physical identity. Replay/decoder adapters remain in examples/tests; physics
+and reset/Bell feedback proofs remain independent of decoder agreement.
 Preserve statement/target/option order, explicit bindings and block nesting.
 Update this ledger and root/test ledgers with actual checkpoint evidence.

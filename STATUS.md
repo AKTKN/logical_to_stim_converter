@@ -2,7 +2,141 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M8_C_IMPLEMENTED` (public LSTIM API, canonical formatter and packaging)
+**Overall state:** `M8_D_CERTIFIED` (bounded exact physical and same-raw simulation matrix)
+
+## M8-D independent physical and simulation certification — 2026-11-08
+
+Baseline main f1c33428855860811d80d59d8cafd93586f361da (M8-C, 1041 tests).
+All four baseline Ubuntu/Windows Python 3.11/3.12 jobs passed in run 42487453839.
+Pre-existing physical-inspection/export changes and report deletions are preserved
+outside this commit. No production Python, grammar, compiler/backend/operations,
+noise, decoder or external_lib code changed. This milestone adds certification,
+an external paired-source example and documentation; it adds no simulator,
+sampler, scheduling/allocation logic, runtime decoder or language CLI.
+
+Test-only helpers/lstim_equivalence.py compares exact Stim ideal/noisy circuits,
+canonical DEMs/double probabilities, every public CompiledCircuit field, signed
+chunk/reflow/loop content, physical/record/detector/observable/time/use mappings,
+reset/terminal/binding/relocation histories, preparation ancestry and composite
+children. Both artifacts validate metadata and flows. Independent samplers with
+identical explicit seeds match raw records/m2d arrays. Shared-raw DecoderViews
+match snapshots, source fingerprints, parities and global/local maps. Only exact
+ordinary-memory models request graphlike DEM decomposition. No approximate text
+serialization is used for equality or identity.
+
+Reference objects use independent public constructors and placed CodeSpecs with
+explicit initial/later BindPatch directives and logical_to_block={}. They never
+inspect AST/lowering output or call the parser/legacy runner to author operations.
+helpers/lstim_programs.py separately writes the fixed three-cycle text and direct
+operation sequences. Source comments/filenames are absent from physical identity;
+labels/bindings are intentionally matched metadata. Legacy M7 implicit-reservation
+helpers remain separate physical/statistical regression references, with no forced
+fingerprint or seeded-record equality across different experiments.
+
+New physical cases cover d=3/5 X/Z memory, initialization 1/d rounds, additional
+SE and two separate repeated SE(1) barriers, physical/frame/absent Paulis, ideal/
+nonuniform noise, unequal parallel SE/H/readout and exact independently counted
+idle/gate noise. H/CNOT orientation/order and Bell resource defaults are checked.
+Knill covers d=3/5, X/Z, bits 0/1, T=1/3, post-SE=0/1; width is exactly 51/147
+qubits with 3/7 uses, ending at P0/epoch2 after three teleports. Independent
+Z/X patch epochs, an active spectator, epoch-local observables and open outputs
+retain historical records without fake termination or stale physical frames.
+
+E2E uses unchanged external analyze_memory and prepare_compiled/analyze_knill.
+Noiseless/nonzero-noise shared batches yield identical local/canonical models,
+ordered stage inputs, temporal/sector predictions, CorrectionBatch bits/use/
+column IDs, interpreted records, physical X/Z frames, logical outputs, failure
+vectors, counts and LER. Both baseline and existing M7 replacement adapters run.
+257 shots as one batch or 13/134/110 slices give exactly equal results and causal
+stage inputs. A spy asserts one static sampler/sample call; replay prohibits
+samplers/TableauSimulator/FlipSimulator. Raw samples and canonical DEMs remain
+unchanged. Model/conditional-fault setup precedes batch sampling.
+
+Independent tableau/actual-Pauli proofs preserve an untouched encoded reference
+through all Bell branches. Injected physical faults before/after a real reset
+prove support extinction; changing historical Bell feedback changes the surviving
+logical state after later reuse. Existing d=3/5 M7 encoded-reference proofs are
+mandatory regressions. Safeguards compare direct/source lifecycle/resource/overlap/
+layout/mixed-distance CX errors and deliberately corrupted signed H flows, plus
+stale-use/source correction rejection. No runtime failure was found or bypassed.
+
+### M8-D checkpoints
+
+Actual local environment: Linux/WSL2 Python 3.12.7, Stim 1.15.0, stimflow 1.17.dev0
+at ffe0d043, Lark 1.3.1, PyMatching 2.3.1, NumPy 2.5.4, SciPy 1.18.1, pytest 9.2.0,
+pytest-xdist 3.8.0, Ruff 0.17.4 and build 1.6.1. Pinned APIs were inspected before
+integration, including Chunk/ChunkLoop/Reflow equality, actual compiler fields,
+views/stage/frame/conditional interfaces and external adapters. ChunkLoop lacks
+structural equality and is compared recursively; CSR maps compare exactly rather
+than using ambiguous array truth. That initial comparison-harness failure was
+fixed without changing production code or weakening a physics assertion.
+
+- D1: `python -m pytest -q -n 8 tests/test_lstim_physical_equivalence.py
+  -k single_patch --durations=3 --tb=short`: **48 passed in 13.65 s**.
+  `-k parallel`: **4 passed in 3.94 s**. `-k 'cnot or bell or knill'`:
+  **40 passed in 50.67 s**. `-k 'reuse_independent or open_knill'`:
+  **6 passed in 28.76 s**. Ruff src/tests/examples passes at each checkpoint.
+- D2: `python -m pytest -q -n 8 tests/test_lstim_simulation_e2e.py
+  -k ordinary_memory --tb=short --durations=3`: **16 passed in 5.51 s**.
+  Additional `-k independent_observables`: **2 passed in 2.90 s**, including
+  alphabetical logical-output ordering different from physical/source order.
+- D3: targeted X-basis Knill family: **8 passed in 40.99 s**. All basis/distance/
+  sign/noise Knill cases pass after final model-before-sampling ordering:
+  `python -m pytest -q -n 8 tests/test_lstim_simulation_e2e.py -k three_patch
+  --tb=short --durations=3`: **16 passed in 56.30 s**.
+  `-k 257`: **2 passed in 6.82 s**. `-k 'encoded_reference or reset_extinguishes'`:
+  **2 passed in 5.88 s**. The existing M7-C `test_patch_reuse_knill_e2e.py
+  -k encoded_reference` checkpoint: **2 passed in 33.45 s** (d=3/5).
+  `test_lstim_safeguards.py`: **28 passed in 3.85 s**. All use -n 8.
+- Full regression: `python -m pytest -n 8 --durations=10 --tb=short`:
+  **1205 passed in 260.96 s**, preserving all 1041 M1–M8-C tests and adding 164
+  (98 physical, 38 simulation E2E, 28 safeguard). The final ordering-only test
+  change was independently rerun as the 16-case Knill checkpoint above. The
+  slowest paired noisy d=5 Knill cases took 45.54 s under parallel load; model/
+  compile setup dominates these small-shot experiments. No timing threshold.
+
+- D4 exact staged export: `PYTHONPATH=src python -m pytest -q -n 8
+  --durations=5 tests/test_lstim_*.py`: **600 passed in 144.32 s**, including
+  every M8-A/B/C test and the final M8-D test/adapter setup. Its `python -m ruff
+  check src tests examples` and `python -m build --outdir
+  /tmp/lstim-m8d-verification/dist` pass. The existing genuine isolated-wheel test
+  builds wheel from sdist, removes source paths and blocks tests/examples/
+  reference/optional decoder/plot imports; both frozen sources parse/compile
+  through installed root APIs with valid metadata/DEMs, views/frame/stage APIs,
+  exact use/label history and independent noise. All runtime .py/.lark bytes,
+  both archives' grammar and sdist sample files match staged source.
+- All eight CI example commands pass from that clean staged export:
+  `python examples/two_patch_memory.py`,
+  `python examples/two_patch_bell_roundtrip.py`,
+  `python examples/knill_ec_single_round.py`,
+  `python examples/offline_dem_views.py`,
+  `python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731`,
+  `python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732`,
+  `python examples/knill_memory_three_patch_reuse.py --suite --shots 32
+  --batch-size 13 --p 0.001 --seed 733`, and
+  `python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826`.
+  The seven old Python examples match HEAD, excluding unrelated user edits.
+  `python -m pip check`, Ruff and diff whitespace checks pass. No sampled data,
+  build products or reference source enter the commit. Final ledger-only changes
+  preserve the exact tested code/test bytes.
+
+The new examples/lstim_equivalence.py pairs both unchanged frozen sample files
+with fully written direct references and unchanged external decoders. Local
+`python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826` passes:
+ordinary memory = 17 wires/49 records/40 detectors/1 observable/492 DEM errors,
+zero failures across global/observable/strict views; three-cycle Knill = 51 wires/
+255 records/192 detectors/1 observable/2698 DEM errors, seven uses, four restricted
+baseline failures (LER .125). These are finite observations, not asserted LER
+targets or threshold/optimality claims. docs/lstim_certification.md contains paired
+source/reference links, the full matrix and honest restrictions. The new example
+is the eighth command in the Ubuntu/Windows Python 3.11/3.12 CI matrix.
+
+Verified scope: exact physical/provenance and same-raw offline equivalence for the
+explicit matrix, with independent physical branch/reset/fault evidence. No new
+unverified runtime functionality. Remaining: resource-creating/labelled REPEAT,
+automatic patch allocation, runtime conditionals, arbitrary backend/code plugins,
+non-Clifford support, text-defined noise/decoders and a language CLI. Physical width
+is bounded; circuit/record/history/model size and setup time grow with cycles.
 
 ## M8-C public LSTIM API, canonical formatting and packaging — 2026-11-08
 

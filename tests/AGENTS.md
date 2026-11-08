@@ -41,7 +41,7 @@ physical behavior. M8-B independently compares existing operation objects, exact
 physical ideal/noisy circuits, DEMs and canonical metadata against Python programs
 with the same explicit BindPatch directives and empty initial mapping. Test
 pre-allocation expansion budgets and unchanged compiler lifecycle failures/cause
-chains. M8-D will add full noisy sample/decoder E2E certification.
+chains. M8-D adds the documented physical/noisy sample/decoder E2E certification.
 
 M8-C tests compare all typed AST fields except spans and exact independently
 authored operation/directive tuples after formatting. Cover invalid manually
@@ -51,6 +51,17 @@ wheel/sdist checks copy inputs into private trees before building. Installed
 consumers run outside the checkout with optional/example/test/reference imports
 blocked and assert every converter module came from the wheel. Test both source
 samples without altering existing physical or M7-C orchestration assertions.
+
+M8-D references must use independently authored public constructors and explicit
+initial BindPatch directives with logical_to_block={}; never derive reference
+programs from AST/lowering or the parser under test. Compare exact Stim objects,
+DEMs/probabilities and all public metadata/flows/use histories/source maps.
+Offline adapters consume the same immutable raw batch with quantum execution
+prohibited; compare causal stage inputs, sectors/corrections, record/physical
+frames and failure labels, including replacement decoders and chunked replay.
+Keep encoded-reference/tableau/executed-Pauli and physical fault/reset proofs
+independent. Do not equate legacy implicit bindings/fingerprints or claim decoder
+optimality/thresholds from finite Monte Carlo. Maintain bounded eight-worker CI.
 
 M7-C independently certifies three working patches through >=3 cycles using
 actual physical tableaux/correction execution, random gauges and Bell branches,

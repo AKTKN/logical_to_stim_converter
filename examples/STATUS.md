@@ -1,5 +1,25 @@
 # STATUS — Examples
 
+## M8-D paired source/physical/offline demonstration — 2026-11-08
+
+lstim_equivalence.py independently writes direct public-operation references for
+both frozen .lstim sources, using exact initial/later BindPatch directives and
+labels. It compares ideal/noisy circuits, canonical DEMs, physical source identity,
+same-seed records and shared-raw decoder outputs via unchanged memory/Knill
+adapters. It checks unmodified raw records/DEMs and reports physical statistics,
+exact first-DEM-error probabilities/targets, use history and finite decoder
+failures/LER. No tests/reference clone imports or production changes are needed.
+
+Local --shots32 --p.001 --seed826: memory 17 qubits/49 records/40 detectors/
+492 DEM errors, zero failures in three strategies; Knill 51/255/192/2698, seven
+uses and four restricted-baseline failures. These are observations, not LER
+thresholds. The new bounded d=3 command is eighth in the existing platform/Python
+CI matrix. The M7-C runner and both frozen source files are unchanged. Root
+STATUS and docs/lstim_certification.md record full verification/scope/performance.
+
+Exact staged frontend: 600 passed in 144.32 s; Ruff, wheel/sdist/isolated
+installed API and all eight CI examples pass. Root STATUS records commands.
+
 ## M8-C frozen logical source samples — 2026-11-08
 
 lstim/memory_d3.lstim and lstim/three_patch_knill_d3.lstim exactly match the two

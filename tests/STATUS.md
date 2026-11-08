@@ -1,5 +1,44 @@
 # STATUS — Tests
 
+## M8-D certification — 2026-11-08
+
+Added 164 tests while retaining every one of the 1041 prior cases:
+
+- test_lstim_physical_equivalence.py (98): 48 signed memory, four unequal
+  parallel, four ordered/oriented H/CX, four Bell default/order, 32 Knill
+  d=3/5 X/Z bits0/1 T=1/3 post0/1, four reuse/spectator and two open-output.
+  Independent public constructors, exact ideal/noisy Stim objects/DEMs/public
+  metadata/flows/epochs/frames/source views and same-seed/shared-raw arrays.
+  Existing physical instruction/reset oracle counts every noise site exactly.
+- test_lstim_simulation_e2e.py (38): 18 ordinary-memory and two-observable
+  global/local MWPM checks, 16 three-cycle Knill baseline/replacement decoder
+  cases, two 257-shot chunk/once-only-sampling checks and two independent
+  encoded-reference/Bell/reset/classical-feedback physical proofs. Causal stage
+  inputs, models/targets/windows, predictions, correction bits/use/column IDs,
+  interpreted records, physical frames, failures/counts/LER match. Quantum
+  execution is prohibited during replay; canonical/raw sources remain unchanged.
+- test_lstim_safeguards.py (28): syntax/semantic limits/repeated resources,
+  matched direct lifecycle/resource/overlap/layout/backend failures, corrupted
+  signed H flow and stale-use/source correction rejection.
+
+helpers/lstim_equivalence.py performs test-only exact structural comparison,
+including CSR maps and signed recursive ChunkLoops (no text serialization);
+helpers/lstim_programs.py independently authors text and direct three-patch
+programs. Neither direct reference uses AST/lowering or legacy helper authoring.
+
+D1 focused: 48/13.65 s, 4/3.94 s, 40/50.67 s, 6/28.76 s plus Ruff after each.
+D2: 16/5.51 s and two independent observables/2.90 s. Final D3 Knill matrix:
+16/56.30 s; chunk replay 2/6.82 s; independent physical probes 2/5.88 s;
+existing d=3/5 M7 encoded-reference regression 2/33.45 s; safeguards 28/3.85 s.
+Full `python -m pytest -n 8 --durations=10 --tb=short`: 1205 passed in 260.96 s.
+The final test-only setup-order change passes the 16-case Knill rerun. Root
+STATUS records exact commands and staged/install/example evidence. Production
+code and all old physics assertions are unchanged. Scope is the documented
+matrix and finite seeded batches, with honest restricted-decoder limitations.
+
+Exact staged frontend: 600 passed in 144.32 s; Ruff, wheel/sdist/isolated
+installed API and all eight CI examples pass. Root STATUS records commands.
+
 ## M8-C update — 2026-11-08
 
 Added 83 cases while retaining all 958 previous regressions: 57 formatter, 25

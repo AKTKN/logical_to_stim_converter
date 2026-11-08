@@ -1,5 +1,21 @@
 # STATUS — Package root
 
+## M8-D certification — 2026-11-08
+
+No installed Python/runtime APIs changed. Independent public-operation references
+now certify the documented d=3/5 memory/Clifford/Bell/reuse/Knill physical matrix
+and same-raw decoding through unchanged external adapters. Exact signed circuits,
+DEMs/double probabilities, all public metadata, source identity, views, epochs,
+causal models/frames and failure labels match. Replay cannot resample and commutes
+with batch slicing. Physical tableaux/executed corrections and deterministic
+fault/reset probes remain independent of decoder agreement. Root STATUS records
+1205 tests in 260.96 s with eight workers (164 new), focused checkpoints, pins,
+platforms and distribution/example evidence. Tests/adapter examples stay outside
+the installed package; no new decoder/simulator/backend or quantum generator.
+
+Exact staged frontend: 600 passed in 144.32 s; Ruff, wheel/sdist/isolated
+installed API and all eight CI examples pass. Root STATUS records commands.
+
 ## M8-C update — 2026-11-08
 
 Root/language expose LogicalProgram, text/file parsing, canonical formatting and

@@ -18,7 +18,10 @@ from root and language. The formatter statically validates and grammar-roundtrip
 the unexpanded AST with exact typed semantic signatures. UTF-8 reads preserve
 path/CRLF offsets and original file/encoding causes. The shipped Lark 1.3.1
 grammar remains the syntax authority; installed wheel checks block optional and
-repository imports. M8-D owns full physical/noisy E2E certification.
+repository imports. M8-D certifies the documented d=3/5 physical/noisy E2E matrix
+against independent public-operation references and unchanged external decoder
+adapters. No decoder or simulator enters the installed runtime. Match authored
+bindings/labels for exact metadata/source identity; raw replay never resamples.
 
 M6-A exports global MeasurementInfo/MeasurementKey/DetectorInfo/ObservableInfo,
 DetectorBoundaryCandidate, PreparationDependencyEvent, PreparationInfo,
