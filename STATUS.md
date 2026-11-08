@@ -2,7 +2,88 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M7_C_IMPLEMENTED` (explicit three-patch static Knill memory)
+**Overall state:** `M8_A_IMPLEMENTED` (LSTIM syntax; M7 physical paths preserved)
+
+## M8-A LSTIM lexer, parser, AST and diagnostics — 2026-11-08
+
+Baseline: main `06cdc4fd61486cb4e0d138feff10c685bc1a0858` (M7-C, 605 tests).
+Existing inspection/export edits and report deletions are preserved and excluded
+from this milestone's commit. No external_lib or physical/compiler/decoder source
+is modified. The root public Python operation API remains unchanged.
+
+The new language/ package ships one grammar.lark, loaded via importlib.resources,
+with LALR/contextual lexing, positional metadata and iterative AST transformation.
+Internal parse_ast/lex_source expose immutable syntax data and typed located
+lex/parse/limit errors. Frozen header/code/patch/bind/operation/option/parallel/
+repeat/file nodes retain order, labels, scalar types and half-open source spans.
+Character offsets retain original CRLF and are excluded from span equality/hash.
+The tracked docs/lstim_v1.md adapts the companion contract and freezes lexical
+decisions, grammar restrictions, physical terminology and later milestone duties.
+
+Grammar decisions: one instruction per line, brace-delimited multiline blocks,
+ASCII case-sensitive names with explicit reserved keywords and keyword boundaries,
+unsigned decimal integers, optional [label] before (rounds), then targets/options.
+A grammar lookahead distinguishes option keys from targets without LALR conflicts.
+PARALLEL contains primitives; REPEAT retains operations/groups/nested repeats.
+No loop expansion or quantum-state validation occurs. Unsupported versions,
+unknown/duplicate option keys, wrong signatures/values, declaration ordering,
+empty groups and resource-changing repeat operations await M8-B semantic checks.
+Physical Stim opcodes, record syntax, strings and expressions are rejected.
+
+Budgets: 1,000,000 source code points, 100,000 tokens including newlines,
+64 brace levels and 128 decimal digits per integer. Oversized inputs fail with
+source name, position, bounded excerpt and caret. These are syntactic limits,
+separate from M8-B's future static expanded-operation budget.
+
+Selected/tested runtime is Lark 1.3.1 (current lark distribution, not lark-parser).
+Inspected [release metadata](https://pypi.org/project/lark/1.3.1/) and
+[official APIs](https://lark-parser.readthedocs.io/en/stable/classes.html), then
+the installed interactive parser/Transformer_NonRecursive implementation. Runtime
+dependency and package data are explicit in pyproject.toml. Setuptools/wheel are
+dev dependencies so the isolated-wheel regression builds offline without build
+isolation. Existing Stim 1.15.0/stimflow ffe0d043 pins are unchanged.
+
+### M8-A verification
+
+Commands below use `.venv/bin/python` on Linux/WSL2, Python 3.12.7.
+
+- A1: `python -m pytest -q tests/test_lstim_lexer.py`: **52 passed in 1.44 s**;
+  `python -m ruff check src tests`: **all checks passed**.
+- A2: `python -m pytest -q tests/test_lstim_parser.py`: **87 passed in 0.18 s**.
+- A3: `python -m pytest -q tests/test_lstim_diagnostics.py`: **24 passed in 3.44 s**.
+- Combined syntax checkpoint: `python -m pytest -q tests/test_lstim_lexer.py
+  tests/test_lstim_parser.py tests/test_lstim_diagnostics.py`:
+  **163 passed in 5.05 s**; `python -m ruff check src tests examples` passes.
+- The wheel regression builds an isolated wheel, extracts it outside the repo,
+  removes source import paths, proves syntax works with physical imports blocked,
+  then verifies normal installed-root imports. grammar.lark loads and token/AST
+  APIs run from the wheel. Wheel/sdist archive inspection verifies identical
+  grammar bytes, exact Lark dependency metadata and the canonical contract in
+  sdist; no examples/tests/external code enter the wheel.
+- `python -m build --outdir /tmp/lstim-m8a-dist`: **sdist/wheel built successfully**.
+  `python -m pip check`: **no broken requirements**.
+- A seeded 3,000-source mutation check gives 92 valid syntax trees and 2,908
+  typed located errors, with no untyped failures.
+- A4: `python -m pytest`: **768 passed in 713.70 s (0:11:53)**, including all
+  605 unchanged M1–M7-C regressions and the 163 new syntax cases.
+- `python -m ruff check src tests examples`: **all checks passed** in both the
+  working tree and a clean export of exactly the staged files.
+- The exact staged export independently passes the combined syntax command:
+  **163 passed in 4.66 s** with `PYTHONPATH=src`. Its sdist/wheel build succeeds;
+  archive checks match grammar bytes and README to the Git index, retain the
+  exact Lark pin, and exclude unrelated inspection exports/reports. Final ledger
+  updates change no tested implementation/test source.
+- `git diff --check` / `git diff --cached --check`: **pass**. The staged runtime
+  diff contains only language/ and instruction/status documents; top-level
+  syntax interfaces/modules have English docstrings. No physics tests change.
+
+Implemented and verified here: syntax, AST, diagnostics and grammar packaging.
+No implemented-but-unverified physical behavior is introduced. Remaining M8-B:
+semantic version/declaration/signature/option checks, bounded repeat validation/
+unrolling, source-aware existing-operation/BindPatch lowering and compile bridge.
+M8-C public API/formatter and M8-D independent physical/DEM/sample equivalence
+remain deferred. This milestone does not claim a runnable text circuit, decoder
+or CLI. Remote platform results are separate from local Linux evidence.
 
 ## M7-C three-patch Knill memory — 2026-11-08
 

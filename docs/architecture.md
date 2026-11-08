@@ -13,6 +13,17 @@ and loops -> physical-layer parallel adapter -> verified `stimflow.ChunkCompiler
 -> ideal circuit and final metadata -> `NoiseInjector` -> optional noisy circuit.
 The caller samples the circuit and may later supply a decoder.
 
+## LSTIM syntax boundary (M8-A)
+
+The separate M8-A `language/` frontend loads one packaged Lark grammar using
+LALR/contextual lexing. `parse_ast` produces frozen source-located declarations,
+bindings, operations, parallel groups and unexpanded repeats; `lex_source` exposes
+the same grammar's contextual tokens. Neither path constructs physical/compiler
+objects. Parser limits bound text, tokens, integer digits and nesting. Syntax
+success does not validate version support, signatures or quantum state. The
+tracked [LSTIM v1 contract](lstim_v1.md) specifies the later M8-B lowering through
+the existing compiler; the public program/formatter API remains M8-C.
+
 ## Identity and data separation
 
 `CodeSpec` is immutable mathematical CSS data: binary H_X/H_Z, L_X/L_Z, GF(2)

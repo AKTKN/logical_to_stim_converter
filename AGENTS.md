@@ -32,7 +32,10 @@ other code families and production decoder result/algorithm interfaces remain de
 7. Parallel logical operations require a coherent global `TICK`/idle schedule. `stimflow.ChunkCompiler.append` alone should not be assumed to encode simultaneous operations.
 8. Check whether logical H/CNOT actually realizes the intended logical Clifford on the selected code and logical basis; do not assume all CSS codes share the same H geometry.
 9. Preserve compatibility with Python 3.11+ and Windows development. Make `knill_bench` depend on this package, never the reverse.
-10. The Stim-like logical text parser is deferred. Do not implement a grammar or CLI unless requested.
+10. M8-A implements LSTIM syntax only in `language/`; `docs/lstim_v1.md` is its
+    contract. Semantic validation/lowering (M8-B), public program/formatter APIs
+    (M8-C), physical equivalence (M8-D) and any CLI remain deferred. Keep the AST
+    independent of physical/compiler objects and reuse the existing compiler later.
 11. Canonical ideal/noisy circuits retain every verified global detector. Stage
     separation is an explicit derived annotation view; metadata keeps global IDs.
     Join preparation ancestry only through actual operand interactions/relocation.

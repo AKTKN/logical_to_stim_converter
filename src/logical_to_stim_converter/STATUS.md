@@ -1,5 +1,18 @@
 # STATUS — Package root
 
+## M8-A update — 2026-11-08
+
+Internal language/ now provides grammar-backed parse_ast/lex_source with frozen
+source-aware syntax trees and typed bounded-input errors. Lark 1.3.1 is a pinned
+runtime dependency; grammar.lark ships in wheel and sdist. Root physical exports
+and all compiler/noise/decoder source remain unchanged. The syntax layer has no
+physical/compiler imports. 163 focused syntax cases, lint, archive/resource and
+isolated-wheel checks pass; root/language/test ledgers retain full-run evidence.
+Full regression: 768 passed in 713.70 s, retaining all 605 M1–M7-C checks.
+Semantic analysis/lowering/compile bridge remain M8-B; public API/formatter M8-C;
+independent physical/DEM/sample equivalence M8-D. Parsing alone validates no
+quantum state, resource lifecycle or executable operation sequence.
+
 ## M7-B update — 2026-11-08
 
 Decoder-neutral reuse now carries explicit use provenance through detectors,

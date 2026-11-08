@@ -1,0 +1,40 @@
+// LSTIM v1. Newlines separate statements; block delimiters occupy their own lines.
+start: _NL* header (_NL+ statement)* _NL*
+header: _FORMAT "(" INT ")"
+?statement: code_decl | patch_decl | bind | operation | parallel | repeat
+code_decl: _CODE NAME _ROTATED_SURFACE "(" INT ")"
+patch_decl: _PATCH NAME NAME _INDEX "=" INT
+bind: _BIND NAME NAME
+operation: (PRIMITIVE_OPCODE | COMPOSITE_OPCODE) label? rounds? NAME+ option*
+primitive_operation: PRIMITIVE_OPCODE label? rounds? NAME+ option* -> operation
+label: "[" NAME "]"
+rounds: "(" INT ")"
+option: OPTION_KEY "=" value
+?value: NAME -> name_value
+      | INT -> int_value
+      | _TRUE -> true_value
+      | _FALSE -> false_value
+parallel: _PARALLEL "{" _NL+ (primitive_operation _NL+)* "}"
+repeat: _REPEAT INT "{" _NL+ (repeat_statement _NL+)* "}"
+?repeat_statement: operation | parallel | repeat
+
+// Boundaries prevent contextual lexing from splitting e.g. HD into H D.
+_FORMAT: /FORMAT(?![A-Za-z0-9_])/
+_CODE: /CODE(?![A-Za-z0-9_])/
+_ROTATED_SURFACE: /ROTATED_SURFACE(?![A-Za-z0-9_])/
+_PATCH: /PATCH(?![A-Za-z0-9_])/
+_INDEX: /index(?![A-Za-z0-9_])/
+_BIND: /BIND(?![A-Za-z0-9_])/
+_PARALLEL: /PARALLEL(?![A-Za-z0-9_])/
+_REPEAT: /REPEAT(?![A-Za-z0-9_])/
+_TRUE.2: /true(?![A-Za-z0-9_])/
+_FALSE.2: /false(?![A-Za-z0-9_])/
+PRIMITIVE_OPCODE: /(?:INIT_Z|INIT_X|SE|H|CX|X|Y|Z|MX|MZ)(?![A-Za-z0-9_])/
+COMPOSITE_OPCODE: /(?:BELL_PREP|KNILL_EC)(?![A-Za-z0-9_])/
+// A word followed by '=' is an option key, never another operand.
+OPTION_KEY: /[A-Za-z_][A-Za-z0-9_]*(?![A-Za-z0-9_])(?=[ \t]*=)/
+NAME: /[A-Za-z_][A-Za-z0-9_]*(?![A-Za-z0-9_])(?![ \t]*=)/
+INT: /[0-9]+(?![A-Za-z0-9_.])/
+_NL: /\r?\n/
+%ignore /[ \t]+/
+%ignore /#[^\r\n]*/

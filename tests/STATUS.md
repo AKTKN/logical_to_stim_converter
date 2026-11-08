@@ -1,5 +1,31 @@
 # STATUS — Tests
 
+## M8-A update — 2026-11-08
+
+Added 163 syntax-only tests, preserving all 605 M1–M7-C tests unchanged:
+
+- test_lstim_lexer.py: 52 cases cover contextual token types/values/positions,
+  reserved words and prefixes, whitespace/comments/CRLF/EOF, malformed lexical
+  boundaries and delimiters, conflict-free LALR construction, and isolated-wheel
+  grammar loading with source paths removed and physical imports blocked.
+- test_lstim_parser.py: 87 cases cover every primitive/composite, optional labels/
+  rounds, typed ordered options, header/declarations/bindings, both exact contract
+  programs, nested groups/repeats, immutable LF/CRLF-equal trees, exact source
+  slices, structural errors and physical-opcode/expression rejection. Explicit
+  syntax-only cases demonstrate that semantic checks are still deferred.
+- test_lstim_diagnostics.py: 24 cases cover typed file/line/column/caret errors,
+  CRLF/EOF and tab behavior, bounded long-line excerpts, source/token/integer/depth
+  budgets including exact boundaries, iterative wide/deep ASTs without expansion,
+  and deterministic syntax values under different Python hash seeds.
+
+Checkpoint evidence: lexer **52 passed in 1.44 s**, parser **87 passed in 0.18 s**,
+diagnostics **24 passed in 3.44 s**; combined **163 passed in 5.05 s**. Full
+regression: **768 passed in 713.70 s**, including all 605 previous checks. The
+exact staged-source syntax run passes **163 tests in 4.66 s**, with lint and
+sdist/wheel builds also passing. Root STATUS records archive/import evidence.
+No existing physics assertion is changed or weakened. M8-B/D
+will test lowered operations against independently authored physical programs.
+
 ## M7-C update — 2026-11-08
 
 Added 61 tests in test_patch_reuse_knill_e2e.py and

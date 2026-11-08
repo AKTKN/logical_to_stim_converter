@@ -1,6 +1,7 @@
 # logical_to_stim_converter
 
-**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance, offline decoder views and ordinary/Knill memory decoding demos.**
+**Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance,
+offline decoder views, ordinary/Knill decoding demos, and LSTIM syntax trees.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -33,6 +34,24 @@ The package pins **Stim 1.15.0** and installs **stimflow 1.17.dev0** directly fr
 Stim commit `ffe0d043598ed5df0851a3e6b4920359a23fafbd`, subdirectory
 `glue/stimflow`. Installation needs network access to GitHub; no local
 `external_lib/` copies are required. See [development notes](docs/development.md).
+
+## LSTIM syntax checkpoint (M8-A)
+
+The internal syntax layer parses `.lstim` text into immutable, source-located data:
+
+```python
+from logical_to_stim_converter.language import parse_ast
+
+tree = parse_ast("FORMAT(1)\nINIT_Z(3) D\nMZ D", source_name="memory.lstim")
+assert tree.format_version == 1
+assert tree.statements[0].opcode == "INIT_Z"
+```
+
+This checks syntax only. Semantic validation and translation to the existing
+physical compiler are planned for M8-B; the public program/file API and formatter
+are planned for M8-C. See the [v1 language contract](docs/lstim_v1.md) for required
+declarations/bindings, line/block rules, reserved words and parser limits.
+The runtime pins Lark 1.3.1 and ships the same grammar in wheel and sdist.
 
 ## Two independent patches
 
@@ -286,8 +305,9 @@ Repeated rounds are represented as `ChunkLoop` in fragments, then expanded to
 export explicit physical layers and per-record metadata. There is no large-round
 compression or general scheduling optimizer.
 
-Other code families, S/other logical Clifford gates, a text parser/CLI, production
-decoder adapters, physical block reuse, and adaptive operations remain unimplemented.
+Other code families, S/other logical Clifford gates, LSTIM semantic lowering/public
+program APIs, a CLI, production decoder adapters, and adaptive operations remain
+unimplemented. Explicit physical block reuse is supported through BindPatch.
 `surface-sim` is a pinned geometry/schedule reference, not a runtime
 dependency; Hex and lomatching are not integrated. External copies remain ignored
 by Git. No license has been selected.

@@ -1,18 +1,29 @@
-# Future Stim-like logical-circuit syntax (not implemented)
+# LSTIM language milestones
 
-The intended long-term user input is a textual logical program similar to Stim:
+M8-A implements the grammar-backed lexer/parser and immutable syntax tree.
+The canonical specification and complete examples are in [LSTIM v1](lstim_v1.md).
+The former R/TH/TCNOT sketch is superseded; those names are not accepted v1 syntax.
 
 ```text
-R 0 1
-TH 0
-TCNOT 0 1
-REPEAT(9) {
-    SE 0 1
+FORMAT(1)
+CODE sc ROTATED_SURFACE(3)
+PATCH P0 sc index=0
+BIND D P0
+INIT_Z(3) D
+REPEAT 2 {
+    SE(1) D
 }
-MZ 1
-MX 0
+MZ D
 ```
 
-**The grammar, parser, semantics of `TICK`/parallel layers, and public API are not implemented and not yet fixed.** This example is a design reminder, not a supported file format.
+`logical_to_stim_converter.language.parse_ast` checks syntax only. A parsed
+program has no allocated physical resources and cannot yet compile. M8-B will
+validate declarations, signatures and bounded static loops, then lower to the
+existing OperationModule/BindPatch sequence and CircuitCompiler. M8-C will add
+the public text/file API and canonical formatter; M8-D will independently certify
+physical, DEM and sample equivalence.
 
-When this milestone is started, parse into operation objects or a small logical IR, then reuse exactly the same `OperationModule` and compiler path as direct Python calls. In particular, logical program layers must not be conflated with physical Stim `TICK`s, and resource state placement must remain explicit or governed by a separately defined policy. Do not add a DSL parser during initial core/primitive implementation.
+Logical PARALLEL groups and REPEAT boundaries are syntax data. The existing
+physical compiler continues to own physical TICKs, scheduling, noise, flow
+verification and epoch/lifecycle validation. No implicit patch allocation,
+decoder, CLI or alternate physical compiler is part of this frontend.

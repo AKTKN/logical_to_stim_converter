@@ -35,6 +35,10 @@ real H/CNOT, and frame replay against explicit physical corrections across reset
 Keep the M7-A regression physics. v3 negative tests must rebind deliberately
 corrupted Bell semantics after first checking rejection of stale source requests.
 
+M8-A syntax tests exercise the shared grammar, immutable source-located AST,
+diagnostics/resource limits and isolated wheel loading. They do not certify
+physical behavior: M8-B/D must test lowering against the existing physics path.
+
 M7-C independently certifies three working patches through >=3 cycles using
 actual physical tableaux/correction execution, random gauges and Bell branches,
 plus an untouched encoded reference. Unfold reset intervals to fresh patches to
