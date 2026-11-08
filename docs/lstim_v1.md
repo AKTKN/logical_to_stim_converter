@@ -1,10 +1,10 @@
 # LSTIM v1: Shared language and compiler contract
 
-**Status (2026-11-08):** M8-A syntax is implemented. This tracked document is the
-canonical contract for M8-A through M8-D. Semantic checking/lowering (M8-B), the
-public program/formatter API (M8-C) and physical-equivalence certification (M8-D)
-remain future work. The Python lowering/semantics below specify those later
-milestones; a successful syntax parse does not establish them.
+**Status (2026-11-08):** M8-A syntax and M8-B static semantic checking/lowering
+through the existing physical compiler are implemented. This tracked document is
+the canonical contract for M8-A through M8-D. Package-root/file APIs and formatting
+(M8-C) and full noisy E2E certification (M8-D) remain future work. A successful
+syntax-only parse still establishes no semantic or quantum-state validity.
 
 **Repository:** `AKTKN/logical_to_stim_converter`. M8-A baseline is
 `06cdc4fd61486cb4e0d138feff10c685bc1a0858` (M7-C, November 8, 2026).
@@ -117,6 +117,8 @@ Physical `R`, `RX`, `TICK`, `DETECTOR`, `OBSERVABLE_INCLUDE`, `rec[-k]`, physica
 - `BIND` is a runtime sequencing directive, allowed after declarations and between operations, preserving its exact order. The lowering must initialize `CircuitCompiler(blocks, logical_to_block={})` when using source `BIND` directives. Without this explicit empty initial mapping the current compiler implicitly reserves block-named handles and text BIND would collide. Never use default auto-reservation as a substitute.
 - `PARALLEL` contains at least two ordinary operation statements on disjoint logical/physical targets. The existing compiler remains the authority for physical overlap and lifecycle checks. No nesting or BIND inside v1 PARALLEL.
 - `REPEAT N` may contain ordinary *state-preserving* operations (`SE`, `H`, `CX`, `X`, `Y`, `Z`) and `PARALLEL` groups composed exclusively of these; nested `REPEAT` is allowed and statically unrolled. Disallow `INIT_*`, `MX`, `MZ`, `BIND`, `KNILL_EC`, `BELL_PREP`, declarations and explicit operation labels within any repeat in v1. These restrictions prevent implicit fresh logical names, unintended epoch changes and duplicate source labels.
+- A REPEAT body must be nonempty. Together with positive counts and the minimum
+  parallel size this prevents unbounded iteration of an empty body at zero cost.
 - `REPEAT` does not imply compression into Stim `REPEAT` or one `SyndromeExtraction(N)` module. Unrolling means **N copies of the existing operations and their logical barriers**, including separate module/stage identities and correct per-module noise/provenance.
 - Set a documented, tested upper bound on total expanded operation count (recommended default 100,000) and nesting depth; reject over-budget programs **before** materializing huge lists.
 - All code/patch declarations and runtime statements are deterministic and immutable after validation. Preserve source file, line, column and spans on AST nodes for diagnostics. Generated physical artifacts are the same as equivalent direct Python assembly when using identical operation labels, explicit bindings, noise models and ordering.
@@ -210,8 +212,8 @@ from equality/hash so otherwise identical LF/CRLF trees compare equally; the
 offset fields remain available for slicing each original source. Node spans
 include punctuation, exclude surrounding indentation/trailing comments, and
 include any interior comments/newlines. The FileNode span covers the whole input.
-All source errors derive from LstimSyntaxError and carry source_name, line,
-column, span, a bounded excerpt and caret. Lexical and parse subclasses distinguish
+All source errors derive from LSTIMError. Located syntax and semantic errors carry
+source_name, line, column, span, a bounded excerpt and caret. Lexical and parse subclasses distinguish
 invalid input positions from invalid token order/EOF; contextual lexing can report
 an unexpected character for an unavailable token. Ordinary errors are raised for
 callers to catch and display, with raw Lark exception chaining suppressed.
@@ -221,3 +223,62 @@ newlines), 64 nested brace blocks, and 128 digits per decimal integer. Oversized
 input raises a located LstimLimitError before AST construction. The transformer
 is iterative and repeats are never expanded here. These syntactic budgets are
 separate from M8-B's required expanded-operation budget (recommended 100,000).
+
+## 8. Implemented M8-B semantic program
+
+The language-namespace `parse_logical_circuit(source, source_name='<string>',
+max_operations=100_000)` entrypoint returns an immutable LogicalProgram.
+`program.ast` retains the unexpanded syntax; `source`/`source_name` retain the
+original diagnostic input. `blocks` and `to_operations()`/`operations` are tuples
+of actual existing LogicalBlock and OperationModule/BindPatch objects. Inspecting
+them does not compile a physical circuit or build a DEM. No code/patch/operation
+definition is a mutable per-shot context. Physical imports occur only when
+lowering or compiling; syntax-only clients remain independent.
+
+Validation enforces FORMAT(1), odd integer distance >=3, preceding code aliases,
+unique aliases/physical patch IDs/placement indices, and declaration ordering.
+Code aliases, physical IDs and logical handles remain separate namespaces. Every
+operation target requires a preceding BIND introducing its handle. This tracks
+name existence only: active/retired state, reservations, overlap, logical Bell
+resources and basis determinism remain the existing compiler's responsibility.
+Every unary v1 opcode (including SE/INIT) takes exactly one target; CX/BELL_PREP
+take two distinct targets and KNILL_EC three. Existing Python multi-target APIs
+remain unchanged; use explicit PARALLEL for v1 concurrent unary instructions.
+Supported rounds/options/defaults and unique explicit labels follow section 3.
+Unsupported physical/unknown command text fails in the syntax layer before
+semantic analysis; manually supplied unknown AST opcodes also fail validation.
+No epoch, module number or physical detector/record index can be overridden.
+
+REPEAT accepts only unlabelled SE/H/CX/X/Y/Z operations and primitive parallel
+groups of those, including nested repeats within the 64-block syntax bound.
+Static cost sums all operation/directive occurrences, counts each parallel
+member, and multiplies repeat costs with budget checks before materialization.
+The default maximum is 100,000; max_operations can set another positive integer.
+All static validation completes before constructing any code/patch definitions.
+Each repeated operation is a separate existing object and barrier; SE(1) repeated
+N times is not SE(N), and parallel groups are not flattened or sorted.
+
+`program.compile(noise_model=None, allow_open_outputs=False)` instantiates
+`CircuitCompiler(program.blocks, logical_to_block={})` and delegates exactly once
+to its compile method. It returns the standard CompiledCircuit, including all
+canonical detector/record/use/stage metadata and existing offline APIs. BIND
+remains an existing directive with no reset/time/noise. The physical compiler
+alone increments epochs at actual LogicalInit. Repeated calls with different
+noise models construct independent artifacts and leave the source/program intact.
+
+LSTIMSemanticError reports the offending source statement/option and its span.
+LSTIMCompileError preserves the original validation exception in original_error
+and __cause__. Current compiler errors expose no reliable source statement token;
+the wrapper therefore sets span/line/column to None and reports the known file
+and underlying reason. It never infers implicit module numbers from operation
+counts or guesses a failing source line. `operation_spans` aligns with lowered
+entries (nested tuples for parallel members); `label_spans` maps explicit source
+labels to their statement spans. Existing operation_id and composite_ids preserve
+these labels in successful compiled metadata, including labelled Knill children.
+
+M8-B certifies focused exact physical/DEM/metadata equivalence against independent
+Python references and unchanged compiler validation. The package-root parser,
+parse_logical_file, canonical formatter and their installed public interface
+remain M8-C. Full raw-sample/decoder predictions and noisy LER equivalence across
+the complete example suite remain M8-D. No CLI, implicit allocator, physical
+scheduler, decoder, simulator or alternate physical compiler is introduced here.

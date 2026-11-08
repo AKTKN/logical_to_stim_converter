@@ -2,7 +2,116 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M8_A_IMPLEMENTED` (LSTIM syntax; M7 physical paths preserved)
+**Overall state:** `M8_B_IMPLEMENTED` (LSTIM semantics and existing-compiler lowering)
+
+## M8-B static semantics, lowering and compiler bridge — 2026-11-08
+
+Baseline: main `0370baf7623791bbf473ac31aec71b5174e86d7e` (M8-A, 768 tests).
+Pre-existing inspection/export changes and report deletions are preserved and
+excluded from this commit. No physical compiler/core/operation/noise/decoder or
+external_lib source changes. Dependencies and the M8-A grammar remain unchanged.
+
+New language/semantics.py validates FORMAT(1), declaration order, odd distance
+>=3, unique code/patch/index names, preceding aliases and BIND-introduced handles,
+exact opcode signatures, rounds, typed/legal/unique options and source labels.
+It tracks name existence only, without a physical occupancy or tableau model.
+Repeated bodies allow unlabelled SE/H/CX/X/Y/Z, nested repeats and primitive
+parallel groups. PARALLEL requires >=2 primitives and REPEAT a nonempty body.
+Static cost counts each existing operation/BindPatch and parallel member, guards
+repeat multiplication/sums before materialization, and defaults to 100,000
+occurrences (configurable positive max_operations), within M8-A's 64-block bound.
+All checks finish before code/patch construction or repeat expansion.
+
+language/lowering.py uses the actual CodeSpec.rotated_surface/LogicalBlock.placed
+factories and existing frozen LogicalInit, SyndromeExtraction, TransversalH/CNOT,
+LogicalPauli, LogicalMeasure, BellStatePrep, KnillEC and BindPatch constructors.
+Target/control order, defaults, source labels and zero-duration reservations are
+preserved. Each repeated occurrence is a fresh object/barrier; parallel groups
+remain ordered tuples and separate SE(1)s never become SE(N).
+
+language/program.py exports namespace-only LogicalProgram/parse_logical_circuit.
+Source/AST, declared blocks, operations, aligned operation_spans and label_spans
+are immutable and inspectable without physical compilation. compile delegates
+once to CircuitCompiler(blocks, logical_to_block={}), then its existing compile
+method with the requested noise/open-output flags. Return type is unchanged
+CompiledCircuit. Physical imports are deferred so the M8-A syntax-only wheel
+regression remains valid. The package-root API remains unchanged.
+
+LSTIMError unifies source errors while preserving every M8-A syntax class and
+diagnostic. LSTIMSemanticError has precise statement/option spans and excerpts;
+LSTIMCompileError preserves original_error and __cause__. Existing compiler
+exceptions expose no reliable source statement marker; the bridge reports the
+known file with span/line/column=None instead of guessing implicit module IDs.
+Explicit labels survive in existing fragment operation_id/composite_ids and
+CompositeInfo, with source spans retained separately on the LogicalProgram.
+
+### M8-B verification
+
+Local commands use `.venv/bin/python` on Linux/WSL2 Python 3.12.7. Inspected actual
+CircuitCompiler/plan_program, CompilerContext/lifecycle, operation constructors,
+code/layout factories and the three-patch example before integration. Inspected
+the pinned public stimflow Chunk.verify implementation; all physical fragments
+continue through it. Pins remain Stim 1.15.0, stimflow 1.17.dev0 at ffe0d043 and
+Lark 1.3.1. No upstream source was changed.
+
+- B1: `python -m pytest -q tests/test_lstim_semantics.py`: **117 passed in 0.20 s**;
+  Ruff src/tests passes. Includes semantic vs earlier syntax failures, located
+  option diagnostics, type/arity/default rules, loop cost/depth/exact budget,
+  forbidden repeated resources/labels and no physical allocation/lifecycle copy.
+- B2: `python -m pytest -q tests/test_lstim_lowering.py`: **47 passed in 0.22 s**;
+  Ruff src/tests passes. Independently authored Python objects/fields, placement/
+  site maps, explicit labels/bindings, nested barriers and fresh repeated object
+  identities match; inspection cannot invoke CircuitCompiler.
+- B3: `python -m pytest -q tests/test_lstim_compile.py --durations=5`:
+  **26 passed in 11.76 s**; Ruff src/tests/examples passes. Signed d=3/5 X/Z
+  memory, mixed-round parallel H/SE, Bell defaults/overrides, Knill default and
+  pre-existing resources, and the full three-cycle P0/P1/P2 contract compare exact
+  ideal/noisy Stim circuits, DEMs, detector coordinates, global record/observable
+  metadata, stages/ancestry, use histories and source-labelled children against
+  independently authored Python programs with the same explicit bindings and
+  empty mapping. Chunk/fragment verification, Stim DEM/noiseless detector checks
+  and independent compilation/noise/open-output continuation are exercised.
+  Lifecycle, occupied/stale aliases, parallel overlap, wrong resource state,
+  nondeterministic readout, implicit-ID collision and mixed-distance coordinate
+  collision still fail in the existing compiler with their original cause.
+- Combined: `python -m pytest -q tests/test_lstim_semantics.py
+  tests/test_lstim_lowering.py tests/test_lstim_compile.py --durations=5`:
+  **190 passed in 11.92 s**. The first B1 run exposed two harness cases sending
+  composites into grammar-forbidden PARALLEL; the first B3 run used a nonexistent
+  DecoderView.dem test attribute. Both harnesses were corrected without changing
+  existing tests or weakening a physics assertion; final checkpoints above pass.
+- M8-A compatibility checkpoint (syntax plus semantics): **280 passed in 4.51 s**,
+  including isolated-wheel syntax loading with physical imports blocked.
+- B4: `python -m pytest --durations=10`: **958 passed in 670.19 s (0:11:10)**,
+  retaining all 768 previous cases. The slowest existing test is the d=5 reused/
+  fresh encoded-reference teleportation check at 32.81 s; no physics test changes.
+- `python -m ruff check src tests examples`: **all checks passed**, including
+  an independent clean export of the exact staged files.
+- That staged export passes all six frontend modules (M8-A and M8-B):
+  **353 passed in 16.41 s**, using `PYTHONPATH=src` and `--durations=5`.
+  Its sdist/wheel build passes. A separate isolated-wheel namespace consumer
+  compiles a labelled three-patch Knill cycle, verifies bindings/relocation,
+  51 wires, labels, independent noise, metadata/DEM/views/frame plans, and checks
+  every package module came from the wheel. PyMatching/Matplotlib/examples/
+  external_lib/knill_bench imports are actively blocked. This is internal
+  namespace compatibility evidence, not M8-C public-root/file/formatter polish.
+- `python -m build --outdir /tmp/lstim-m8b-dist` and the clean staged export's
+  build: **sdist/wheel built successfully**. Archive checks verify identical
+  grammar bytes, new runtime modules matching the Git index, unchanged exact
+  Lark pin and the canonical contract in sdist; no examples/tests/external code
+  enter the wheel. Final ledger changes do not alter tested code/test files.
+- The README source snippet compiles to **17 qubits / 40 detectors**, with valid
+  metadata and DEM. `python -m pip check`: **no broken requirements**.
+  `git diff --check` and `git diff --cached --check`: **pass**. Staged runtime
+  changes are confined to language/ and package instruction/status documents.
+
+Implemented/verified: static semantics, exact existing-object lowering and focused
+physical/DEM/metadata equivalence. No implemented-but-unverified physical behavior
+is introduced. Remaining M8-C: package-root/file APIs, canonical formatter and
+installed public-interface polish. Remaining M8-D: complete raw-sample/decoder/
+LER equivalence certification. No CLI, allocator, decoder, physical scheduler,
+adaptive operation or alternate compiler is introduced. Remote platform evidence
+is separate from local Linux verification.
 
 ## M8-A LSTIM lexer, parser, AST and diagnostics — 2026-11-08
 

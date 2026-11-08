@@ -1,5 +1,39 @@
 # STATUS — Tests
 
+## M8-B update — 2026-11-08
+
+Added 190 tests while preserving all 768 M1–M8-A cases unchanged:
+
+- test_lstim_semantics.py (117): declaration/version/distance/name/order checks,
+  exact opcode arity/rounds, bool/int/enum option types and duplicates, labels,
+  loop restrictions, budgets/depth/exact cost, manual AST defensive validation,
+  source-aware diagnostics and no static geometry allocation/lifecycle copying.
+- test_lstim_lowering.py (47): independently authored existing Python operation
+  types/fields/defaults/labels, fixed patch/site definitions, explicit ordered
+  BINDs, the three-cycle reuse schedule, distinct repeated objects, parallel/SE
+  barriers, immutable source/operations and budget-before-allocation ordering.
+- test_lstim_compile.py (26): real d=3/5 X/Z signed memory, unequal parallel
+  rounds/H, Bell defaults, Knill default/pre-existing resources and full d=3
+  three-cycle explicit bindings; exact ideal/noisy circuits, DEMs, canonical
+  record/detector/observable/use/stage/ancestry metadata and actual signed flows
+  against independently authored empty-mapping Python references. Tests retain
+  compiler lifecycle/resource/overlap/geometry failure causes, standard open
+  outputs/continuation and independent noise artifacts, including existing views
+  and frame-plan APIs. No runtime decoder or physics assertions are altered.
+
+B1: 117 passed in 0.20 s; B2: 47 passed in 0.22 s; B3: 26 passed in 11.76 s.
+Combined focused command: `python -m pytest -q tests/test_lstim_semantics.py
+tests/test_lstim_lowering.py tests/test_lstim_compile.py --durations=5`:
+190 passed in 11.92 s. M8-A syntax plus semantics: 280 passed in 4.51 s, retaining
+the isolated wheel grammar/import guard. Ruff src/tests/examples passes. Root
+STATUS records actual full regression/build and final staged-source evidence.
+Final `python -m pytest --durations=10`: **958 passed in 670.19 s**. The exact
+staged export independently passes all **353 M8-A/B frontend cases in 16.41 s**,
+lint and sdist/wheel builds. An isolated internal-namespace wheel consumer passes
+physical Knill compilation with optional/example/reference imports blocked.
+M8-C formatter/file/public-root APIs and M8-D complete noisy sample/decoder E2E
+certification remain deferred.
+
 ## M8-A update — 2026-11-08
 
 Added 163 syntax-only tests, preserving all 605 M1–M7-C tests unchanged:

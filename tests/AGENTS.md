@@ -37,7 +37,11 @@ corrupted Bell semantics after first checking rejection of stale source requests
 
 M8-A syntax tests exercise the shared grammar, immutable source-located AST,
 diagnostics/resource limits and isolated wheel loading. They do not certify
-physical behavior: M8-B/D must test lowering against the existing physics path.
+physical behavior. M8-B independently compares existing operation objects, exact
+physical ideal/noisy circuits, DEMs and canonical metadata against Python programs
+with the same explicit BindPatch directives and empty initial mapping. Test
+pre-allocation expansion budgets and unchanged compiler lifecycle failures/cause
+chains. M8-D will add full noisy sample/decoder E2E certification.
 
 M7-C independently certifies three working patches through >=3 cycles using
 actual physical tableaux/correction execution, random gauges and Bell branches,

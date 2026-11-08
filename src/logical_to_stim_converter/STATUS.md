@@ -1,5 +1,22 @@
 # STATUS — Package root
 
+## M8-B update — 2026-11-08
+
+The language namespace now exports immutable LogicalProgram/parse_logical_circuit
+with static declaration/signature/option/name validation, pre-allocation repeat
+budgets and exact existing-operation/BindPatch lowering. compile delegates once
+with an empty initial mapping to the unchanged CircuitCompiler and returns its
+standard artifact. Physical imports are deferred until lowering/compilation;
+parse_ast/lex_source remain syntax-only and physically independent. Semantic
+errors are located; compiler errors preserve cause/file without guessed lines.
+190 focused checks pass, with independent Python-object and real physical/DEM/
+metadata equivalence. Root/language/test ledgers record full-run evidence.
+Full regression: 958 passed in 670.19 s, retaining all 768 previous checks.
+Clean staged frontend: 353 passed in 16.41 s; lint, sdist/wheel build and an
+isolated internal-namespace physical compile with optional imports blocked pass.
+Root public exports and physical/core/operation/noise/decoding code are unchanged.
+M8-C root/file APIs/formatter and M8-D full noisy E2E certification remain separate.
+
 ## M8-A update — 2026-11-08
 
 Internal language/ now provides grammar-backed parse_ast/lex_source with frozen

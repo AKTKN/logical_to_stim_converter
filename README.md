@@ -1,7 +1,7 @@
 # logical_to_stim_converter
 
 **Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance,
-offline decoder views, ordinary/Knill decoding demos, and LSTIM syntax trees.**
+offline decoder views, ordinary/Knill decoding demos, and LSTIM semantic compilation.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -35,23 +35,48 @@ Stim commit `ffe0d043598ed5df0851a3e6b4920359a23fafbd`, subdirectory
 `glue/stimflow`. Installation needs network access to GitHub; no local
 `external_lib/` copies are required. See [development notes](docs/development.md).
 
-## LSTIM syntax checkpoint (M8-A)
+## LSTIM semantic frontend (M8-B)
 
-The internal syntax layer parses `.lstim` text into immutable, source-located data:
+The language namespace validates `.lstim` text and lowers it to existing Python
+operations. Compilation uses the same verified physical compiler:
 
 ```python
-from logical_to_stim_converter.language import parse_ast
+from logical_to_stim_converter import NoiseModel
+from logical_to_stim_converter.language import parse_logical_circuit
 
-tree = parse_ast("FORMAT(1)\nINIT_Z(3) D\nMZ D", source_name="memory.lstim")
-assert tree.format_version == 1
-assert tree.statements[0].opcode == "INIT_Z"
+source = """FORMAT(1)
+CODE sc ROTATED_SURFACE(3)
+PATCH P0 sc index=0
+BIND D P0
+INIT_Z(3) D
+REPEAT 2 {
+    SE(1) D
+}
+MZ D
+"""
+program = parse_logical_circuit(source, source_name="memory.lstim")
+assert program.blocks[0].block_id == "P0"
+operations = program.to_operations()  # Immutable, including the explicit BindPatch.
+compiled = program.compile(noise_model=NoiseModel.uniform_depolarizing(0.001))
+assert compiled.circuit.num_detectors > 0
 ```
 
-This checks syntax only. Semantic validation and translation to the existing
-physical compiler are planned for M8-B; the public program/file API and formatter
-are planned for M8-C. See the [v1 language contract](docs/lstim_v1.md) for required
-declarations/bindings, line/block rules, reserved words and parser limits.
-The runtime pins Lark 1.3.1 and ships the same grammar in wheel and sdist.
+`parse_ast` remains available for syntax-only inspection. LogicalProgram retains
+that AST, the source text, fixed blocks, ordered operations and source spans.
+Static checks validate declarations, signatures/options, previously bound names
+and repeats before materializing at most 100,000 operations/directives by default
+(configurable with `max_operations`). Repeats preserve each operation/barrier;
+parallel groups stay tuples. The existing compiler validates physical lifecycle,
+geometry and flows and owns all noise/timing. Each compilation starts with an
+empty initial mapping and executes every source BIND in order.
+
+Semantic errors carry file/line/column/excerpt/caret. Compiler validation failures
+raise `language.errors.LSTIMCompileError` with the original exception as cause;
+they report the file without guessing a statement location. Explicit labels map
+through `program.label_spans` and existing fragment/composite operation IDs.
+The package-root/file API and formatter remain M8-C, and full noisy E2E
+certification remains M8-D. See the [v1 language contract](docs/lstim_v1.md).
+Lark 1.3.1 and the packaged grammar are unchanged.
 
 ## Two independent patches
 
@@ -305,8 +330,8 @@ Repeated rounds are represented as `ChunkLoop` in fragments, then expanded to
 export explicit physical layers and per-record metadata. There is no large-round
 compression or general scheduling optimizer.
 
-Other code families, S/other logical Clifford gates, LSTIM semantic lowering/public
-program APIs, a CLI, production decoder adapters, and adaptive operations remain
+Other code families, S/other logical Clifford gates, LSTIM package-root/file APIs
+and formatting, a CLI, production decoder adapters, and adaptive operations remain
 unimplemented. Explicit physical block reuse is supported through BindPatch.
 `surface-sim` is a pinned geometry/schedule reference, not a runtime
 dependency; Hex and lomatching are not integrated. External copies remain ignored

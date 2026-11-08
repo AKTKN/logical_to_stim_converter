@@ -1,5 +1,52 @@
 # STATUS — LSTIM language
 
+## M8-B implemented — 2026-11-08
+
+Baseline main 0370baf7623791bbf473ac31aec71b5174e86d7e (M8-A, 768 tests).
+semantics.py validates static names/order, FORMAT, code distances, signatures,
+options/types/labels and repeats without modeling quantum lifecycle. Expansion
+cost counts operations/directives/parallel members before constructing any code
+or patch; default max_operations=100,000, configurable positive integer. Empty
+repeat bodies are rejected so large empty loops cannot hide zero-cost iteration.
+PARALLEL requires >=2 primitive operations; repeated bodies restrict resource
+changes/labels and preserve the 64-block syntax bound.
+
+lowering.py constructs the existing code/patch/operation types, preserving each
+BIND, default flag/round value, label, ordered operand, separate SE and parallel
+tuple. Repeated objects are fresh. program.py exports namespace-only immutable
+LogicalProgram/parse_logical_circuit, blocks/operations/to_operations, original
+source/AST and aligned source/explicit-label spans. compile delegates to
+CircuitCompiler(blocks, logical_to_block={}) and the unchanged compile method.
+No physical lifecycle/flow/noise/decoder logic is duplicated. Deferred imports
+preserve syntax-only use and its existing isolated-wheel regression.
+
+errors.py retains all M8-A syntax classes and adds LSTIMError, SemanticError and
+CompileError. Semantic diagnostics locate statements/options; compiler wrappers
+retain original_error/__cause__, source file and explicitly absent statement span.
+The compiler provides no reliable statement marker; implicit module IDs are
+never guessed. Source labels retain existing operation_id/composite provenance.
+
+Checkpoints: semantics 117 passed in 0.20 s; lowering 47 passed in 0.22 s;
+physical bridge 26 passed in 11.76 s; combined 190 passed in 11.92 s. Ruff passes.
+M8-A syntax+semantics 280 passed in 4.51 s including wheel/physical-import isolation.
+Focused tests compare actual objects, layouts/sites, physical ideal/noisy circuits,
+DEMs, canonical record/detector/observable/use/stage metadata, repeated-compilation
+independence and labelled Knill children against independently authored Python.
+Compiler negatives retain original lifecycle/resource/geometry errors. Root STATUS
+records complete commands and final full regression/build/source-snapshot evidence.
+Full regression: 958 passed in 670.19 s; every one of the 768 old checks remains.
+The exact staged source passes all 353 M8-A/B frontend cases in 16.41 s, lint and
+sdist/wheel builds. An isolated installed-namespace Knill consumer verifies
+bindings/relocation, labels, independent noise, DEM, metadata/views/frame plans
+with decoder/plot/example/reference imports blocked. Wheel/sdist grammar and new
+runtime modules agree with the index; README memory produces 17 wires/40 detectors.
+
+Inspected actual constructor/planner/context/lifecycle APIs and pinned public
+stimflow Chunk.verify before integrating. Dependencies remain Stim 1.15.0,
+stimflow 1.17.dev0 ffe0d043, Lark 1.3.1. No external_lib/physical/decoder source
+changes. Root/file parser and formatter remain M8-C; full noisy sampling/decoder
+E2E equivalence certification remains M8-D. No allocator/CLI/scheduler/decoder.
+
 ## M8-A implemented — 2026-11-08
 
 Baseline main 06cdc4fd61486cb4e0d138feff10c685bc1a0858 (M7-C).

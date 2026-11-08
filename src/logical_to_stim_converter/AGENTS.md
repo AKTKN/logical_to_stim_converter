@@ -7,10 +7,14 @@ Hex, lomatching, and knill_bench must not be imported here. BellStatePrep, Knill
 placeholder operations until implemented with physics tests. Preserve the `src/`
 layout and consult per-directory AGENTS/STATUS before changes.
 
-M8-A adds an internal language namespace with parse_ast/lex_source, frozen syntax
-nodes and located syntax diagnostics. The root API stays unchanged. Its shipped
-Lark grammar is the syntax authority; no semantic lowering or physical compilation
-is implied by a successful parse. Lark 1.3.1 is a pinned runtime dependency.
+M8-A adds language parse_ast/lex_source, frozen syntax nodes and located syntax
+diagnostics. M8-B adds namespace-only LogicalProgram/parse_logical_circuit, static
+validation, bounded unrolling and existing-operation/BindPatch lowering. compile
+delegates with logical_to_block={} and returns the standard CompiledCircuit.
+Syntax-only parsing still implies no semantic or physical validation. Physical
+imports stay deferred until lowering/compilation. The root API stays unchanged;
+the shipped Lark 1.3.1 grammar remains the syntax authority. M8-C owns root/file
+API and formatter polish; M8-D owns full physical/noisy E2E certification.
 
 M6-A exports global MeasurementInfo/MeasurementKey/DetectorInfo/ObservableInfo,
 DetectorBoundaryCandidate, PreparationDependencyEvent, PreparationInfo,

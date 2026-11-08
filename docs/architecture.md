@@ -13,16 +13,33 @@ and loops -> physical-layer parallel adapter -> verified `stimflow.ChunkCompiler
 -> ideal circuit and final metadata -> `NoiseInjector` -> optional noisy circuit.
 The caller samples the circuit and may later supply a decoder.
 
-## LSTIM syntax boundary (M8-A)
+## LSTIM frontend boundary (M8-A/B)
 
 The separate M8-A `language/` frontend loads one packaged Lark grammar using
 LALR/contextual lexing. `parse_ast` produces frozen source-located declarations,
 bindings, operations, parallel groups and unexpanded repeats; `lex_source` exposes
 the same grammar's contextual tokens. Neither path constructs physical/compiler
 objects. Parser limits bound text, tokens, integer digits and nesting. Syntax
-success does not validate version support, signatures or quantum state. The
-tracked [LSTIM v1 contract](lstim_v1.md) specifies the later M8-B lowering through
-the existing compiler; the public program/formatter API remains M8-C.
+success does not validate version support, signatures or quantum state.
+
+M8-B's separate semantics module validates version, declaration order/names,
+signatures/options, labels, repeat restrictions and expansion cost. It does not
+track active patches or logical tableaux. After validation, lowering constructs
+CodeSpec/LogicalBlock instances and the existing frozen OperationModule/BindPatch
+objects. Repeats unroll to separate occurrences; parallel groups remain tuples.
+The immutable LogicalProgram retains source/AST, blocks, operations and aligned
+source spans. Namespace-only parse_logical_circuit returns this program without
+physical compilation. Its compile method instantiates the existing CircuitCompiler
+with logical_to_block={} and returns its standard artifact. No source binding is
+removed or converted to an initial mapping. Existing physical lifecycle, geometry,
+flow, timing, noise and decoder-neutral metadata paths are reused unchanged.
+
+Compiler validation failures preserve their original exception chain and known
+source file. No line is guessed when the compiler supplies no statement marker.
+Explicit labels retain source spans and feed existing operation_id/composite_ids;
+there is no second planner for implicit module IDs. The tracked
+[LSTIM v1 contract](lstim_v1.md) documents current limits. Package-root/file APIs
+and formatting remain M8-C; full noisy sample/decoder E2E certification is M8-D.
 
 ## Identity and data separation
 

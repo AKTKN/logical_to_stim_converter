@@ -1,15 +1,22 @@
-"""Located LSTIM syntax diagnostics without exposing Lark exception dumps."""
+"""Source-aware syntax/semantic diagnostics and preserved compiler failures."""
 
 from .ast_nodes import SourceSpan
 
 
-class LstimSyntaxError(ValueError):
-    """A lexical, grammatical or parser-budget error in user source."""
+class LSTIMError(ValueError):
+    """A source diagnostic; a missing span means only the file is known."""
 
-    def __init__(self, message: str, span: SourceSpan, source: str) -> None:
+    def __init__(
+        self, message: str, span: SourceSpan | None, source: str,
+        *, source_name: str = "<string>",
+    ) -> None:
         self.message = message
         self.span = span
-        self.source_name = span.source_name
+        self.source_name = span.source_name if span is not None else source_name
+        if span is None:
+            self.line = self.column = self.excerpt = self.caret = None
+            super().__init__(f"{self.source_name}: {message}")
+            return
         self.line = span.start_line
         self.column = span.start_column
         line_start = source.rfind("\n", 0, span.start_offset) + 1
@@ -26,6 +33,10 @@ class LstimSyntaxError(ValueError):
         )
 
 
+class LstimSyntaxError(LSTIMError):
+    """A lexical, grammatical or parser-budget error in user source."""
+
+
 class LstimLexError(LstimSyntaxError):
     """A character or token that is not accepted at this source position."""
 
@@ -36,3 +47,17 @@ class LstimParseError(LstimSyntaxError):
 
 class LstimLimitError(LstimSyntaxError):
     """A source exceeds a documented syntactic resource limit."""
+
+
+class LSTIMSemanticError(LSTIMError):
+    """An invalid declaration, name, signature, option or static expansion."""
+
+
+class LSTIMCompileError(LSTIMError):
+    """An existing compiler validation failure, without guessed source locations."""
+
+    def __init__(self, original_error: Exception, source_name: str) -> None:
+        self.original_error = original_error
+        super().__init__(
+            f"Physical compilation failed: {original_error}", None, "", source_name=source_name,
+        )
