@@ -24,7 +24,7 @@ jobs:
       - name: Lint
         run: python -m ruff check src tests examples
       - name: Physics, mapping, lifecycle, and noise tests
-        run: python -m pytest
+        run: python -m pytest -n 8
       - name: Build source distribution and wheel
         run: python -m build
       - name: Two-patch example

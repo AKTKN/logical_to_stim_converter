@@ -2,6 +2,7 @@
 
 M8-A implements the grammar-backed lexer/parser and immutable syntax tree.
 M8-B adds semantic validation, bounded lowering and existing-compiler integration.
+M8-C adds package-root text/file APIs, typed file errors and canonical formatting.
 The canonical specification and complete examples are in [LSTIM v1](lstim_v1.md).
 The former R/TH/TCNOT sketch is superseded; those names are not accepted v1 syntax.
 
@@ -18,15 +19,25 @@ MZ D
 ```
 
 `logical_to_stim_converter.language.parse_ast` checks syntax only.
-`language.parse_logical_circuit` returns an immutable LogicalProgram with existing
+`parse_logical_circuit` (package root or language namespace) returns an immutable LogicalProgram with existing
 CodeSpec/LogicalBlock definitions and OperationModule/BindPatch objects. Its
 compile method delegates to CircuitCompiler with an explicit empty initial
 mapping; every source BIND is executed in order. Static loop analysis bounds
-expanded occurrences before allocating patches or unrolling. M8-C will add
-the public text/file API and canonical formatter; M8-D will independently certify
-physical, DEM and sample equivalence.
+expanded occurrences before allocating patches or unrolling. `parse_logical_file`
+reads UTF-8 and retains the path and original CRLF offsets. `format_logical_circuit`
+preserves the nested AST and all operation semantics, using four spaces, LF and
+a final newline, dropping comments/blank lines. See the [language guide](lstim.md)
+for installed API use and diagnostics. M8-D will independently certify full noisy
+physical, DEM and sample/decoder equivalence.
 
 Logical PARALLEL groups and REPEAT boundaries retain exact logical barriers. The existing
 physical compiler continues to own physical TICKs, scheduling, noise, flow
 verification and epoch/lifecycle validation. No implicit patch allocation,
 decoder, CLI or alternate physical compiler is part of this frontend.
+
+## Deferred features
+
+Automatic allocation, additional code families, non-Clifford gates, runtime
+conditionals, probabilistic branching, text-defined noise/decoder configuration,
+physical Stim passthrough and a CLI remain unsupported. v1 REPEAT is bounded
+static unrolling, preserving each existing operation and logical barrier.

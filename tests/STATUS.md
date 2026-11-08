@@ -1,5 +1,27 @@
 # STATUS — Tests
 
+## M8-C update — 2026-11-08
+
+Added 83 cases while retaining all 958 previous regressions: 57 formatter, 25
+public API/files and one combined wheel/sdist isolation check. Exact typed AST
+signatures exclude only spans; independently authored operation/directive tuples
+check all fields/control order/defaults/labels and nested logical barriers.
+Malformed raw ASTs fail. API tests cover UTF-8/CRLF/Unicode paths, OS/encoding
+causes/locations, readonly order/labels, budgets and independent repeated physical
+compilation. The installed root consumer compiles both frozen sample files with
+valid metadata/DEMs, labelled Knill composites/children, views/frame/stage APIs
+and independent noise; all package modules must come from the wheel. Optional
+and repository imports are actively blocked. Both packaging tests build privately
+so pytest-xdist cannot race on setuptools artifacts; no physics assertion changes.
+
+C1 57/1.47 s; C2 API+formatter 82/2.07 s; full API checkpoint 1040/125.01 s;
+C3 packaging+lexer 53/6.87 s. Final `python -m pytest -n 8 --durations=10`:
+1041 passed in 119.24 s. Exact staged frontend 436 passed in 14.87 s; staged
+Ruff/build pass. pytest-xdist 3.8.0 supplies eight workers locally and in the
+Ubuntu/Windows Python 3.11/3.12 matrix; actual local execution is Linux Python
+3.12.7. Root STATUS records full commands and staged/archive/example evidence.
+M8-D full noisy sample/decoder equivalence remains deferred.
+
 ## M8-B update — 2026-11-08
 
 Added 190 tests while preserving all 768 M1–M8-A cases unchanged:

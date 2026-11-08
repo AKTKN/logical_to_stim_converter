@@ -13,7 +13,7 @@ and loops -> physical-layer parallel adapter -> verified `stimflow.ChunkCompiler
 -> ideal circuit and final metadata -> `NoiseInjector` -> optional noisy circuit.
 The caller samples the circuit and may later supply a decoder.
 
-## LSTIM frontend boundary (M8-A/B)
+## LSTIM frontend boundary (M8-A/B/C)
 
 The separate M8-A `language/` frontend loads one packaged Lark grammar using
 LALR/contextual lexing. `parse_ast` produces frozen source-located declarations,
@@ -28,7 +28,7 @@ track active patches or logical tableaux. After validation, lowering constructs
 CodeSpec/LogicalBlock instances and the existing frozen OperationModule/BindPatch
 objects. Repeats unroll to separate occurrences; parallel groups remain tuples.
 The immutable LogicalProgram retains source/AST, blocks, operations and aligned
-source spans. Namespace-only parse_logical_circuit returns this program without
+source spans. Public parse_logical_circuit returns this program without
 physical compilation. Its compile method instantiates the existing CircuitCompiler
 with logical_to_block={} and returns its standard artifact. No source binding is
 removed or converted to an initial mapping. Existing physical lifecycle, geometry,
@@ -38,8 +38,20 @@ Compiler validation failures preserve their original exception chain and known
 source file. No line is guessed when the compiler supplies no statement marker.
 Explicit labels retain source spans and feed existing operation_id/composite_ids;
 there is no second planner for implicit module IDs. The tracked
-[LSTIM v1 contract](lstim_v1.md) documents current limits. Package-root/file APIs
-and formatting remain M8-C; full noisy sample/decoder E2E certification is M8-D.
+[LSTIM v1 contract](lstim_v1.md) documents current limits. M8-C exports
+LogicalProgram, parse_logical_circuit, parse_logical_file, format_logical_circuit
+and typed errors from the package root and language namespace. UTF-8 file parsing
+preserves path/CRLF offsets and wraps OS/encoding causes. The formatter operates
+on the nested source AST, without unrolling or physical allocation. Static
+validation plus grammar reparsing and an exact typed semantic signature reject
+malformed ASTs and semantic changes. Signature fields include declaration/target/
+option order, scalar types, labels and all group boundaries, excluding only spans.
+Canonical text drops comments/blank lines and uses four spaces, LF/final newline.
+Only syntax/AST helpers remain subpackage-only; Lark internals are not root API.
+Installed-wheel tests compile both frozen source examples away from the checkout,
+with example/test/reference and optional decoder/plotting imports blocked. Builds
+use private temporary trees so eight pytest-xdist workers cannot race over
+setuptools output. Full noisy sample/decoder E2E certification remains M8-D.
 
 ## Identity and data separation
 

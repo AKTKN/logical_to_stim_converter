@@ -32,11 +32,13 @@ other code families and production decoder result/algorithm interfaces remain de
 7. Parallel logical operations require a coherent global `TICK`/idle schedule. `stimflow.ChunkCompiler.append` alone should not be assumed to encode simultaneous operations.
 8. Check whether logical H/CNOT actually realizes the intended logical Clifford on the selected code and logical basis; do not assume all CSS codes share the same H geometry.
 9. Preserve compatibility with Python 3.11+ and Windows development. Make `knill_bench` depend on this package, never the reverse.
-10. `language/` implements M8-A syntax and M8-B static validation/lowering through
-    the existing compiler; `docs/lstim_v1.md` is the contract. Keep AST/syntax
-    independent of physical objects. LogicalProgram preserves explicit BindPatch
-    directives and compiles with an empty initial mapping. Package-root/file APIs
-    and formatting (M8-C), full E2E certification (M8-D) and any CLI remain deferred.
+10. `language/` implements M8-A syntax, M8-B static validation/lowering and M8-C
+    public text/file/formatter APIs; `docs/lstim_v1.md` is the contract. Keep
+    AST/syntax independent of physical objects. LogicalProgram preserves explicit
+    BindPatch directives and compiles with an empty initial mapping. Formatting
+    preserves all typed semantic fields, target/binding order and nested source
+    groups; it never unrolls or compiles. UTF-8 file errors retain causes and
+    reliable locations. Full E2E certification (M8-D) and any CLI remain deferred.
 11. Canonical ideal/noisy circuits retain every verified global detector. Stage
     separation is an explicit derived annotation view; metadata keeps global IDs.
     Join preparation ancestry only through actual operand interactions/relocation.
@@ -52,7 +54,9 @@ other code families and production decoder result/algorithm interfaces remain de
 2. Inspect the actual pinned upstream APIs before copying integration code. Record versions/commits and any behavioral assumptions in status or docs.
 3. Make the smallest scoped change. Do not silently expand into parser, scheduling optimization, decoder switching, or non-Clifford support.
 4. Add a focused test that can fail on an incorrect physical flow, frame, detector, mapping, or noise rule. Do not replace physics checks with mere import tests once functionality exists.
-5. Run applicable checks: `python -m pytest`, `python -m ruff check src tests`, plus relevant Stim/flow validation.
+5. Run applicable checks: `python -m pytest -n 8` (pytest-xdist dev dependency),
+   `python -m ruff check src tests`, plus relevant Stim/flow validation. Build
+   tests use private temporary source trees to avoid parallel setuptools races.
 6. Update the affected folder's `STATUS.md` and root `STATUS.md` (what changed, evidence/tests, unimplemented/blocked items, date). Update `AGENTS.md` if architecture/responsibility changes and `README.md` if user-visible instructions change.
 7. In the completion report, separate verified behavior, implemented but unverified behavior, and remaining plans. Do not call a stub implemented.
 

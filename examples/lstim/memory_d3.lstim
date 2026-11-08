@@ -1,0 +1,9 @@
+FORMAT(1)
+CODE sc ROTATED_SURFACE(3)
+PATCH P0 sc index=0
+BIND D P0
+INIT_Z(3) D
+REPEAT 2 {
+    SE(1) D
+}
+MZ D

@@ -11,6 +11,7 @@ import pytest
 
 from logical_to_stim_converter.language import lex_source
 from logical_to_stim_converter.language.errors import LstimSyntaxError
+from tests.helpers.package_build import copy_package_source
 
 
 def test_tokens_labels_options_and_positions():
@@ -86,10 +87,11 @@ def test_grammar_has_no_lalr_conflicts(monkeypatch):
 def test_isolated_wheel_contains_and_loads_grammar(tmp_path):
     """Build and import an isolated wheel with source access and physical imports blocked."""
     root = Path(__file__).resolve().parents[1]
+    source_tree = copy_package_source(tmp_path / "source")
     dist = tmp_path / "dist"
     build = subprocess.run(
         [sys.executable, "-m", "build", "--wheel", "--no-isolation", "--outdir", str(dist)],
-        cwd=root, capture_output=True, text=True,
+        cwd=source_tree, capture_output=True, text=True,
     )
     assert build.returncode == 0, build.stdout + build.stderr
     wheel, = dist.glob("*.whl")

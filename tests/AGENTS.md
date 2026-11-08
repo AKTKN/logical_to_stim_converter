@@ -43,6 +43,15 @@ with the same explicit BindPatch directives and empty initial mapping. Test
 pre-allocation expansion budgets and unchanged compiler lifecycle failures/cause
 chains. M8-D will add full noisy sample/decoder E2E certification.
 
+M8-C tests compare all typed AST fields except spans and exact independently
+authored operation/directive tuples after formatting. Cover invalid manually
+constructed ASTs, UTF-8/CRLF/error causes, immutable repeated compilation and
+explicit labels in real composites/children. Run pytest-xdist with eight workers;
+wheel/sdist checks copy inputs into private trees before building. Installed
+consumers run outside the checkout with optional/example/test/reference imports
+blocked and assert every converter module came from the wheel. Test both source
+samples without altering existing physical or M7-C orchestration assertions.
+
 M7-C independently certifies three working patches through >=3 cycles using
 actual physical tableaux/correction execution, random gauges and Bell branches,
 plus an untouched encoded reference. Unfold reset intervals to fresh patches to

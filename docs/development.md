@@ -11,7 +11,7 @@ source .venv/bin/activate
 # .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
-python -m pytest
+python -m pytest -n 8
 python -m ruff check src tests examples
 python -m build
 python examples/two_patch_memory.py
@@ -20,6 +20,7 @@ python examples/knill_ec_single_round.py
 python examples/offline_dem_views.py
 python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
 python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
+python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -32,6 +33,7 @@ are not required.
 `pyproject.toml` pins these validated integration dependencies:
 
 - `stim==1.15.0` (wheel).
+- `lark==1.3.1` (runtime grammar/parser); grammar.lark ships in both distributions.
 - `stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow`
   (`stimflow.__version__ == "1.17.dev0"`).
 
@@ -44,7 +46,12 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and all six circuit/view/ordinary-memory/Knill-memory examples. Local verification results/platforms are recorded in STATUS;
+and all seven circuit/view/ordinary-memory/Knill-memory examples. Tests use
+pytest-xdist 3.8.0 (`.[dev]`) with eight workers; build tests use private source
+trees to avoid shared setuptools output. The isolated wheel test runs outside
+the checkout with optional/example/test/reference imports blocked, exercises
+both .lstim inputs and checks every loaded converter module came from the wheel.
+Local verification results/platforms are recorded in STATUS;
 CI configuration alone is not evidence that those remote jobs ran.
 
 `surface-sim` commit `493f800a3b4e9f80a6a569eb92d3c962dd6b09ad` supplies the

@@ -1,7 +1,7 @@
 # logical_to_stim_converter
 
 **Status (2026-11-08): verified memory, Clifford/Knill circuits, global provenance,
-offline decoder views, ordinary/Knill decoding demos, and LSTIM semantic compilation.**
+offline decoder views, ordinary/Knill decoding demos, and the LSTIM v1 Python API.**
 
 Compile Python logical-operation objects into physical Stim circuits for independent
 square rotated surface-code patches, including interacting logical Clifford circuits.
@@ -25,7 +25,7 @@ source .venv/bin/activate
 # Windows PowerShell instead:
 # .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-python -m pytest
+python -m pytest -n 8
 python -m ruff check src tests examples
 python -m build
 ```
@@ -35,14 +35,15 @@ Stim commit `ffe0d043598ed5df0851a3e6b4920359a23fafbd`, subdirectory
 `glue/stimflow`. Installation needs network access to GitHub; no local
 `external_lib/` copies are required. See [development notes](docs/development.md).
 
-## LSTIM semantic frontend (M8-B)
+## LSTIM source API (M8-C)
 
-The language namespace validates `.lstim` text and lowers it to existing Python
-operations. Compilation uses the same verified physical compiler:
+Parse UTF-8 `.lstim` logical source from text or a file, inspect its immutable
+program, and format it canonically. Compilation uses the existing physical compiler:
 
 ```python
-from logical_to_stim_converter import NoiseModel
-from logical_to_stim_converter.language import parse_logical_circuit
+from logical_to_stim_converter import (
+    NoiseModel, parse_logical_circuit, parse_logical_file, format_logical_circuit,
+)
 
 source = """FORMAT(1)
 CODE sc ROTATED_SURFACE(3)
@@ -57,8 +58,13 @@ MZ D
 program = parse_logical_circuit(source, source_name="memory.lstim")
 assert program.blocks[0].block_id == "P0"
 operations = program.to_operations()  # Immutable, including the explicit BindPatch.
+canonical_source = format_logical_circuit(program)
 compiled = program.compile(noise_model=NoiseModel.uniform_depolarizing(0.001))
 assert compiled.circuit.num_detectors > 0
+
+# From a checkout or source distribution; samples are not required by the wheel.
+from_disk = parse_logical_file("examples/lstim/memory_d3.lstim")
+assert from_disk.to_operations() == operations
 ```
 
 `parse_ast` remains available for syntax-only inspection. LogicalProgram retains
@@ -70,13 +76,24 @@ parallel groups stay tuples. The existing compiler validates physical lifecycle,
 geometry and flows and owns all noise/timing. Each compilation starts with an
 empty initial mapping and executes every source BIND in order.
 
-Semantic errors carry file/line/column/excerpt/caret. Compiler validation failures
-raise `language.errors.LSTIMCompileError` with the original exception as cause;
+The same API is available from `logical_to_stim_converter.language`.
+`format_logical_circuit(program)` or `format_logical_circuit(program.ast)` retains
+declarations, targets, labels, options, bindings and nested groups. It uses four
+spaces, LF and one final newline; comments and blank lines are discarded. It
+validates raw ASTs without physical compilation or repeat expansion. Formatting
+is deterministic, idempotent and checks all typed semantic fields on reparsing.
+
+Syntax/semantic errors carry file/line/column/excerpt/caret. `LSTIMFileError`
+wraps unreadable files or invalid UTF-8 with the original exception as cause.
+Compiler validation failures raise `LSTIMCompileError` with their original cause;
 they report the file without guessing a statement location. Explicit labels map
 through `program.label_spans` and existing fragment/composite operation IDs.
-The package-root/file API and formatter remain M8-C, and full noisy E2E
-certification remains M8-D. See the [v1 language contract](docs/lstim_v1.md).
-Lark 1.3.1 and the packaged grammar are unchanged.
+Full noisy E2E certification remains M8-D. See the [language guide](docs/lstim.md),
+[opcode/version contract](docs/lstim_v1.md), and
+[three-patch source](examples/lstim/three_patch_knill_d3.lstim).
+LSTIM is logical source; generated Stim text describes physical gates/records.
+Lark 1.3.1 is a runtime dependency and its grammar ships in the wheel and sdist.
+The Python operation-object API remains available independently of LSTIM.
 
 ## Two independent patches
 
@@ -330,8 +347,8 @@ Repeated rounds are represented as `ChunkLoop` in fragments, then expanded to
 export explicit physical layers and per-record metadata. There is no large-round
 compression or general scheduling optimizer.
 
-Other code families, S/other logical Clifford gates, LSTIM package-root/file APIs
-and formatting, a CLI, production decoder adapters, and adaptive operations remain
+Other code families, S/other logical Clifford gates, a CLI,
+production decoder adapters, and adaptive operations remain
 unimplemented. Explicit physical block reuse is supported through BindPatch.
 `surface-sim` is a pinned geometry/schedule reference, not a runtime
 dependency; Hex and lomatching are not integrated. External copies remain ignored

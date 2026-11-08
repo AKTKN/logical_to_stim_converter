@@ -53,6 +53,17 @@ class LSTIMSemanticError(LSTIMError):
     """An invalid declaration, name, signature, option or static expansion."""
 
 
+class LSTIMFileError(LSTIMError):
+    """An unreadable or non-UTF-8 source file, retaining the original exception."""
+
+    def __init__(
+        self, message: str, original_error: OSError | UnicodeDecodeError,
+        source_name: str, *, span: SourceSpan | None = None, source: str = "",
+    ) -> None:
+        self.original_error = original_error
+        super().__init__(message, span, source, source_name=source_name)
+
+
 class LSTIMCompileError(LSTIMError):
     """An existing compiler validation failure, without guessed source locations."""
 

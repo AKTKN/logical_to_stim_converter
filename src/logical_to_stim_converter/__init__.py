@@ -36,6 +36,17 @@ from .decoding import (
     make_decoder_view,
     observable_local_views,
 )
+from .language import (
+    LogicalProgram,
+    LSTIMCompileError,
+    LSTIMError,
+    LSTIMFileError,
+    LSTIMSemanticError,
+    LstimSyntaxError,
+    format_logical_circuit,
+    parse_logical_circuit,
+    parse_logical_file,
+)
 from .noise.injector import NoiseInjector
 from .noise.model import NoiseModel, NoiseOverride, NoiseParameters
 from .operations.base import OperationModule
@@ -50,6 +61,15 @@ from .operations.syndrome_extraction import SyndromeExtraction
 from .operations.transversal import TransversalCNOT, TransversalH
 
 __all__ = [
+    "LogicalProgram",
+    "parse_logical_circuit",
+    "parse_logical_file",
+    "format_logical_circuit",
+    "LSTIMError",
+    "LstimSyntaxError",
+    "LSTIMSemanticError",
+    "LSTIMCompileError",
+    "LSTIMFileError",
     "BindPatch",
     "BlockUseId",
     "BlockUseInfo",

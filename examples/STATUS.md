@@ -1,5 +1,18 @@
 # STATUS — Examples
 
+## M8-C frozen logical source samples — 2026-11-08
+
+lstim/memory_d3.lstim and lstim/three_patch_knill_d3.lstim exactly match the two
+v1 contract programs. They are UTF-8/LF logical source (enforced by Git attributes),
+not physical Stim exports, and ship in sdist. The isolated-wheel root consumer
+parses/formats/compiles both to 17/51 wires and checks real metadata/DEMs, source
+labels/composite children, existing offline APIs and independent noise. The Knill
+source preserves the explicit P0/P1/P2 reuse schedule and fresh resource handles.
+The M7-C Python runner is unchanged. All seven existing CI example commands
+pass from the exact staged export, including the three-patch 32-shot/13-row-batch
+suite. Root STATUS records full commands and regression/build evidence;
+full M8-D noisy E2E equivalence remains separate.
+
 
 ## M7-C explicit three-patch Knill memory — 2026-11-08
 

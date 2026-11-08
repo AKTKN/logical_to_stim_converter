@@ -1,9 +1,9 @@
 # LSTIM v1: Shared language and compiler contract
 
-**Status (2026-11-08):** M8-A syntax and M8-B static semantic checking/lowering
-through the existing physical compiler are implemented. This tracked document is
-the canonical contract for M8-A through M8-D. Package-root/file APIs and formatting
-(M8-C) and full noisy E2E certification (M8-D) remain future work. A successful
+**Status (2026-11-08):** M8-A syntax, M8-B static checking/lowering through the
+existing physical compiler and M8-C public text/file/formatter APIs are implemented.
+This tracked document is the canonical contract for M8-A through M8-D.
+Full noisy E2E certification (M8-D) remains future work. A successful
 syntax-only parse still establishes no semantic or quantum-state validity.
 
 **Repository:** `AKTKN/logical_to_stim_converter`. M8-A baseline is
@@ -144,7 +144,7 @@ src/logical_to_stim_converter/language/
 
 The grammar is **one source of truth**: do not separately implement an incompatible regex parser. Lexer tokens may be based on Lark's contextual lexer; reserve regular expressions for lexical patterns such as names and integers. LALR + positional metadata is the initial parsing approach. AST types should not depend on Stim, stimflow, PyMatching or concrete decoders. Semantic analysis must not duplicate M7 physical lifecycle state machines; delegate the final quantum-state and flow validation to the existing compiler.
 
-Suggested public API at end of M8-C:
+Public API (package root or language namespace):
 
 ```python
 program = parse_logical_circuit(text, source_name='example.lstim')
@@ -196,13 +196,13 @@ program API is introduced in M8-A.
   whitespace and `=` is lexically an option key, so LALR needs no ambiguous
   choice between one more target and the first option. A target cannot follow
   an option. Options preserve order and scalar string/int/bool types; unknown
-  keys, duplicate keys, unsupported values, rounds and arities await M8-B.
+  keys, duplicate keys, unsupported values, rounds and arities are checked by M8-B semantics.
 - PARALLEL contains primitive operation lines only, with no nested groups,
   declarations, bindings or composites. REPEAT contains operation lines,
   PARALLEL groups and nested REPEAT. Empty blocks and resource-changing operation
   lines in REPEAT parse structurally; minimum cardinality and allowed repeated
   opcodes/labels/counts are semantic restrictions described in section 4.
-  Top-level declaration ordering and name resolution also await M8-B.
+  Top-level declaration ordering and name resolution are checked by M8-B semantics.
 - Physical Stim instructions, raw record expressions, quoted strings,
   interpolation and executable expressions are outside the grammar.
 
@@ -226,7 +226,7 @@ separate from M8-B's required expanded-operation budget (recommended 100,000).
 
 ## 8. Implemented M8-B semantic program
 
-The language-namespace `parse_logical_circuit(source, source_name='<string>',
+The root/language `parse_logical_circuit(source, source_name='<string>',
 max_operations=100_000)` entrypoint returns an immutable LogicalProgram.
 `program.ast` retains the unexpanded syntax; `source`/`source_name` retain the
 original diagnostic input. `blocks` and `to_operations()`/`operations` are tuples
@@ -277,8 +277,44 @@ labels to their statement spans. Existing operation_id and composite_ids preserv
 these labels in successful compiled metadata, including labelled Knill children.
 
 M8-B certifies focused exact physical/DEM/metadata equivalence against independent
-Python references and unchanged compiler validation. The package-root parser,
-parse_logical_file, canonical formatter and their installed public interface
-remain M8-C. Full raw-sample/decoder predictions and noisy LER equivalence across
+Python references and unchanged compiler validation. M8-C adds the package-root
+parser, parse_logical_file, canonical formatter and installed public interface.
+Full raw-sample/decoder predictions and noisy LER equivalence across
 the complete example suite remain M8-D. No CLI, implicit allocator, physical
 scheduler, decoder, simulator or alternate physical compiler is introduced here.
+
+## 9. Public files, canonical source and installation
+
+Root and language export LogicalProgram, parse_logical_circuit, parse_logical_file,
+format_logical_circuit and LSTIMError/LstimSyntaxError/LSTIMSemanticError/
+LSTIMCompileError/LSTIMFileError. Syntax-only parse_ast/lex_source remain in the
+language namespace. See the [concise usage/physical-meaning guide](lstim.md).
+
+parse_logical_file accepts str or PathLike[str], reads strict UTF-8 and preserves
+the supplied path as source_name, including Unicode names. It preserves original
+CRLF offsets. OSError/UnicodeDecodeError are retained as original_error and
+__cause__ on LSTIMFileError. Invalid UTF-8 reports the byte offset and a reliable
+line/character column after the valid prefix; unreadable files have no guessed
+line. It accepts the same max_operations keyword as text parsing.
+
+format_logical_circuit accepts LogicalProgram or FileNode. It preserves every
+typed field except SourceSpan: header version, code alias/family/distance,
+patch ID/code/index, binding order, opcode/target order, explicit rounds, ordered
+options and their scalar types, labels and nested repeat/parallel structure.
+No defaults are inserted. Raw ASTs receive static validation under the default
+expansion budget; programs retain any larger caller-validated budget. Grammar
+reparsing and an exact immutable semantic signature prevent malformed names or
+injected statements from being emitted as verified source. No lowering or
+physical compilation runs. Formatting drops comments/blank lines and uses four
+spaces per block, lowercase booleans, LF and exactly one final newline. It is
+deterministic and idempotent; source spans naturally change after formatting.
+
+Lark 1.3.1 is a required runtime dependency; grammar.lark is loaded through
+importlib.resources and included in wheel and sdist. The wheel has no dependency
+on examples/tests/reference clones, PyMatching or Matplotlib. Source distributions
+include both exact samples from section 2 under examples/lstim/. Portable
+isolated-wheel tests build a wheel from the sdist and compile both samples through
+the root API, checking real metadata/DEMs, source labels and independent noise.
+CI runs these checks on Ubuntu/Windows with Python 3.11/3.12; actual local and
+remote evidence is distinguished in STATUS.md. The [development guide](development.md)
+records dependency pins and the eight-worker pytest-xdist invocation.

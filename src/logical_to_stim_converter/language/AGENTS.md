@@ -12,7 +12,13 @@ directive, repeated occurrence and parallel tuple. Do not duplicate lifecycle,
 geometry, flow, noise, allocation or decoder logic. Compile errors preserve their
 cause and report file-only context when the compiler supplies no reliable span.
 Only explicit operation_id labels map to source spans; never emulate module IDs.
-Keep physical imports deferred so syntax-only use remains independent. M8-C owns
-the package-root/file APIs and formatter; M8-D owns full noisy E2E certification.
+Keep physical imports deferred so syntax-only use remains independent. M8-C adds
+root/language text/file/formatter APIs and typed file failures with retained OS/
+encoding causes. Canonical formatting validates raw ASTs, reparses with the same
+grammar and compares every typed semantic field except spans; retain groups
+without unrolling or allocating physical objects. Drop comments/blank lines and
+use four spaces, lowercase booleans and LF/final newline. Packaged runtime checks
+must work away from the checkout with optional/repository imports blocked.
+M8-D owns full noisy E2E certification.
 Preserve statement/target/option order, explicit bindings and block nesting.
 Update this ledger and root/test ledgers with actual checkpoint evidence.

@@ -1,5 +1,18 @@
 # STATUS — Package root
 
+## M8-C update — 2026-11-08
+
+Root/language expose LogicalProgram, text/file parsing, canonical formatting and
+typed errors. UTF-8 errors retain causes/locations; readonly source/blocks/ops and
+explicit source labels are preserved. Formatting validates and grammar-roundtrips
+nested ASTs, comparing every typed semantic field except spans without unrolling
+or physical allocation. Compiler/noise/decoder behavior and Python signatures are
+unchanged. Private wheel/sdist builds and isolated root consumers verify packaged
+grammar and both source samples with repository/optional imports blocked.
+83 new tests plus all 958 old cases pass: 1041 in 119.24 s with pytest-xdist 3.8.0
+and eight workers. Exact staged frontend: 436 in 14.87 s; Ruff and build pass.
+Root STATUS records exact commands/platforms and deferred M8-D certification.
+
 ## M8-B update — 2026-11-08
 
 The language namespace now exports immutable LogicalProgram/parse_logical_circuit

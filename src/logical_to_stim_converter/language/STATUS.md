@@ -1,5 +1,33 @@
 # STATUS — LSTIM language
 
+## M8-C implemented — 2026-11-08
+
+formatter.py emits canonical nested source with four spaces, lowercase booleans,
+LF/final newline and no invented defaults. It preserves every typed semantic
+field/order except SourceSpan and drops comments/blank lines. Static validation,
+same-grammar reparse and exact typed immutable signatures reject malformed raw
+ASTs. It neither lowers/unrolls nor allocates/compiles physical code. Raw ASTs use
+the default budget; LogicalProgram retains its caller-validated larger budget.
+
+program.parse_logical_file reads UTF-8 without newline translation and retains
+the path. LSTIMFileError preserves original OS/encoding causes, reporting byte
+and character locations for bad UTF-8 and no guessed line for unreadable paths.
+Root/language export the four program/text/file/format APIs and five error types.
+Existing immutable blocks/operations/spans, explicit labels and standard compiler
+return values are preserved. No syntax, lifecycle, scheduling or physical changes.
+
+C1 formatter: 57 passed in 1.47 s plus Ruff. C2 API+formatter: 82 in 2.07 s;
+1040 full API-checkpoint regressions in 125.01 s. C3 packaging+lexer: 53 in 6.87 s,
+including syntax-only and normal root imports from real wheel resources, both
+source samples, independent noise, canonical metadata/DEMs, labelled Knill
+children and views/frame/stage APIs. Both builds now use private source trees.
+C4 full suite: 1041 passed in 119.24 s; exact staged frontend: 436 in 14.87 s;
+Ruff/build pass. All pytest commands use -n 8 with pytest-xdist 3.8.0. Root STATUS
+records commands, actual Linux Python 3.12.7/Lark 1.3.1/upstream pins and separate
+Windows/Python 3.11 CI configuration. Runtime dependencies have no decoder/plot
+requirement; wheel consumers block repository/optional imports and verify loaded
+module paths. M8-D full noisy sample/decoder E2E certification remains deferred.
+
 ## M8-B implemented — 2026-11-08
 
 Baseline main 0370baf7623791bbf473ac31aec71b5174e86d7e (M8-A, 768 tests).

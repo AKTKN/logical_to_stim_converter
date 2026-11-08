@@ -11,10 +11,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from os import PathLike
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .ast_nodes import FileNode, SourceSpan
-from .errors import LSTIMCompileError
+from .errors import LSTIMCompileError, LSTIMFileError
 from .lowering import ProgramEntry, SourceEntry, lower_ast
 from .parser import parse_ast
 from .semantics import MAX_EXPANDED_OPERATIONS, validate_ast
@@ -91,7 +93,39 @@ def parse_logical_circuit(
 ) -> LogicalProgram:
     """Parse, statically validate and lower text without building physical circuits.
 
-    This language-namespace entrypoint precedes M8-C's package-root/file API and
-    formatter. The operation budget counts BIND directives and parallel members.
+    The operation budget counts BIND directives and parallel members. Invalid
+    syntax and static semantics have distinct located LSTIMError subclasses;
+    physical lifecycle/flow checks run only when calling program.compile().
     """
     return LogicalProgram(source, source_name, max_operations=max_operations)
+
+
+def parse_logical_file(
+    path: str | PathLike[str], *, max_operations: int = MAX_EXPANDED_OPERATIONS,
+) -> LogicalProgram:
+    """Read UTF-8 logical source, retaining its path and original CRLF offsets.
+
+    Reading/encoding failures raise LSTIMFileError with the original cause;
+    decoding failures locate the first invalid byte after the valid UTF-8 prefix.
+    Parsing never compiles or samples a physical circuit.
+    """
+    file = Path(path)
+    source_name = str(file)
+    try:
+        data = file.read_bytes()
+    except OSError as error:
+        raise LSTIMFileError(
+            f"Cannot read UTF-8 LSTIM file: {error.strerror or str(error)}",
+            error, source_name,
+        ) from error
+    try:
+        source = data.decode("utf-8")
+    except UnicodeDecodeError as error:
+        prefix = data[:error.start].decode("utf-8")
+        source = prefix + "\ufffd"
+        span = SourceSpan.from_offsets(source, source_name, len(prefix), len(source))
+        raise LSTIMFileError(
+            f"Invalid UTF-8 encoding at byte {error.start}: {error.reason}",
+            error, source_name, span=span, source=source,
+        ) from error
+    return parse_logical_circuit(source, source_name, max_operations=max_operations)

@@ -2,7 +2,111 @@
 
 **As of:** 2026-11-08
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M8_B_IMPLEMENTED` (LSTIM semantics and existing-compiler lowering)
+**Overall state:** `M8_C_IMPLEMENTED` (public LSTIM API, canonical formatter and packaging)
+
+## M8-C public LSTIM API, canonical formatting and packaging — 2026-11-08
+
+Baseline: main b4fd36263812259ae7201c7aef47975d5535b2d2 (M8-B, 958 tests).
+Pre-existing inspection/export edits and report deletions are preserved outside
+this commit. Physical compiler/core/operations/noise/decoder and external_lib
+sources are unchanged; direct Python operation APIs retain their signatures.
+
+Root and language now export LogicalProgram, parse_logical_circuit,
+parse_logical_file, format_logical_circuit and five typed error classes.
+Strict UTF-8 file parsing retains path, original CRLF/code-point offsets and
+source-label spans without compiling/sampling. LSTIMFileError retains OS/encoding
+exceptions as original_error and __cause__; invalid UTF-8 locates the first bad
+byte and corresponding line/character column after the valid prefix. Existing
+syntax/semantic/compiler error categories and compiler cause behavior remain.
+
+The formatter consumes LogicalProgram/FileNode and preserves source declarations,
+indices, ordered bindings/targets/options, explicit rounds/labels/defaults and
+nested REPEAT/PARALLEL. It uses four spaces, lowercase booleans, LF and one final
+newline, dropping comments/blank lines. Raw ASTs undergo static validation; a
+same-grammar reparse and exact immutable typed signature compare every field
+except SourceSpan, rejecting malformed names/containers or semantic mutation.
+There is no physical allocation/compile or repeat expansion in formatting.
+Programs retain caller-validated larger operation budgets; raw ASTs use the
+normal default. Explicit labels remain source lookups and real composite/child
+IDs; no implicit-module-ID planner was added.
+
+Both exact contract samples now live under examples/lstim/ and ship in sdist;
+.lstim Git attributes enforce LF across platforms. grammar.lark remains runtime
+package data in wheel/sdist, loaded through importlib.resources with Lark 1.3.1.
+The new packaging test builds wheel from sdist in a private source tree, extracts
+it and runs an isolated subprocess away from checkout. It blocks tests/examples/
+reference clones/PyMatching/Matplotlib/knill_bench imports and checks every loaded
+converter module came from the wheel. Both source samples compile through root
+APIs (17/51 physical qubits), with valid canonical metadata/DEMs, explicit Knill
+labels, standard views/frame/stage requests and independent noise artifacts.
+The prior syntax-only wheel regression retains its physical-import blocker and
+now also builds privately, avoiding shared setuptools output under xdist.
+
+pytest-xdist 3.8.0 is a pinned dev dependency (inspected installed plugin CLI and
+Python >=3.9 metadata). Local/CI test commands use eight workers. Stim 1.15.0,
+stimflow 1.17.dev0 at ffe0d043 and runtime Lark 1.3.1 remain unchanged. No upstream
+code was copied or changed. README, language guide/contract, architecture,
+future-feature/development notes and affected instructions describe current APIs,
+physical identities/epochs/stages/rounds/resources and deferred features.
+
+### M8-C verification
+
+Local environment: Linux/WSL2 Python 3.12.7, pytest 9.2.0, pytest-xdist 3.8.0,
+Ruff 0.17.4, build 1.6.1, setuptools 84.2.1, wheel 0.48.0. These are actual local
+versions, not evidence of a Windows/Python 3.11 execution. The existing Actions
+Ubuntu/Windows x Python 3.11/3.12 matrix runs the same installed-wheel regression
+and all examples with eight workers; remote results are separate from local ones.
+
+- C1: `python -m pytest -q -n 8 tests/test_lstim_formatter.py`:
+  **57 passed in 1.47 s**, then Ruff src/tests passes. Every opcode, explicit
+  labels/options/defaults/control order, declarations, comments/CRLF, nested
+  groups, source binding barriers and negative manually built ASTs are covered.
+  Round trips compare all typed AST fields and independently authored exact
+  existing OperationModule/BindPatch tuples. No physical compilation is used.
+- C2: `python -m pytest -q -n 8 tests/test_lstim_api.py
+  tests/test_lstim_formatter.py`: **82 passed in 2.07 s**. Root/subpackage exports,
+  UTF-8 Unicode paths/CRLF, missing/directory/denied/encoding files, located syntax/
+  semantic diagnostics, original causes, operation budgets, source-order/read-only
+  views and independent repeated physical/noise compilation are checked.
+  Full API checkpoint: **1040 passed in 125.01 s** with eight workers.
+- C3: `python -m pytest -q -n 8 tests/test_lstim_packaging.py
+  tests/test_lstim_lexer.py`: **53 passed in 6.87 s**, including both isolated
+  wheel regressions. Early harness failures were corrected: expected labelled
+  operations use the existing custom constructors; the wheel consumer retains
+  installed dependency paths and checks the actual third teleport destination
+  P0. No physics assertions or runtime compiler were weakened.
+- C4: `python -m pytest -n 8 --durations=10`:
+  **1041 passed in 119.24 s**, retaining all 958 previous tests and adding 83.
+  The slowest d=5 encoded-reference three-teleport regression took 42.12 s under
+  parallel load. Previous M8-B sequential full run was 670.19 s (958 tests);
+  timings are observations, not performance thresholds.
+- Exact staged export: all nine frontend modules pass **436 tests in 14.87 s**
+  with `python -m pytest -q -n 8 --durations=5 tests/test_lstim_*.py`.
+  Its `python -m ruff check src tests examples` and `python -m build` pass;
+  the latter independently produces wheel and sdist. Packaging tests compare
+  every runtime .py/.lark byte against the staged source, exact grammar bytes
+  in both archives, Lark runtime metadata, and both source samples in sdist.
+- Working-tree `python -m ruff check src tests examples`, `python -m build
+  --outdir /tmp/lstim-m8c-dist`, `python -m pip check` and `git diff --check`
+  pass. README/guide snippets compile to 17 qubits/40 detectors.
+
+- All seven GitHub CI example commands pass from the exact staged export:
+  `python examples/two_patch_memory.py`,
+  `python examples/two_patch_bell_roundtrip.py`,
+  `python examples/knill_ec_single_round.py`,
+  `python examples/offline_dem_views.py`,
+  `python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731`,
+  `python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732`,
+  `python examples/knill_memory_three_patch_reuse.py --suite --shots 32
+  --batch-size 13 --p 0.001 --seed 733`. The Python example source matches HEAD;
+  unrelated inspection/export edits are excluded. No stored raw samples/artifacts
+  enter the commit. Final ledger-only changes leave the tested runtime/tests exact.
+
+Verified: the public installed text/file/format/compile interface, semantic
+formatting, source diagnostics/labels, distribution resources and existing physics
+regressions. No new unverified physical implementation is introduced. Full noisy
+sample/decoder E2E equivalence remains M8-D; CLI, automatic allocation, runtime
+branching, text noise/decoder DSL and additional code families remain deferred.
 
 ## M8-B static semantics, lowering and compiler bridge — 2026-11-08
 
