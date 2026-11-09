@@ -25,8 +25,11 @@ compiled = parse_logical_file(
 ```
 
 The enable flag must be a boolean. The probability must be finite, numeric,
-non-boolean and between zero and one inclusive. Wrong configuration types fail
-with `ValueError`. `enabled=True, p_st_transversal=0` still makes the resource
+non-boolean and in the closed interval **[0, 0.75]** for exact native DEM
+compatibility. This policy-level limit applies even when `enabled=False` and
+without the example CLI. Invalid probabilities and configuration types fail at
+construction with `ValueError`; nothing is clamped, rescaled or approximated.
+`enabled=True, p_st_transversal=0` still makes the resource
 initialization ideal; it emits no post-SE stochastic instruction. A nonzero
 probability with `enabled=False` has no effect. Continuations made with
 `CompiledCircuit.append()` retain the complete noise model.
@@ -81,6 +84,23 @@ Ambiguous membership, missing uses, duplicate sites/epochs and misplaced channel
 fail validation. The resolver runs after ideal metadata/flow validation; the
 injector consumes an indexed insertion plan.
 
+Direct public `NoiseInjector.apply()` calls use an explicit presence contract for
+`resource_preparation_boundaries`:
+
+- Omitted or `None`: accepted for a disabled policy; an enabled policy raises
+  `ValueError` before noise setup, including when the post-SE probability is zero.
+- Explicit `()`: declares that there are no eligible Bell preparations and applies
+  ordinary background noise, including when the policy is enabled.
+- A verified nonempty tuple of `ResourcePreparationBoundary` objects: applies the
+  special policy; a disabled policy rejects this contradictory request.
+
+Other container types and invalid tuple elements are rejected. An explicit tuple
+is the direct caller's declared boundary plan. The injector cannot establish Bell
+composite eligibility from its primitive-only inputs and does not duplicate the
+compiler's resolver; use `CircuitCompiler.compile()` to resolve and validate the
+complete plan. Standard compilation always supplies an explicit tuple, including
+`()` for resource-free programs. Existing duplicate module/use checks remain.
+
 Preparation `BoundaryRequest` model-only probes stop at the existing final-layer
 TICK, **before** all post-SE channels. Their temporal models therefore do not own
 these faults. The matching conditional Bell model starts at the earliest of its
@@ -109,13 +129,13 @@ fingerprints stay unchanged. Cached views/requests/plans from another policy,
 probability, boundary or epoch must be regenerated. No runtime decoder dependency
 is added; PyMatching and the restricted example adapters remain in dev/examples.
 
-**Pinned Stim limitation:** Stim 1.15.0 samples `DEPOLARIZE1(p)` for the full
-validated `[0,1]` range, but cannot extract an exact DEM for `p > 3/4` (over-mixing).
-Compilation retains the actual physical probability for sampling and checks the
-remaining model with those specific tagged channels set to 3/4 in a temporary
-validation copy. Canonical DEM extraction and DEM-based views/decoders still fail
-explicitly for over-mixing channels; there is no approximate conversion. Conditional
-Pauli-atom enumeration itself supports the full probability range.
+**DEM compatibility:** pinned Stim 1.15.0 cannot extract an exact DEM for an
+over-mixing `DEPOLARIZE1(p > 3/4)` channel. The M9 policy therefore rejects these
+probabilities at construction. The mathematical channel definition above is
+unchanged. Compilation validates the actual noisy circuit directly with Stim;
+there is no temporary reweighted circuit or fallback. Unrelated
+`NoiseOverride`/`NoiseParameters` channels keep their existing `[0,1]` validation,
+and native errors from DEM-incompatible background channels propagate normally.
 
 ## Runnable paired example
 

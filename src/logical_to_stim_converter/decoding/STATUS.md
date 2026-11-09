@@ -1,5 +1,16 @@
 # STATUS — `decoding`
 
+## M9 follow-up — 2026-11-09
+
+No decoder implementation, model window, atom map, frame/source schema or
+preparation probe changed. ResourcePreparationNoise now enforces the closed
+[0,.75] range for native exact DEM compatibility, with actual-circuit validation.
+Tests construct native DEMs and views at the upper endpoint, compare exact native
+fault instructions/absolute detector coordinates, retain source fingerprints for
+valid existing inputs and preserve the independent intermediate-operand-SE
+UnsupportedProjectionError. Root STATUS records full regression evidence.
+
+
 ## M9 update — 2026-11-09
 
 Conditional Bell windows now start at their two explicitly indexed post-SE

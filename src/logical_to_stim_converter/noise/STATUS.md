@@ -1,6 +1,20 @@
 # STATUS — Noise
 
-## M9 update — 2026-11-09
+## M9 follow-up — 2026-11-09
+
+The policy's closed supported range is now [0,.75], enforced at construction
+for either enable state with finite/non-boolean/type checks. Other noise channels
+retain [0,1]. Direct NoiseInjector.apply distinguishes None/omitted from explicit
+(): enabled omission fails before noise setup; explicit () declares no resources.
+Tuple/element checks reject malformed arguments and existing duplicate use/module
+checks remain. Standard compilation resolves and supplies the complete plan; the
+injector does not reconstruct Bell composite eligibility from primitive-only
+inputs. Exact direct/compiler/reference circuits, native DEMs and source identities
+are tested, including probability zero and exactly .75. Root STATUS records
+commands/results. The old p=1 sampling evidence below is historical only.
+
+
+## M9 initial update — 2026-11-09 (historical pre-restriction)
 
 model.py adds immutable ResourcePreparationNoise with strict bool, finite
 probability and config-type checks. resource_preparation.py resolves actual
@@ -13,9 +27,10 @@ one tagged independent DEPOLARIZE1 per data target after the existing final TICK
 Waiting D/spectators and later resource waiting/gate/readout noise retain their
 ordinary precedence. Enabled zero suppresses preparation noise without a channel;
 disabled mode matches independent original-rule circuits and exact DEMs. Root
-STATUS records full exact physical-location, p=1 sampling, regression and CI
-checks. Stim cannot extract an exact DEM for over-mixing p>3/4; sampling remains
-supported with the canonical probability unchanged. No upstream pins/source changed.
+STATUS records the original exact physical-location, historical p=1 sampling,
+regression and CI checks. The initial API permitted sampling for p>3/4 despite
+Stim's DEM limitation; the follow-up now rejects these probabilities. No upstream
+pins/source changed.
 
 
 ## M7-B update — 2026-11-08

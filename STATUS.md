@@ -4,7 +4,125 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
-## M9 Bell-resource preparation noise — 2026-11-09
+## M9 follow-up: DEM-compatible probability and injector safety — 2026-11-09
+
+Baseline main b35acb08426572a9f567d7dfe437ded755f2c1a7 matches fetched origin/main.
+Pre-existing user inspection/export edits, snapshots and report deletions remain
+outside this change. The minimal patch restricts ResourcePreparationNoise to finite
+non-boolean probabilities in [0,.75] for either enable flag and removes the
+compiler's capped over-mixing validation copy. Public NoiseInjector.apply now uses
+None as omitted-boundary sentinel and checks tuple/element types before noise setup.
+Explicit () declares no eligible resources; standard compilation already supplies
+an explicit tuple in all cases. No second Bell resolver, scheduling change, parser
+change or decoder algorithm. Physical noise/metadata/source contracts remain
+unchanged for valid existing inputs. Unrelated NoiseParameters/NoiseOverride
+probabilities retain [0,1] and native Stim DEM errors propagate normally.
+
+Current direct API: enabled with omitted/None boundaries raises ValueError, also
+at p_st=0. Disabled omission retains the original noise pattern. Enabled explicit
+() is the caller's resource-free declaration; nonempty tuples must contain verified
+ResourcePreparationBoundary objects. Malformed containers/elements, duplicates
+and disabled/nonempty contradictions fail. The injector's primitive-only inputs
+do not establish composite eligibility; full structural resolution/validation
+remains in CircuitCompiler.compile. This caller-plan limitation is documented,
+not hidden behind stage/name heuristics. Append policy inheritance is unchanged.
+
+Inspected pinned Stim 1.15.0/stimflow 1.17.dev0 (ffe0d043) APIs and actual production
+call sites (one, in CircuitCompiler.compile). Direct native extraction accepts
+DEPOLARIZE1(.75) and rejects .7500000001; this is a policy/API range restriction,
+with no change to the mathematical channel or its probability interpretation.
+The example delegates --p-st validation to the policy, reports argparse errors
+without traceback, and documents [0,.75] in its help. README, architecture and
+folder guidance describe omission versus explicit emptiness. Original p=1 tests
+and capped-validation ledger entries below are labelled historical pre-restriction.
+The independent intermediate-operand-SE conditional-model limitation remains.
+
+### Follow-up checkpoints
+
+All pytest commands use eight pytest-xdist workers. Local environment remains
+Linux/WSL2 Python 3.12.7, Stim 1.15.0, stimflow 1.17.dev0, pytest 9.2.0/xdist 3.8.0,
+Ruff 0.17.4; dependency pins and external reference sources are unchanged.
+
+- A: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_noise.py
+  -k 'probability or dem_compatible or unrelated_noise or disabled' --tb=short`:
+  **45 passed in 4.50 s**, followed by Ruff src/tests/examples. Valid 0/interior/.75
+  circuits retain exact probabilities; native global and decoder-view fault
+  instructions and absolute coordinates agree. Both enable states reject invalid
+  values; native errors from unrelated .9 idle noise propagate. An initial test
+  harness run had 8 failures/37 passes because it compared whole DEM instruction
+  order despite views relocating annotation definitions. It was corrected to
+  compare exact native fault instructions, absolute coordinates and native view
+  extraction, without weakening physical assertions or changing runtime models.
+- B: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_noise.py
+  tests/test_noise.py tests/test_knill_noise.py --tb=short`:
+  **112 passed in 12.53 s**, with Ruff passing. Direct enabled omission/explicit
+  None (including p=0) and malformed types fail before upstream noise setup.
+  Explicit resource-free (), verified nonempty plans, disabled compatibility,
+  contradictory flags and duplicate module/use checks are exact circuit/DEM tests.
+- C: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_noise.py
+  tests/test_resource_preparation_models.py tests/test_resource_preparation_e2e.py
+  tests/test_noise.py tests/test_knill_noise.py tests/test_lstim_packaging.py
+  --tb=short --durations=5`: **170 passed in 146.21 s**. Preserves d=3/5 exact
+  physical/idle/fault-action, conditional boundary/probe/source, signed three-cycle
+  direct-Python/LSTIM and same-raw baseline/replacement decoder equivalence, plus
+  genuine isolated installed-wheel compilation with optional imports blocked.
+  A final bounds-first validation check ensures huge finite integer probabilities
+  raise ValueError instead of overflowing float conversion; `-k invalid_probability
+  -n 8 --tb=short` then passes **34 tests in 1.35 s** (four added huge-int cases).
+- Before source edits, eight exact baseline snapshots were saved outside the repo:
+  three-cycle d=3/5 with p_st0/.003/.75 enabled and .003 disabled, nonuniform
+  background. Final source matches every exact ideal/noisy instruction snapshot,
+  canonical DEM/probability snapshot, module/use/epoch/timing/relocation history,
+  boundary position/target and source fingerprint. No text precision roundtrip.
+- CLI help and six invalid probabilities (.7500000001/.9/1/NaN/inf/negative) pass
+  explicit exit-code/message/no-traceback checks. The paired example at --p-st .75
+  --p .001 --shots 2 succeeds with native DEMs and exact source/direct equality.
+
+### Final follow-up verification
+
+An exact index export (tree dcdc68a0bec7105760ff64bc1da24c92f0c01675) excludes
+all pre-existing user changes. From that export, `PYTHONPATH=src python -m pytest
+-n 8 --tb=short --durations=10` passes **1367 tests in 353.49 s** (65 net additional
+cases versus the initial 1302-case M9 suite, with the old p=1 acceptance fixture
+intentionally migrated to .75). This includes every physical/lifecycle/decoder/
+LSTIM regression and the private-build isolated installed-wheel consumer.
+The final runtime/test bytes match this export; only documentation ledgers were
+completed afterward. The eight exact b35acb0 physical/DEM/provenance/source snapshot
+comparisons also pass from the final export, including .75 and recycled epochs.
+
+The export's `python -m ruff check src tests examples` passes. `python -m build
+--outdir /tmp/m9-followup-dist` builds wheel and sdist; `python -m pip check`,
+working/index whitespace checks and exact final code-byte comparison pass.
+All nine established workflow example commands pass from the export, including:
+
+- `python examples/two_patch_memory.py`
+- `python examples/two_patch_bell_roundtrip.py`
+- `python examples/knill_ec_single_round.py`
+- `python examples/offline_dem_views.py`
+- `python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731`
+- `python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732`
+- `python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13
+  --p 0.001 --seed 733`
+- `python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826`
+- `python examples/knill_resource_preparation_noise.py --shots 32 --p 0.001 --p-st 0.003`
+
+Verified scope is the unchanged valid-input M1-M9 physical/simulation matrix plus
+policy endpoint/type/range and public injector presence/type/compatibility checks.
+No test is skipped or left failing. Remaining limits are the independently
+unsupported intermediate operand-SE conditional window and direct callers' duty
+to supply their verified explicit boundary plan; no second resolver was added.
+
+The existing CI matrix covers Ubuntu/Windows x Python 3.11/3.12. Baseline M9 run
+42547789950 (b35acb0) is observed successful in all four jobs; this is historical
+baseline evidence, not a remote result for the follow-up. Actual local execution
+is Linux Python 3.12; new remote results are reported separately after push.
+No issues were created, and no other M1-M9 functionality was redesigned.
+
+## M9 Bell-resource preparation noise — 2026-11-09 (historical pre-restriction)
+
+This initial M9 record describes b35acb0 before the follow-up above. Its p=1
+sampling checks and temporary capped-validation behavior are historical; the
+current API rejects p_st_transversal>0.75 and removes that workaround.
 
 Baseline main d2f88ca4b13b3dfecee05f6cc7642f5ac4bc00bb. Existing uncommitted
 inspection/export documentation, examples, snapshots and report deletions are
@@ -41,11 +159,11 @@ Enabled source metadata includes resource_preparation_v1 boundaries; disabled v3
 fingerprints/circuits/models remain compatible. Public validation rejects damaged
 cut/site/index/use metadata and stale source corrections.
 
-Verified limitations: pinned Stim samples the full [0,1] probability range but
-cannot exactly factor over-mixing DEPOLARIZE1(p>3/4) into a DEM. Such compilation
-retains the actual circuit for sampling, checks remaining channels with only the
-specific post-SE channels capped at .75 in a temporary copy, and leaves native
-DEM/view failures explicit. No approximate canonical model. Enabled nonzero
+Historical pre-restriction behavior: pinned Stim sampled the full [0,1] range but
+could not exactly factor over-mixing DEPOLARIZE1(p>3/4) into a DEM. Initial M9
+compilation retained the actual sampling circuit and checked a temporary copy
+with only post-SE channels capped at .75. This workaround is removed by the
+follow-up; the original tests/results below remain historical evidence. Enabled nonzero
 conditional windows crossing an intermediate SE/preparation measurement on a Bell
 operand fail explicitly: an additional temporal-sector hypothesis is required.
 Delays containing gates/idles work and their faults are retained. Canonical
@@ -126,8 +244,8 @@ The new seed929 finite batch reports two restricted-baseline failures / 32 shots
 observation is not a numerical target or decoder optimality statement.
 Verified behavior is the documented bounded physical/simulation matrix. There is
 no claimed unverified runtime feature; the explicit unsupported intervals and
-sampling-only over-mixing case above are limitations, not silently implemented
-capabilities. General intermediate-sector conditional inference remains deferred.
+historical sampling-only over-mixing case above were the initial limitations;
+the current policy excludes over-mixing at construction. General intermediate-sector conditional inference remains deferred.
 
 Ubuntu/Windows Python 3.11/3.12 CI includes the same full suite, build, existing
 eight examples and new opt-in example. Remote CI runs on push; its observed result is reported separately from local

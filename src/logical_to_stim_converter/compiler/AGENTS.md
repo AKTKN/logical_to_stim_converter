@@ -54,6 +54,7 @@ physical supports die at reset while earlier Bell feedback survives on real data
 M9: build resource-noise insertion plans only after ideal metadata validation.
 Retain immutable use-aware boundaries/channel indices on CompiledCircuit and the
 complete NoiseModel on continuation. Preserve the ideal circuit and existing
-TICK/annotation ordering. Stim 1.15 over-mixing post-SE p>3/4 is sampling-only;
-validate remaining channels in a temporary capped copy and let exact DEM requests
-report their native limitation. Never approximate the canonical physical model.
+TICK/annotation ordering. ResourcePreparationNoise enforces [0,.75] for native
+exact DEM compatibility. Validate the actual noisy circuit directly and propagate
+Stim errors; never cap/reweight resource probabilities. Always pass an explicit
+boundary tuple to NoiseInjector.apply, including () for resource-free programs.

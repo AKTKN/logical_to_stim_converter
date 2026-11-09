@@ -418,24 +418,7 @@ class CircuitCompiler:
                 layers=context.layers, fragments=fragment_tuple,
                 resource_preparation_boundaries=boundaries,
             )
-            try:
-                noisy.detector_error_model()
-            except ValueError as ex:
-                # Stim 1.15 samples over-mixing channels, but cannot factor them
-                # into an exact DEM. Keep the physical circuit for sampling;
-                # public DEM/view construction still reports this limitation.
-                policy = noise_model.resource_preparation
-                if not (policy.enabled and policy.p_st_transversal > .75
-                        and str(ex).startswith("Can't analyze over-mixing DEPOLARIZE1 errors")):
-                    raise
-                validation = stim.Circuit()
-                tags = {b.channel_tag for b in boundaries}
-                for inst in noisy:
-                    if inst.tag in tags:
-                        validation.append(inst.name, inst.targets_copy(), .75, tag=inst.tag)
-                    else:
-                        validation.append(inst)
-                validation.detector_error_model()
+            noisy.detector_error_model()
             channel_tags = {b.channel_tag for b in boundaries}
             channels = {inst.tag: i for i, inst in enumerate(noisy) if inst.tag in channel_tags}
             boundaries = tuple(replace(b, channel_instruction=channels.get(b.channel_tag))

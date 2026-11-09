@@ -1,5 +1,16 @@
 # STATUS — Package root
 
+## M9 follow-up — 2026-11-09
+
+ResourcePreparationNoise now rejects p_st_transversal outside [0,.75] even when
+disabled. Public NoiseInjector.apply requires an explicit boundary tuple when
+enabled; None/omitted fails and () declares a resource-free plan. The compiler
+continues supplying verified tuples, retains append policy inheritance, and
+validates actual noisy circuits without a capped fallback. No public quantum,
+LSTIM, scheduling, source schema or decoder model changed. See root STATUS for
+checkpoints and final exact regression/build/example evidence.
+
+
 ## M9 update — 2026-11-09
 
 Root and noise now export the frozen ResourcePreparationNoise policy. Default

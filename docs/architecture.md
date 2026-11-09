@@ -370,7 +370,11 @@ intermediate operand SE measurements in enabled nonzero windows fail explicitly
 because they need another temporal-sector hypothesis. Global physical circuits
 remain usable. Optional resource_preparation_v1 fingerprint metadata preserves
 disabled v3 identities. See [the full contract](resource_preparation_noise.md),
-including sampling-only support for Stim over-mixing probabilities above 3/4.
+including the policy-level closed [0,.75] probability range for native exact DEM
+compatibility. The compiler validates the actual noisy circuit without a fallback.
+Direct NoiseInjector.apply calls require an explicit boundary tuple when enabled;
+omitted/None fails, while () declares no resources. The compiler always supplies
+the structurally resolved tuple; the injector does not duplicate that resolver.
 No new operation, decoder, allocator, scheduler or LSTIM field is introduced.
 
 ## Deferred boundaries

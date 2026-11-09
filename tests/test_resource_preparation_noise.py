@@ -31,11 +31,14 @@ def test_invalid_enable(enabled):
         ResourcePreparationNoise(enabled)
 
 
-@pytest.mark.parametrize("p", [True, False, None, "0.1", -.1, 1.1, float("nan"),
-                              float("inf"), -float("inf"), complex(.1)])
-def test_invalid_probability(p):
-    with pytest.raises(ValueError, match="probability"):
-        ResourcePreparationNoise(True, p)
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("p", [True, False, None, "0.1", -.1, 1.1, .7500000001, .9, 1.,
+                              float("nan"), float("inf"), -float("inf"), complex(.1), [], {},
+                              pytest.param(10**1000, id="huge_positive"),
+                              pytest.param(-10**1000, id="huge_negative")])
+def test_invalid_probability(enabled, p):
+    with pytest.raises(ValueError, match=r"p_st_transversal.*\[0, 0\.75\].*DEM"):
+        ResourcePreparationNoise(enabled, p)
 
 
 def test_immutable_config_and_wrong_types():
@@ -198,7 +201,7 @@ def test_exact_gate_idle_and_post_se_channels(distance, basis, full_rounds):
     c.circuit.detector_error_model()
 
 
-@pytest.mark.parametrize("p", [0, .019, 1])
+@pytest.mark.parametrize("p", [0, .019, .75])
 def test_explicit_preparation_waiting_spectator_and_probability_extremes(p):
     import numpy as np
 
@@ -221,11 +224,8 @@ def test_explicit_preparation_waiting_spectator_and_probability_extremes(p):
     assert len(c.resource_preparation_boundaries) == 2
     np.testing.assert_array_equal(c.circuit.compile_sampler(seed=91).sample(32),
                                   c.circuit.compile_sampler(seed=91).sample(32))
-    if p > .75:
-        with pytest.raises(ValueError, match="over-mixing"):
-            c.circuit.detector_error_model()
-    else:
-        c.circuit.detector_error_model()
+    c.circuit.detector_error_model()
+    c.make_decoder_view()
 
 
 def test_simultaneous_bell_preparations_are_injected_once_each():
@@ -247,7 +247,7 @@ def test_disabled_mode_is_exact_original_injector_and_append_retains_policy():
     ops = [LogicalInit("D", "Z", 1), KnillEC("D", "A", "B", rounds=1)]
     compiler = make_compiler()
     baseline = NoiseModel.uniform_depolarizing(.001)
-    disabled = replace(baseline, resource_preparation=ResourcePreparationNoise(False, .9))
+    disabled = replace(baseline, resource_preparation=ResourcePreparationNoise(False, .75))
     c = compiler.compile(ops, noise_model=disabled, allow_open_outputs=True)
     reference = compiler.compile(ops, noise_model=baseline, allow_open_outputs=True)
     assert c.circuit == reference.circuit
@@ -328,3 +328,153 @@ def test_disabled_circuit_dem_and_identity_match_independent_original_rules(dist
         model, resource_preparation=ResourcePreparationNoise()))
     assert source_fingerprint(c) == source_fingerprint(restored)
     assert not c.resource_preparation_boundaries
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("p", [0, .003, .12345678912345678, .75])
+def test_native_dem_compatible_policy_range_and_exact_gate_probabilities(enabled, p):
+    from logical_to_stim_converter import NoiseParameters
+
+    model = NoiseModel(NoiseParameters(.001, .002, .003, .004, .005),
+                       resource_preparation=ResourcePreparationNoise(enabled, p))
+    assert model.resource_preparation.p_st_transversal == p
+    c = make_compiler().compile([
+        LogicalInit("D", "Z", 1), KnillEC("D", "A", "B", rounds=1), LogicalMeasure("D", "Z")
+    ], noise_model=model)
+    tags = {b.channel_tag for b in c.resource_preparation_boundaries}
+    channels = [i for i in c.circuit if i.tag in tags]
+    assert len(channels) == (2 if enabled and p else 0)
+    assert all(i.gate_args_copy() == [p] for i in channels)
+    if enabled:
+        assert_exact_policy_locations(c, model, {"A", "B"})
+    else:
+        assert c.circuit == original_noise_reference(c, model)
+    assert c.circuit.without_noise() == c.ideal_circuit
+    dem = c.circuit.detector_error_model()
+    view = c.make_decoder_view()
+    # Views place annotation definitions at the end; compare exact native fault
+    # instructions and absolute coordinates independently of that placement.
+    local_dem = view.detector_error_model
+    assert local_dem == view.circuit.detector_error_model()
+    assert [i for i in local_dem.flattened() if i.type == "error"] == [
+        i for i in dem.flattened() if i.type == "error"]
+    assert local_dem.get_detector_coordinates() == dem.get_detector_coordinates()
+
+
+def test_unrelated_noise_channels_keep_unit_range_and_native_dem_errors():
+    from logical_to_stim_converter import NoiseOverride, NoiseParameters
+
+    # The DEM-compatible resource range does not restrict unrelated settings.
+    for settings in (NoiseParameters(1, 1, 1, 1, 1), NoiseOverride(1, 1, 1, 1, 1)):
+        assert all(getattr(settings, channel) == 1
+                   for channel in ("reset", "one_qubit", "two_qubit", "measurement", "idle"))
+    with pytest.raises(ValueError, match="Can't analyze over-mixing DEPOLARIZE1"):
+        make_compiler().compile([
+            LogicalInit("D", "Z", 1), KnillEC("D", "A", "B", rounds=1),
+            LogicalMeasure("D", "Z")
+        ], noise_model=special(.75, default=NoiseParameters(idle=.9)))
+
+
+def inject_direct(c, model, **options):
+    """Exercise the public injector with only its existing physical metadata inputs."""
+    from logical_to_stim_converter import NoiseInjector
+
+    return NoiseInjector().apply(
+        c.ideal_circuit, model=model, physical_map=c.physical_qubit_map,
+        layers=c.time_layers, fragments=c.fragments, **options)
+
+
+@pytest.mark.parametrize("p", [0, .003])
+@pytest.mark.parametrize("explicit_none", [False, True])
+def test_enabled_injector_requires_boundary_presence_before_noise_setup(
+    monkeypatch, p, explicit_none,
+):
+    from logical_to_stim_converter import NoiseParameters
+
+    c = make_compiler().compile([
+        LogicalInit("D", "Z", 1), KnillEC("D", "A", "B", rounds=1), LogicalMeasure("D", "Z")
+    ])
+    original = c.ideal_circuit.copy()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Noise setup must not run before boundary presence validation")
+
+    monkeypatch.setattr(NoiseParameters, "to_stimflow", forbidden)
+    options = {"resource_preparation_boundaries": None} if explicit_none else {}
+    with pytest.raises(ValueError,
+                       match=r"resource_preparation_boundaries.*CircuitCompiler\.compile"):
+        inject_direct(c, special(p), **options)
+    assert c.ideal_circuit == original
+
+
+def test_disabled_injector_omission_and_explicit_empty_keep_original_model():
+    from logical_to_stim_converter import NoiseParameters
+
+    model = NoiseModel(NoiseParameters(.001, .002, .003, .004, .005))
+    c = make_compiler().compile([
+        LogicalInit("D", "Z", 1), KnillEC("D", "A", "B", rounds=1), LogicalMeasure("D", "Z")
+    ], noise_model=model)
+    expected = original_noise_reference(c, model)
+    assert inject_direct(c, model) == expected == c.circuit
+    assert inject_direct(c, model, resource_preparation_boundaries=()) == expected
+    assert expected.detector_error_model() == c.circuit.detector_error_model()
+
+
+@pytest.mark.parametrize("p", [0, .75])
+def test_enabled_resource_free_explicit_empty_and_standard_compilation_match_ordinary(p):
+    from logical_to_stim_converter import NoiseParameters
+    from logical_to_stim_converter.decoding.views import source_fingerprint
+
+    compiler = make_compiler(names="D")
+    operations = [LogicalInit("D", "X", 1), LogicalMeasure("D", "X")]
+    ordinary_model = NoiseModel(NoiseParameters(.001, .002, .003, .004, .005))
+    enabled_model = replace(ordinary_model, resource_preparation=ResourcePreparationNoise(True, p))
+    ordinary = compiler.compile(operations, noise_model=ordinary_model)
+    enabled = compiler.compile(operations, noise_model=enabled_model)
+    assert not enabled.resource_preparation_boundaries
+    assert inject_direct(enabled, enabled_model, resource_preparation_boundaries=()) == (
+        ordinary.circuit) == enabled.circuit
+    assert enabled.circuit == original_noise_reference(enabled, ordinary_model)
+    assert enabled.circuit.detector_error_model() == ordinary.circuit.detector_error_model()
+    assert source_fingerprint(enabled) == source_fingerprint(ordinary)
+    with pytest.raises(ValueError, match="explicit resource_preparation_boundaries"):
+        inject_direct(enabled, enabled_model)
+
+
+@pytest.mark.parametrize("p", [0, .003, .75])
+def test_enabled_direct_verified_boundaries_match_compiler_exactly(p):
+    from logical_to_stim_converter import NoiseParameters
+
+    model = special(p, default=NoiseParameters(.001, .002, .003, .004, .005))
+    c = make_compiler().compile([
+        LogicalInit("D", "X", 1), KnillEC("D", "A", "B", rounds=1), LogicalMeasure("D", "X")
+    ], noise_model=model)
+    original = c.ideal_circuit.copy()
+    direct = inject_direct(c, model,
+                           resource_preparation_boundaries=c.resource_preparation_boundaries)
+    assert direct == c.circuit
+    assert direct.detector_error_model() == c.circuit.detector_error_model()
+    assert c.ideal_circuit == original
+    with pytest.raises(ValueError, match="enabled policy"):
+        inject_direct(c, replace(model, resource_preparation=ResourcePreparationNoise()),
+                      resource_preparation_boundaries=c.resource_preparation_boundaries)
+    with pytest.raises(ValueError, match="Duplicate resource preparation module/use epoch"):
+        inject_direct(c, model, resource_preparation_boundaries=(
+            c.resource_preparation_boundaries[0], c.resource_preparation_boundaries[0]))
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("boundaries", [[], {}, False, 0, "", "invalid", (None,), (object(),),
+                                       ((),), (False,), range(0)])
+def test_malformed_boundary_arguments_fail_before_noise_setup(monkeypatch, enabled, boundaries):
+    from logical_to_stim_converter import NoiseParameters
+
+    c = make_compiler(names="D").compile([LogicalInit("D", "Z", 1), LogicalMeasure("D", "Z")])
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Malformed boundaries must fail before noise setup")
+
+    monkeypatch.setattr(NoiseParameters, "to_stimflow", forbidden)
+    with pytest.raises(ValueError, match="must be a tuple of ResourcePreparationBoundary"):
+        inject_direct(c, NoiseModel(resource_preparation=ResourcePreparationNoise(enabled, .003)),
+                      resource_preparation_boundaries=boundaries)

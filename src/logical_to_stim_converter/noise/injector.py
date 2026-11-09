@@ -22,15 +22,30 @@ class NoiseInjector:
         physical_map: Mapping[GlobalSiteId, int],
         layers: tuple[TimeLayer, ...],
         fragments: tuple[ModuleFragment, ...],
-        resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] = (),
+        resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] | None = None,
     ) -> stim.Circuit:
         """Return a noisy copy using inclusive reset-to-readout use intervals.
 
         All data/check ancillas of active_use_ids are idle-eligible. Available or
         reserved patches receive no idle channel until their next physical reset.
+        An enabled resource policy requires an explicit verified boundary tuple;
+        () declares no eligible resources. Use CircuitCompiler.compile to resolve
+        that plan. Omission remains supported when the policy is disabled.
         """
         if ideal != ideal.without_noise():
             raise ValueError("Noise must be applied once to a noiseless ideal circuit")
+        if resource_preparation_boundaries is None:
+            if model.resource_preparation.enabled:
+                raise ValueError(
+                    "Enabled resource preparation requires explicit "
+                    "resource_preparation_boundaries; "
+                    "pass verified boundaries or use CircuitCompiler.compile")
+            resource_preparation_boundaries = ()
+        elif not isinstance(resource_preparation_boundaries, tuple) or any(
+            not isinstance(b, ResourcePreparationBoundary) for b in resource_preparation_boundaries
+        ):
+            raise ValueError("resource_preparation_boundaries must be a tuple of "
+                             "ResourcePreparationBoundary objects")
         if resource_preparation_boundaries and not model.resource_preparation.enabled:
             raise ValueError("Resource preparation boundaries require an enabled policy")
         eligible = {b.preparation_module_id for b in resource_preparation_boundaries}

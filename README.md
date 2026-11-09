@@ -955,6 +955,11 @@ See [the physical-use and verification guide](docs/three_patch_knill.md).
 depolarization after final SE and before resource CNOT. Ordinary noise continues
 on input/spectator patches, waiting layers and subsequent gates. The default is
 disabled; enabled probability zero still suppresses resource preparation noise.
+The finite non-boolean `p_st_transversal` probability must be in **[0, 0.75]**,
+even when disabled, so supported circuits can use Stim's native exact DEM workflow.
+Direct `NoiseInjector.apply()` requires an explicit boundary tuple when enabled;
+`()` declares that there are no eligible resources. Standard compilation resolves
+and supplies this tuple automatically.
 
 ```python
 from logical_to_stim_converter import NoiseModel, ResourcePreparationNoise, parse_logical_file
@@ -970,5 +975,5 @@ Run `python examples/knill_resource_preparation_noise.py --shots 32` for paired
 direct-Python/LSTIM compilation and same-raw external decoding. Three d=3 cycles
 add 54 stochastic data targets without extra TICKs or changed ideal records.
 See [exact physics, provenance and decoder boundaries](docs/resource_preparation_noise.md),
-including Stim's exact-DEM restriction for probabilities above 3/4 and conditional
-model rejection of intermediate SE measurements on Bell operands.
+including policy validation, the direct injector's omitted-versus-empty boundary
+contract and conditional-model rejection of intermediate SE measurements on Bell operands.

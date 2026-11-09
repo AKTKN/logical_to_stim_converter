@@ -28,3 +28,9 @@ boundaries structurally after ideal validation; use data layouts/maps and actual
 BlockUseIds. Suppress gate and inclusive per-use idle faults, then inject distinctly
 tagged data-only DEPOLARIZE1 after the existing final TICK. Do not infer eligibility
 from stage strings, current logical names, coordinate ranges or bare init pairs.
+
+M9 follow-up: ResourcePreparationNoise validates [0,.75] even when disabled.
+NoiseInjector.apply uses None for omitted metadata: enabled calls fail before
+noise setup; explicit () is the caller's declared resource-free plan. Reject
+other container/element types, retain duplicate checks and ordinary disabled
+omission behavior. The compiler supplies the fully resolved tuple in every case.

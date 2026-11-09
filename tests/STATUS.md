@@ -1,6 +1,20 @@
 # STATUS — Tests
 
-## M9 update — 2026-11-09
+## M9 follow-up — 2026-11-09
+
+Expanded policy negatives to both enabled states, including .7500000001/.9/1,
+NaN/infinity/bools/strings/complex/containers. Exact boundary tests accept 0,
+interior probabilities and .75 with native DEM/view construction and unchanged
+physical gate arguments. Other noise channels still accept their unit range and
+native DEM errors propagate. Direct API tests cover omission/explicit None,
+resource-free (), verified nonempty plans, disabled contradictions, duplicates and
+malformed container/element types, including early failure before noise setup.
+The old p=1 fixture is replaced by .75; historical results below remain intact.
+M9 physical, conditional and three-cycle same-raw LSTIM tests stay in place.
+Checkpoint and full-suite/installed-wheel/build/example evidence is in root STATUS.
+
+
+## M9 initial update — 2026-11-09 (historical pre-restriction)
 
 Added 97 cases while preserving all 1205 M1-M8 cases: 40 policy/structural/exact
 noise tests, 17 independent physical/model/provenance tests and 40 three-cycle
@@ -9,7 +23,8 @@ real isolated wheel consumer with optional/repository imports blocked.
 
 The location oracle enumerates every ordinary/special gate/result/idle target,
 probability and layer, including positive overrides, spectators, unequal waiting,
-concurrent Bell preparations, d=3/5, X/Z, rounds1/d, p=0/1 and bare-init exclusion.
+concurrent Bell preparations, d=3/5, X/Z, rounds1/d, historical pre-restriction
+p=0/1 and bare-init exclusion. The current policy rejects p=1.
 A direct-Stim original-rule reference compares exact disabled circuits and DEMs.
 Independent primitive ideal references and Stim physical X/Y/Z injections verify
 raw/check/logical/survivor maps, exclusive groups and full global signatures;

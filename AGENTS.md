@@ -123,3 +123,10 @@ TICK/idle accounting and before resource CNOT, with distinct stochastic provenan
 Keep preparation probes before these channels and conditional Bell models starting
 at them. Reject unsupported intervening operand SE boundaries explicitly. Preserve
 disabled circuits/fingerprints and canonical ideal schedules; no new LSTIM syntax.
+
+M9 follow-up restricts p_st_transversal to finite non-boolean [0,.75] values,
+including disabled configurations, for native exact DEM compatibility. Validate
+the actual noisy circuit without caps/fallbacks. Enabled direct NoiseInjector.apply
+requires an explicit verified tuple; None/omitted fails, () declares no resources.
+Only standard compilation resolves/validates full Bell eligibility; do not add a
+second resolver or infer it from primitive stages/names.

@@ -16,14 +16,15 @@ def main():
     """Compare one paired experiment with the existing external restricted decoder."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--p", type=float, default=.001, help="ordinary background probability")
-    parser.add_argument("--p-st", type=float, default=.003, help="post-SE data depolarization")
+    parser.add_argument("--p-st", type=float, default=.003,
+                        help="post-SE data depolarization in [0, 0.75] (DEM-compatible policy)")
     parser.add_argument("--shots", type=int, default=32)
     parser.add_argument("--seed", type=int, default=929)
     args = parser.parse_args()
-    policy = ResourcePreparationNoise(enabled=True, p_st_transversal=args.p_st)
-    if args.p_st > .75:
-        parser.error("This DEM/decoder example needs p-st <= .75; "
-                     "physical sampling supports up to 1")
+    try:
+        policy = ResourcePreparationNoise(enabled=True, p_st_transversal=args.p_st)
+    except ValueError as ex:
+        parser.error(str(ex))
     if args.shots <= 0:
         parser.error("shots must be positive")
     noise = NoiseModel(default=NoiseModel.uniform_depolarizing(args.p).default,

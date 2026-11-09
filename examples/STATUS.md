@@ -1,6 +1,17 @@
 # STATUS — Examples
 
-## M9 update — 2026-11-09
+## M9 follow-up — 2026-11-09
+
+The M9 paired example now describes --p-st in [0,.75] as a policy-level DEM
+compatibility requirement. It delegates validation to ResourcePreparationNoise
+and reports invalid settings through argparse, without a traceback or separate
+sampling-only exception. Direct Python callers receive the same policy validation.
+The example's direct/source physical/DEM/shared-raw comparison is unchanged.
+Root STATUS records CLI help/invalid/valid checks and all nine example commands.
+The demo-only restriction and p=1 API behavior below are historical pre-follow-up.
+
+
+## M9 initial update — 2026-11-09 (historical pre-restriction)
 
 knill_resource_preparation_noise.py opts into ideal Bell resource initialization
 plus post-SE independent data depolarization. It reuses the independently authored
@@ -13,8 +24,9 @@ staged export: 51 wires/255 records/192 detectors, six resource uses and 54 new
 data targets; the finite seed929 batch has two restricted-baseline failures
 (LER .0625), an observation without a threshold/optimality assertion. All eight
 previous CI example commands also pass. Probability zero remains opt-in ideal
-preparation; this DEM/decoder demo rejects p_st>3/4 explicitly, while the physical
-API supports sampling through p=1. Root STATUS records full tests/build and
+preparation. At the initial pre-restriction revision, only this demo rejected
+p_st>3/4 and the API allowed p=1 sampling; the follow-up enforces the policy-level
+[0,.75] range for every caller. Root STATUS records full tests/build and
 remote Ubuntu/Windows Python 3.11/3.12 results separately. Exact physics and
 conditional limits are in docs/resource_preparation_noise.md.
 

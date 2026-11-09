@@ -47,4 +47,5 @@ M9 exports ResourcePreparationNoise from root/noise. The compiled artifact expos
 immutable resource_preparation_boundaries with module/use/site/index provenance.
 Default disabled behavior and source identities remain compatible; enabled cuts
 participate in fingerprints. See docs/resource_preparation_noise.md for exact
-physical and conditional boundaries and the pinned over-mixing DEM limitation.
+physical/conditional boundaries, the DEM-compatible [0,.75] policy range and
+the direct injector's required explicit boundary tuple when enabled.

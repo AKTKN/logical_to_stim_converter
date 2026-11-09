@@ -77,3 +77,9 @@ Stim. Compare raw/check/logical/survivor/global signatures, exclusive groups and
 preparation probe exclusion. Three-cycle d=3/5 signed X/Z source/direct pairs
 replay the same raw batch through both existing external adapters. Disabled mode
 must match an independently spelled original noise circuit and exact DEM.
+
+M9 follow-up tests require policy-level [0,.75] validation for either enabled
+state and native DEM/view construction at .75. Reject omitted enabled injector
+metadata before noise setup, distinguish explicit (), and compare exact direct/
+compiler/original-rule circuits and DEMs. Keep historical p=1 results labelled
+pre-restriction; the current policy rejects them.

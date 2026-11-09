@@ -66,6 +66,7 @@ class ResourcePreparationNoise:
 
     Zero probability still suppresses ordinary initialization/SE noise when enabled.
     This policy applies to explicit BellStatePrep composites, including nested ones.
+    Probabilities in [0, 0.75] support native exact DEM extraction with pinned Stim.
     """
 
     enabled: bool = False
@@ -76,8 +77,9 @@ class ResourcePreparationNoise:
             raise ValueError("enabled must be a boolean")
         p = self.p_st_transversal
         if (not isinstance(p, (int, float)) or isinstance(p, bool)
-                or not math.isfinite(p) or not 0 <= p <= 1):
-            raise ValueError("p_st_transversal must be a finite probability in [0, 1]")
+                or not 0 <= p <= .75 or not math.isfinite(p)):
+            raise ValueError("p_st_transversal must be a finite probability in [0, 0.75] "
+                             "for exact DEM compatibility")
 
 
 @dataclass(frozen=True)

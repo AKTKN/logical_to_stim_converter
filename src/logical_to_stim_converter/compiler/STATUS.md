@@ -1,6 +1,18 @@
 # STATUS — Compiler
 
-## M9 update — 2026-11-09
+## M9 follow-up — 2026-11-09
+
+Removed the over-mixing exception branch and temporary .75 validation circuit.
+ResourcePreparationNoise enforces [0,.75] before compilation, and the actual noisy
+circuit now undergoes straightforward native DEM validation. Unrelated Stim
+errors propagate normally. The compiler still passes explicit boundary tuples
+for enabled resources, enabled resource-free programs and disabled models; public
+metadata validation order and append policy inheritance are unchanged. Exact
+M9-baseline snapshots and current physics/conditional/E2E/build tests are recorded
+in root STATUS. The capped-validation description below is historical only.
+
+
+## M9 initial update — 2026-11-09 (historical pre-restriction)
 
 Compilation now validates ideal public metadata before resolving the optional
 Bell-resource noise plan. CompiledCircuit.resource_preparation_boundaries retains
@@ -9,9 +21,9 @@ is revalidated; append retains the complete original NoiseModel. Ideal circuit,
 flows, physical indices/TICKs, measurement/detector/observable order, random sectors
 and logical frame assembly remain unchanged. Explicit and nested Bell preparations
 are handled structurally, including recycled epochs and unequal parallel work.
-Pinned Stim over-mixing p>3/4 is isolated as sampling-only: remaining channels are
-validated with only tagged post-SE channels temporarily capped, while canonical
-DEM/view extraction reports its native limitation. Root STATUS records exact
+Initial pre-restriction M9 isolated p>3/4 as sampling-only and temporarily capped
+tagged post-SE channels for validation. The follow-up removes that workaround
+and rejects these policy settings at construction. Root STATUS records exact
 checkpoint/full-suite/build/example and remote platform evidence. General
 conditional inference across intermediate operand SE boundaries remains deferred.
 
