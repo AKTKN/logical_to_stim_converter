@@ -501,3 +501,20 @@ physics is implemented. CI is configured for Ubuntu/Windows Python 3.11/3.12;
 remote jobs have not run during this task. No upstream tests or sources were edited.
 
 History: initial import-only scaffold -> full memory-core physics suite on 2026-11-07.
+
+# Phase 2 ordinary circuit research validator — 2026-11-09
+
+`test_validation_ordinary_circuit.py` adds eight focused tests for exact
+physical noise-location inventory, 3+15 categorical alternatives, batched
+targets, measurement-result timing, complete selected d3/d5 single faults,
+signed global parity, H/virtual/spectator controls, active/retired idles,
+mutated gate/order/map/channel/sign controls, DEM `^` components and hyperedge
+rejection, cross-location pair propagation, one-versus-two-worker determinism,
+separate categorical sampling, zero noise, invalid settings, a quick CLI run,
+Wilson intervals and a synthetic fit. Final eight-worker full-suite and Ruff
+evidence: **1,389 passed in 553.55 s** for the full suite, and **191 passed
+in 32.14 s** for the final targeted run including this test and the requested
+noise, Clifford noise, memory, decoder-view and detector-provenance tests.
+Ruff src/tests/validation and formatting pass. The full suite started before
+the narrow spectator label, throughput and idle provenance edits; the final targeted
+run exercised those edits.

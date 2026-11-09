@@ -1,0 +1,996 @@
+{
+  "assumptions": [
+    "ordinary rotated-surface ideal physical schedule",
+    "independent per-location categorical reset/gate/measurement/idle channels",
+    "two-pass correlated PyMatching only for decomposed graphlike components",
+    "failure is any decoded observable XOR physical truth per shot",
+    "no circuit-level analytic exponent/coefficient asserted"
+  ],
+  "census": [
+    {
+      "aliased_signature_groups": 24,
+      "atom_count": 556,
+      "atoms_per_second": 393.80861713332496,
+      "case": {
+        "basis": "Z",
+        "distance": 3,
+        "probabilities": [
+          0.001,
+          0.002,
+          0.003,
+          0.004,
+          0.005
+        ],
+        "rounds": 1,
+        "variant": "ordinary"
+      },
+      "categorical_sample": {
+        "counts": [
+          87255,
+          1958,
+          2311,
+          71,
+          1896,
+          489,
+          39,
+          10,
+          3157,
+          1551,
+          1022,
+          60,
+          82,
+          64,
+          28,
+          7
+        ],
+        "exact_probabilities": [
+          0.8731307901583313,
+          0.019411120533705917,
+          0.02286507978600262,
+          0.0006694687574906322,
+          0.01913051313453959,
+          0.004914718439081409,
+          0.0005018085489207902,
+          0.0001322162099503671,
+          0.0312703518033525,
+          0.015495804967592189,
+          0.010312855418034006,
+          0.0006110910060034697,
+          0.00076127981428524,
+          0.000498608439582604,
+          0.00022792142036774654,
+          6.63715627596817e-05
+        ],
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "max_binomial_z_when_expected_ge_5": 2.0028663648319287,
+        "seed": 9201,
+        "shots": 100000,
+        "total_variation": 0.0010239929148608677
+      },
+      "distinct_signatures": 24,
+      "first_order": {
+        "max_absolute_coefficient_difference": 2.5859796214111608e-09,
+        "nonzero_signatures": 23,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "755ec1f63d8677e16c8787a9a6451907b36e4ea64c7ccc9d5612319be6b2f76f",
+        "noisy_sha256": "2418d7be674cfd74781f1a8f487ee03257e898549237d5d7fdb6e3c1c804b2e7",
+        "num_detectors": 8,
+        "num_measurements": 17,
+        "num_observables": 1,
+        "num_ticks": 7,
+        "source_fingerprint": "87672eef604090d96376641c72e4c2d19e8d2676e87cda1f5ffd8cc8c890efb2"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 6,
+        "decomposed_max_fourier_difference": 5.218048215738236e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 34,
+        "full_hyperedge_components": 0,
+        "full_max_fourier_difference": 4.773959005888173e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 4.884981308350689e-15
+      },
+      "name": "d3_Z_r1_ordinary",
+      "pair_subset": {
+        "complete": false,
+        "eligible_atom_count": 539,
+        "measurement_atoms_excluded": true,
+        "possible_cross_location_pairs": 142309,
+        "sampled_cross_location_pairs": 128,
+        "seed": 9201
+      },
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 54,
+          "DEPOLARIZE2": 24,
+          "RESULT_FLIP": 17,
+          "X_ERROR": 13,
+          "Z_ERROR": 4
+        },
+        "kinds": {
+          "after_2q": 24,
+          "idle": 54,
+          "measurement": 17,
+          "reset": 17
+        },
+        "locations": 112
+      },
+      "signed_reference": {
+        "expected_values": [
+          false
+        ],
+        "random_raw_columns": 13,
+        "shots": 64
+      },
+      "table": {
+        "bytes": 5528,
+        "path": "atoms_d3_Z_r1_ordinary.csv.gz",
+        "rows": 556,
+        "sha256": "99b94aa7b5faae8835cf890b106f952998ed5195edd7b250212a557490d5326a"
+      },
+      "wall_seconds": 1.411853310999959,
+      "zero_signature_atoms": 206
+    },
+    {
+      "aliased_signature_groups": 162,
+      "atom_count": 1536,
+      "atoms_per_second": 2593.4512462043454,
+      "case": {
+        "basis": "X",
+        "distance": 3,
+        "probabilities": [
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "rounds": 3,
+        "variant": "ordinary"
+      },
+      "distinct_signatures": 220,
+      "first_order": {
+        "max_absolute_coefficient_difference": 2.518106903548478e-10,
+        "nonzero_signatures": 219,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "9d92c9c441f7ce14a5b0ab7fbdaa30d9e00aec79e1c7b055112aa526024a0a47",
+        "noisy_sha256": "d74d736bf527bb682987dd12aadb222f543becc153dcdfc054812cfed82b4937",
+        "num_detectors": 24,
+        "num_measurements": 33,
+        "num_observables": 1,
+        "num_ticks": 19,
+        "source_fingerprint": "e0fc7b736737dc978e532a44b4475d5b652da1517885fed87f50b2804b7ebb88"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 220,
+        "decomposed_max_fourier_difference": 8.992806499463768e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 250,
+        "full_hyperedge_components": 113,
+        "full_max_fourier_difference": 9.43689570931383e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 12,
+        "view_max_fourier_difference": 9.103828801926284e-15
+      },
+      "name": "d3_X_r3_ordinary",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 130,
+          "DEPOLARIZE2": 72,
+          "RESULT_FLIP": 33,
+          "X_ERROR": 12,
+          "Z_ERROR": 21
+        },
+        "kinds": {
+          "after_2q": 72,
+          "idle": 130,
+          "measurement": 33,
+          "reset": 33
+        },
+        "locations": 268
+      },
+      "shortest_graphlike_faults": 3,
+      "signed_reference": {
+        "expected_values": [
+          false
+        ],
+        "random_raw_columns": 21,
+        "shots": 64
+      },
+      "stim_generated_reference": {
+        "num_ticks": 21,
+        "same_physical_schedule": false,
+        "shortest_graphlike_faults": 3
+      },
+      "table": {
+        "bytes": 15505,
+        "path": "atoms_d3_X_r3_ordinary.csv.gz",
+        "rows": 1536,
+        "sha256": "c609d6934a5d72cba674e146db80284b929f4f328534e66d5c3eb344cb4a5858"
+      },
+      "wall_seconds": 0.5922609889998967,
+      "zero_signature_atoms": 200
+    },
+    {
+      "aliased_signature_groups": 78,
+      "atom_count": 1700,
+      "atoms_per_second": 1529.5535968769314,
+      "case": {
+        "basis": "Z",
+        "distance": 5,
+        "probabilities": [
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "rounds": 1,
+        "variant": "ordinary"
+      },
+      "distinct_signatures": 78,
+      "first_order": {
+        "max_absolute_coefficient_difference": 3.183018935232207e-10,
+        "nonzero_signatures": 77,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "994de3f5225f157822a9f32ad60795de42fddfe4967e412be9ff1e2a4976fbb6",
+        "noisy_sha256": "00bc202ab1d45e4f8817a5a03c398772a6653c77aa2e78bbcd9989776177b07c",
+        "num_detectors": 24,
+        "num_measurements": 49,
+        "num_observables": 1,
+        "num_ticks": 7,
+        "source_fingerprint": "9f805ade2c07fa9a88ef352ad1631eb05613b63acd9b7635466ee49d1aa02e51"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 10,
+        "decomposed_max_fourier_difference": 8.326672684688674e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 110,
+        "full_hyperedge_components": 0,
+        "full_max_fourier_difference": 7.993605777301127e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 7.993605777301127e-15
+      },
+      "name": "d5_Z_r1_ordinary",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 134,
+          "DEPOLARIZE2": 80,
+          "RESULT_FLIP": 49,
+          "X_ERROR": 37,
+          "Z_ERROR": 12
+        },
+        "kinds": {
+          "after_2q": 80,
+          "idle": 134,
+          "measurement": 49,
+          "reset": 49
+        },
+        "locations": 312
+      },
+      "signed_reference": {
+        "expected_values": [
+          false
+        ],
+        "random_raw_columns": 37,
+        "shots": 64
+      },
+      "table": {
+        "bytes": 16387,
+        "path": "atoms_d5_Z_r1_ordinary.csv.gz",
+        "rows": 1700,
+        "sha256": "340f66524a26f37b402d3e23dd543a14cfe3216046d5092b4ccf4a9ade672125"
+      },
+      "wall_seconds": 1.111435390999759,
+      "zero_signature_atoms": 606
+    },
+    {
+      "aliased_signature_groups": 1082,
+      "atom_count": 7724,
+      "atoms_per_second": 2405.4641352332637,
+      "case": {
+        "basis": "X",
+        "distance": 5,
+        "probabilities": [
+          0.001,
+          0.001,
+          0.001,
+          0.001,
+          0.001
+        ],
+        "rounds": 5,
+        "variant": "ordinary"
+      },
+      "distinct_signatures": 1678,
+      "first_order": {
+        "max_absolute_coefficient_difference": 2.518106903548478e-10,
+        "nonzero_signatures": 1677,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "41044ab4cc7ac12d8af248890a728bd9299c164a23d72de7250cc1776d99de46",
+        "noisy_sha256": "6bd0a2bc42a989e9f636afeab2c2594ce42b596c763d0a8c490aa59194ff7072",
+        "num_detectors": 120,
+        "num_measurements": 145,
+        "num_observables": 1,
+        "num_ticks": 31,
+        "source_fingerprint": "1b809f540ca40204cca1200179335d2cf0f3fc20ffda1ed0eb73d35f8316d7a4"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 1467,
+        "decomposed_max_fourier_difference": 2.0095036745715333e-14,
+        "full_correlated_components": 0,
+        "full_dem_errors": 1818,
+        "full_hyperedge_components": 1101,
+        "full_max_fourier_difference": 2.120525977034049e-14,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 2.0872192862952943e-14
+      },
+      "name": "d5_X_r5_ordinary",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 478,
+          "DEPOLARIZE2": 400,
+          "RESULT_FLIP": 145,
+          "X_ERROR": 60,
+          "Z_ERROR": 85
+        },
+        "kinds": {
+          "after_2q": 400,
+          "idle": 478,
+          "measurement": 145,
+          "reset": 145
+        },
+        "locations": 1168
+      },
+      "shortest_graphlike_faults": 5,
+      "signed_reference": {
+        "expected_values": [
+          false
+        ],
+        "random_raw_columns": 85,
+        "shots": 64
+      },
+      "stim_generated_reference": {
+        "num_ticks": 35,
+        "same_physical_schedule": false,
+        "shortest_graphlike_faults": 5
+      },
+      "table": {
+        "bytes": 80896,
+        "path": "atoms_d5_X_r5_ordinary.csv.gz",
+        "rows": 7724,
+        "sha256": "b3298473a609a8e139eed43289990dc2d017f4fb162e114fce600d88b5692849"
+      },
+      "wall_seconds": 3.2110227239995766,
+      "zero_signature_atoms": 678
+    },
+    {
+      "aliased_signature_groups": 24,
+      "atom_count": 607,
+      "atoms_per_second": 1604.1439833015518,
+      "case": {
+        "basis": "X",
+        "distance": 3,
+        "probabilities": [
+          0.001,
+          0.002,
+          0.003,
+          0.004,
+          0.005
+        ],
+        "rounds": 1,
+        "variant": "h"
+      },
+      "distinct_signatures": 24,
+      "first_order": {
+        "max_absolute_coefficient_difference": 3.12651207354242e-09,
+        "nonzero_signatures": 23,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "8d55b0e9610bb27ff1823f06c82fc0fbea86581dc4470f081c8a411aeb38fe68",
+        "noisy_sha256": "c32729094bee73c866c775eb47ca0200d3d100e69bf4480aeba9e8bf8ebe2d61",
+        "num_detectors": 8,
+        "num_measurements": 17,
+        "num_observables": 1,
+        "num_ticks": 8,
+        "source_fingerprint": "473c0b1fd46568cdb9dff30c9551ab648d268335399901bb1e977592dae9f878"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 6,
+        "decomposed_max_fourier_difference": 5.218048215738236e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 34,
+        "full_hyperedge_components": 0,
+        "full_max_fourier_difference": 4.773959005888173e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 4.9960036108132044e-15
+      },
+      "name": "d3_X_r1_h",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 71,
+          "DEPOLARIZE2": 24,
+          "RESULT_FLIP": 17,
+          "X_ERROR": 13,
+          "Z_ERROR": 4
+        },
+        "kinds": {
+          "after_1q": 9,
+          "after_2q": 24,
+          "idle": 62,
+          "measurement": 17,
+          "reset": 17
+        },
+        "locations": 129
+      },
+      "signed_reference": {
+        "expected_values": [
+          false
+        ],
+        "random_raw_columns": 13,
+        "shots": 64
+      },
+      "table": {
+        "bytes": 6001,
+        "path": "atoms_d3_X_r1_h.csv.gz",
+        "rows": 607,
+        "sha256": "827a57cd42f736f3ca5890e9f5230e106e09bb6a5cd27bc8f3002db1ac6b2c91"
+      },
+      "wall_seconds": 0.37839496100014003,
+      "zero_signature_atoms": 239
+    },
+    {
+      "aliased_signature_groups": 24,
+      "atom_count": 556,
+      "atoms_per_second": 1921.466737674265,
+      "case": {
+        "basis": "Z",
+        "distance": 3,
+        "probabilities": [
+          0.001,
+          0.002,
+          0.003,
+          0.004,
+          0.005
+        ],
+        "rounds": 1,
+        "variant": "signed"
+      },
+      "distinct_signatures": 24,
+      "first_order": {
+        "max_absolute_coefficient_difference": 2.5859796214111608e-09,
+        "nonzero_signatures": 23,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "5faa13fad2062a53760f0c741d5b7570b3e0a55478de438cfb7b3365b1852312",
+        "noisy_sha256": "2eb824040d472d599ad2567579ad10a0dd84fa2d37260452a33677ec122c44d9",
+        "num_detectors": 8,
+        "num_measurements": 17,
+        "num_observables": 1,
+        "num_ticks": 7,
+        "source_fingerprint": "b1801f7a596bf3fc0811bef7b75dcd9e692d35704e6b4b9a5a297a5fa0684d9b"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 6,
+        "decomposed_max_fourier_difference": 5.218048215738236e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 34,
+        "full_hyperedge_components": 0,
+        "full_max_fourier_difference": 4.773959005888173e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 4.884981308350689e-15
+      },
+      "name": "d3_Z_r1_signed",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 54,
+          "DEPOLARIZE2": 24,
+          "RESULT_FLIP": 17,
+          "X_ERROR": 13,
+          "Z_ERROR": 4
+        },
+        "kinds": {
+          "after_2q": 24,
+          "idle": 54,
+          "measurement": 17,
+          "reset": 17
+        },
+        "locations": 112
+      },
+      "signed_reference": {
+        "expected_values": [
+          true
+        ],
+        "random_raw_columns": 13,
+        "shots": 64
+      },
+      "table": {
+        "bytes": 5533,
+        "path": "atoms_d3_Z_r1_signed.csv.gz",
+        "rows": 556,
+        "sha256": "1fbf1539a50599a4d7ea1e887b6820e41954da3c2b48f1961f01df86c855440d"
+      },
+      "wall_seconds": 0.289362281999729,
+      "zero_signature_atoms": 206
+    },
+    {
+      "aliased_signature_groups": 251,
+      "atom_count": 2888,
+      "atoms_per_second": 2479.0111086662787,
+      "case": {
+        "basis": "Z",
+        "distance": 3,
+        "probabilities": [
+          0.001,
+          0.002,
+          0.003,
+          0.004,
+          0.005
+        ],
+        "rounds": 3,
+        "variant": "spectator"
+      },
+      "distinct_signatures": 329,
+      "first_order": {
+        "max_absolute_coefficient_difference": 2.28377287705972e-08,
+        "nonzero_signatures": 328,
+        "scale": 1e-05
+      },
+      "identity": {
+        "ideal_sha256": "1e0e3dbf5b39cd837401bb6293ca95d715dfca604ac507c838b126b0dc97fa5c",
+        "noisy_sha256": "1b66a563810bf86962b643d1ba8d1eecb2b4d10570015bb5ce1d7e12f8a6cd24",
+        "num_detectors": 40,
+        "num_measurements": 58,
+        "num_observables": 2,
+        "num_ticks": 26,
+        "source_fingerprint": "d56df094f28d03dafa040e64da781185b32f18bc4682830960adba9f8f90bf7d"
+      },
+      "marginal": {
+        "decomposed_correlated_components": 314,
+        "decomposed_max_fourier_difference": 7.105427357601002e-15,
+        "full_correlated_components": 0,
+        "full_dem_errors": 382,
+        "full_hyperedge_components": 158,
+        "full_max_fourier_difference": 7.882583474838611e-15,
+        "global_detector_ids": [
+          0,
+          1,
+          2
+        ],
+        "global_observable_ids": [
+          0
+        ],
+        "view_dem_errors": 11,
+        "view_max_fourier_difference": 7.105427357601002e-15
+      },
+      "name": "d3_Z_r3_spectator",
+      "schedule": {
+        "channels": {
+          "DEPOLARIZE1": 324,
+          "DEPOLARIZE2": 120,
+          "RESULT_FLIP": 58,
+          "X_ERROR": 29,
+          "Z_ERROR": 29
+        },
+        "kinds": {
+          "after_2q": 120,
+          "idle": 324,
+          "measurement": 58,
+          "reset": 58
+        },
+        "locations": 560
+      },
+      "signed_reference": {
+        "expected_values": [
+          false,
+          false
+        ],
+        "random_raw_columns": 38,
+        "shots": 64
+      },
+      "table": {
+        "bytes": 29774,
+        "path": "atoms_d3_Z_r3_spectator.csv.gz",
+        "rows": 2888,
+        "sha256": "97c200590d9f17c674b7ad7c33a9dc6fd95cfa75ee18eae5fdf5249fa9f7bbf6"
+      },
+      "wall_seconds": 1.164980660999845,
+      "zero_signature_atoms": 567
+    }
+  ],
+  "compiler_source_sha": "d3a34d47cc10d1272e11125ed34a87925bec6621",
+  "fits": {
+    "d3_Z": {
+      "free_curvature": {
+        "A": 2067.785591744355,
+        "A_95": [
+          1137.1024188772253,
+          3760.2041666989107
+        ],
+        "beta": 2.0276487582487306,
+        "beta_95": [
+          1.927488962835507,
+          2.127808553661954
+        ],
+        "c": -46.40296914929257,
+        "c_95": [
+          -59.87703057623576,
+          -32.928907722349386
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 5,
+        "status": "ok",
+        "weighted_log_residual": 3.2594889672679135
+      },
+      "free_power": {
+        "A": 273.16513065849875,
+        "A_95": [
+          244.6650201185436,
+          304.985112181221
+        ],
+        "beta": 1.692075884435036,
+        "beta_95": [
+          1.6688955181969192,
+          1.715256250673153
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 5,
+        "status": "ok",
+        "weighted_log_residual": 48.82189368515433
+      }
+    },
+    "d5_Z": {
+      "free_curvature": {
+        "A": 4453541.886178546,
+        "A_95": [
+          1816958.8855469113,
+          10916061.717035847
+        ],
+        "beta": 3.465490564119584,
+        "beta_95": [
+          3.3122881395005415,
+          3.6186929887386263
+        ],
+        "c": -133.56122466389508,
+        "c_95": [
+          -152.219401268591,
+          -114.90304805919912
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 5,
+        "status": "ok",
+        "weighted_log_residual": 2.142572413362331
+      },
+      "free_power": {
+        "A": 7771.1878372460815,
+        "A_95": [
+          6831.487654641316,
+          8840.147776704465
+        ],
+        "beta": 2.3869699749873354,
+        "beta_95": [
+          2.359211526668706,
+          2.4147284233059647
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 5,
+        "status": "ok",
+        "weighted_log_residual": 198.99216891858083
+      }
+    }
+  },
+  "implementation_version": "phase2-1",
+  "memory_points": [
+    {
+      "basis": "Z",
+      "case": "d3_Z_r3_ordinary",
+      "distance": 3,
+      "failures": 854,
+      "per_shot_normalization": true,
+      "probability": 0.002,
+      "rate": 0.0065155029296875,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 587979.7280856463,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 1.5800221939998664,
+      "wall_seconds": 0.22291924999990442,
+      "wilson_95": [
+        0.006094172226445631,
+        0.006965758877322969
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d3_Z_r3_ordinary",
+      "distance": 3,
+      "failures": 3052,
+      "per_shot_normalization": true,
+      "probability": 0.004,
+      "rate": 0.023284912109375,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 544833.2318441212,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 1.7156427469999471,
+      "wall_seconds": 0.24057269700006145,
+      "wilson_95": [
+        0.0224823543008487,
+        0.024115412235249097
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d3_Z_r3_ordinary",
+      "distance": 3,
+      "failures": 6347,
+      "per_shot_normalization": true,
+      "probability": 0.006,
+      "rate": 0.04842376708984375,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 525580.0460407011,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 1.7689364460002253,
+      "wall_seconds": 0.24938541900019118,
+      "wilson_95": [
+        0.04727484128307612,
+        0.04959916171777357
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d3_Z_r3_ordinary",
+      "distance": 3,
+      "failures": 10587,
+      "per_shot_normalization": true,
+      "probability": 0.008,
+      "rate": 0.08077239990234375,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 490323.9228228723,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 1.92052472999967,
+      "wall_seconds": 0.26731716299991604,
+      "wilson_95": [
+        0.07930950683456273,
+        0.0822598656990785
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d3_Z_r3_ordinary",
+      "distance": 3,
+      "failures": 19755,
+      "per_shot_normalization": true,
+      "probability": 0.012,
+      "rate": 0.15071868896484375,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 458088.83487130515,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 2.0314006570006313,
+      "wall_seconds": 0.28612790800025323,
+      "wilson_95": [
+        0.14879204784749542,
+        0.15266580295893653
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d5_Z_r5_ordinary",
+      "distance": 5,
+      "failures": 198,
+      "per_shot_normalization": true,
+      "probability": 0.002,
+      "rate": 0.0015106201171875,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 109654.30373930422,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 8.727153482000631,
+      "wall_seconds": 1.1953201609999269,
+      "wilson_95": [
+        0.0013144724068057361,
+        0.001735986429625308
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d5_Z_r5_ordinary",
+      "distance": 5,
+      "failures": 1700,
+      "per_shot_normalization": true,
+      "probability": 0.004,
+      "rate": 0.012969970703125,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 101367.69867841258,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 9.640972305000105,
+      "wall_seconds": 1.2930351750001137,
+      "wilson_95": [
+        0.01237155622944974,
+        0.013596932097135285
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d5_Z_r5_ordinary",
+      "distance": 5,
+      "failures": 5148,
+      "per_shot_normalization": true,
+      "probability": 0.006,
+      "rate": 0.039276123046875,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 93814.21878322955,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 10.847452564999912,
+      "wall_seconds": 1.3971442890001526,
+      "wilson_95": [
+        0.03823793938821794,
+        0.04034131170937302
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d5_Z_r5_ordinary",
+      "distance": 5,
+      "failures": 10917,
+      "per_shot_normalization": true,
+      "probability": 0.008,
+      "rate": 0.08329010009765625,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 85235.69556659814,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 11.40317526400031,
+      "wall_seconds": 1.5377594930000669,
+      "wilson_95": [
+        0.08180637365885658,
+        0.0847982516921953
+      ]
+    },
+    {
+      "basis": "Z",
+      "case": "d5_Z_r5_ordinary",
+      "distance": 5,
+      "failures": 25903,
+      "per_shot_normalization": true,
+      "probability": 0.012,
+      "rate": 0.19762420654296875,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 73257.90361129581,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 13.384284987999308,
+      "wall_seconds": 1.7891857879999407,
+      "wilson_95": [
+        0.1954773132653161,
+        0.1997888233636636
+      ]
+    },
+    {
+      "basis": "X",
+      "case": "d3_X_r3_ordinary",
+      "distance": 3,
+      "failures": 10019,
+      "per_shot_normalization": true,
+      "probability": 0.008,
+      "rate": 0.07643890380859375,
+      "rounds": 3,
+      "shots": 131072,
+      "shots_per_second": 478970.768879346,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 1.8750344340010088,
+      "wall_seconds": 0.2736534429996027,
+      "wilson_95": [
+        0.07501287311853795,
+        0.07788976123240855
+      ]
+    },
+    {
+      "basis": "X",
+      "case": "d5_X_r5_ordinary",
+      "distance": 5,
+      "failures": 25886,
+      "per_shot_normalization": true,
+      "probability": 0.012,
+      "rate": 0.1974945068359375,
+      "rounds": 5,
+      "shots": 131072,
+      "shots_per_second": 73938.71098219776,
+      "stop_reason": "max_shots",
+      "sum_worker_seconds": 13.27478702200051,
+      "wall_seconds": 1.7727114559997972,
+      "wilson_95": [
+        0.19534815068726052,
+        0.19965859412991316
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "settings": {
+    "batch_size": 16384,
+    "cpu_count": 20,
+    "max_seconds": 120.0,
+    "max_shots": 131072,
+    "seed": 9201,
+    "target_failures": 0,
+    "workers": 8
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pymatching": "2.3.1",
+    "stim": "1.15.0"
+  },
+  "wall_seconds": 19.14035978100037
+}

@@ -4,6 +4,29 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research validation Phase 2 — ordinary circuit faults (2026-11-09)
+
+Added research-only `validation/ordinary_faults.py` and
+`validation/ordinary_circuit.py`, with focused physical/statistical tests and a
+[dated reproducible report](validation/reports/phase2_2026-11-09/REPORT.md).
+Seven ordinary d3/5 Z/X, H, signed and spectator circuits have exact physical
+location inventories and complete single-fault propagation: **2,661 locations,
+15,567 atoms**. Independent raw-record/Stim parity, signed logical labels,
+canonical/view DEM 4-bit Fourier marginals (maximum `2.2e-14` difference),
+tiny-scale first-order checks and deliberate corruption controls pass. A
+128-pair cross-location d3 Pauli subset is checked but incomplete; no analytic
+circuit coefficient is claimed. Eight-worker fixed-shot MWPM experiments
+sampled 7,864,320 shots in two runs (19.14 s and 21.11 s); effective lower-p
+pure-power slopes are 1.827 (d3) and 2.898 (d5), with finite-p and decoder
+limitations in the report. The selected graphlike-fault lengths 3 and 5 are
+distinct from decoder performance; Stim-generated references have different
+physical schedules. Installed runtime, pins, version, license, M9 and Knill
+physics are unchanged. Eight-worker full pytest passed **1,389 tests in
+553.55 s**; final targeted eight-worker pytest passed **191 in 32.14 s**
+after the narrow runner metadata changes. Ruff src/tests/validation and
+whitespace pass. The [validation ledger](validation/STATUS.md) states the
+gate order and remaining limits.
+
 ## Research validation Phase 1 — code capacity (2026-11-09)
 
 Added a research-only `validation/` harness and tests for one independent data-X

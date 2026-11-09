@@ -25,8 +25,9 @@ The verified physical/test envelope emphasizes odd distances 3 and 5. Other code
 families, non-Clifford gates, automatic allocation and adaptive execution remain
 unsupported. No production decoder or experiment runner ships inside the converter.
 See the [implementation and limitations matrix](docs/index.md#current-implementation-and-limitations).
-The separate [Phase 1 code-capacity validator](validation/README.md) records exact
-d=3/5 one-layer memory MWPM counts and bounded physical Stim comparisons.
+The separate [research validators](validation/README.md) record exact d=3/5
+one-layer code-capacity counts and a bounded ordinary-circuit physical fault
+census with eight-worker MWPM sampling.
 
 ## Installation
 
