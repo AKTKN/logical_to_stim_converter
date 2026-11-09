@@ -46,6 +46,11 @@ optional `.[dev]` tools for examples, tests and development. Decoder algorithms,
 LER experiments/sweeps and shot-dependent scheduling belong to downstream
 consumers such as `knill_bench` and `lomatching`.
 
+For public-only workflows from an installed runtime, use the
+[ordinary memory tutorial](ordinary_memory_tutorial.md) and
+[three-patch Knill tutorial](knill_memory_tutorial.md). Their consumer scripts and
+input files are supplied separately; neither is automatically installed by the wheel.
+
 For the approved decisions, exact phase evidence and remaining work, see the
 [research-beta plan and verification record](research_beta_0.0.1_plan_and_verification.md).
 

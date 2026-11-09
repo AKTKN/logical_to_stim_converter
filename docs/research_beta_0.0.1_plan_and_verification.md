@@ -316,3 +316,183 @@ as described above; broader deferred capabilities are not implied.
 including exact heading anchors and new status/ledger navigation. Root status's
 new relative targets were also checked. The final package build is refreshed
 from the completed documentation tree; local artifacts stay outside Git.
+
+## Phase 4 — Installed consumers and tutorials (2026-11-09)
+
+**Authorization/dependencies:** The maintainer requested Phase 4 implementation,
+testing, commit and push. This explicitly authorizes the Git push deferred by
+the file brief; it does not authorize Phase 5, a license, tags/releases, artifacts
+publication or issue edits/closures. The clean starting `main` is the committed
+Phase 2 + Phase 3 revision `e41c16e4fbdbf98274cc2adbe16ed0c68ea5cc5a`.
+Its concise README, docs index, API reference and reconciled current-state claims
+were verified before implementation; Phase 1/2+3 history remains intact.
+
+Read current bodies/comments for
+[#2 REL-02](https://github.com/AKTKN/logical_to_stim_converter/issues/2),
+[#5 DOC-03](https://github.com/AKTKN/logical_to_stim_converter/issues/5),
+[#4 DOC-02](https://github.com/AKTKN/logical_to_stim_converter/issues/4) and
+[#7 DOC-05](https://github.com/AKTKN/logical_to_stim_converter/issues/7).
+Inspected root/folder instructions/status, existing CI/private-wheel path,
+M6-D/M7-C source consumers, public exports/signatures and stage/frame/M9 physics
+contracts. Stim 1.15.0, stimflow 1.17.dev0 at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd` and Lark 1.3.1 remain unchanged.
+
+**Commit subject:** `Add public-only installed consumers and memory/Knill tutorials`
+
+### Architecture and artifacts
+
+- [examples/installed_consumer.py](../examples/installed_consumer.py): one
+  self-contained external asset (259 lines), copied by the user/test outside the
+  checkout. Imports only public root/decoding APIs, NumPy and standard library.
+  Its CLI accepts a separately supplied source and samples once; analysis functions
+  have no sampler or hidden physical-fault input. No runtime package files change.
+- The two unchanged inputs are [ordinary memory](../examples/lstim/memory_d3.lstim)
+  and [three-patch Knill](../examples/lstim/three_patch_knill_d3.lstim). The installed
+  wheel supplies neither source files nor the consumer script; tutorials provide
+  complete source text and a transparent script-copy instruction. All ship in sdist.
+- [tests/installed_consumer_checks.py](../tests/installed_consumer_checks.py):
+  copied as `consumer_checks.py` beside the external script, never imported as
+  `tests`. Public-only workflow/import/source/use/shape/model checks reuse compiled
+  artifacts from the existing isolated-wheel consumer. A single build serves all
+  six new ideal/noisy/M9 subcases and the preserved prior packaging/API checks.
+- [tests/test_lstim_packaging.py](../tests/test_lstim_packaging.py): extends the
+  existing private source-tree build, metadata/archive and outside-checkout import
+  path test. Verifies both tutorials contain the exact supplied source texts and
+  the sdist contains the consumer; wheel continues excluding examples/tests.
+- [tests/test_installed_consumer.py](../tests/test_installed_consumer.py): six
+  source-tree physics/interface cases. Reuses independent public-operation authors,
+  exact M8 equality helpers and the existing Stim conditional-atom oracle. Tests
+  signed/multiple-observable labeling, strict frame replay and one actual sampler
+  call per CLI workflow. Oracles stay in tests, outside consumer inputs.
+- [ordinary tutorial](ordinary_memory_tutorial.md) and
+  [Knill tutorial](knill_memory_tutorial.md): supplied inputs, runtime-only install,
+  external commands, dimensions/orders, adapter hook, failure convention and limits.
+  README remains 110 lines; index/API/example/development navigation and affected
+  root/docs/tests/examples STATUS files point to the completed Phase 4 work.
+
+**Why inference stays external:** The converter compiles a verified static physical
+experiment and exports exact models/provenance and linear propagation. Decoder
+algorithms, model assignment, hypotheses, empirical failure aggregation and adaptive
+policies remain caller choices. The consumer's `ObservedSectorAdapter` implements
+the public StageDecoder protocol with binary elimination: trust current last
+records, select a CSS sector representative and impose the known initialization
+logical constraint; predict zero last-result errors and no readout flips. Free
+variables are zero, not minimum weight. It correctly resolves random noiseless
+preparation sectors but is deliberately inadequate for general noisy inference.
+No PyMatching or Matplotlib enters the consumer/runtime. Users can replace the
+adapter without recompiling/resampling the physical batch.
+
+### Physics, identity and model assumptions
+
+Ordinary memory retains the canonical full DEM and a deliberately permuted exact
+view: detectors (39,37,...,1), observable (0,), records (48,47,46,45). Full record
+parities reproduce Stim m2d events/labels; selected record order does not truncate
+physical measurement/noise history. The predictor receives events, not observable
+truth. Failure is predicted XOR reference-relative actual flip, independently
+checked against interpreted readout XOR prediction XOR intended value. A signed
+2-observable test reverses IDs (1,0) and distinguishes intended 1 from reference
+flip 0. Hyperedges/correlated components are retained, never forced into matching.
+
+Knill uses all three labeled cycles, seven BlockUseIds, three relocations and
+persistent D ending P0/2. Causal stage requests provide current interpreted
+records/events and transported expected sectors. Source/use/column-bound
+CorrectionBatch values are applied once; raw records remain immutable. Final
+failure is corrected physical readout XOR intended value, without reapplying the
+symbolic frame already represented by the frame plan. Independent strict physical
+frame replay checks the noiseless result and full corrected record batch.
+
+M9 checks six actual resource boundaries, exact .003 probability, data-only layout
+targets, post-final-SE idle/TICK placement before actual resource CNOT and distinct
+tags. Concurrent channels can be adjacent after the same TICK. Preparation prefixes
+exclude their own post-SE channel, while retaining legitimate earlier-cycle faults.
+Conditional models begin before the earliest relevant channel, preserving exclusive
+X/Y/Z alternatives and raw/check/logical/survivor actions. M9-only windows have
+54 atoms; mixed background windows have 639 here, with 54 specifically post-SE.
+Existing independent Stim atom tests verify physical raw/survivor mappings, not
+just model sizes. Incoming hypotheses and unsupported intermediate operand-SE
+windows remain exactly as documented; #23 is not implemented.
+
+The external wheel test rejects accidental optional imports and module path leakage
+(including a synthetic noninstalled converter module), wrong binding to an active
+patch, raw/stage/prediction/correction shapes/dtypes, stale source/conditional models,
+wrong epochs, swapped columns and duplicate corrections. It prohibits quantum
+execution during replay. A supported canonical circuit with intermediate operand
+SE explicitly rejects its conditional model with UnsupportedProjectionError.
+
+### Observed fresh runtime-only results
+
+An independent private-source isolated build creates 0.0.1 wheel/sdist outside the
+checkout. A new venv, without system site packages or dev extras, installs that
+wheel. The exact pinned stimflow wheel resolves from cache, not a new cold Git
+clone. A temporary `verify_runtime.py` runs all six CLI cases and both tutorial
+Python blocks from the external consumer directory with optional/test/example/
+reference/downstream imports blocked and converter module paths checked inside
+the fresh environment. Installed versions: Python 3.12.7, Stim 1.15.0, stimflow
+1.17.dev0, NumPy 2.5.4, SciPy 1.18.1, Lark 1.3.1.
+
+| Workflow / policy | Raw bool shape | Events shape | Output/failure shape | Canonical DEM errors | Conditional atoms per Bell | Observed failures / 32 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Memory ideal | [32,49] | [32,40] | [32,1] | 0 | n/a | 0 |
+| Memory p=.001 | [32,49] | [32,40] | [32,1] | 492 | n/a | 3 |
+| Knill ideal | [32,255] | [32,192] | [32,1] | 0 | 0/0/0 | 0 |
+| Knill ordinary p=.001 | [32,255] | [32,192] | [32,1] | 2698 | 585/585/585 | 13 |
+| Knill M9-only p_st=.003 | [32,255] | [32,192] | [32,1] | 138 | 54/54/54 | 1 |
+| Knill p=.001 + M9 p_st=.003 | [32,255] | [32,192] | [32,1] | 1093 | 639/639/639 | 9 |
+
+All use seed 41, one raw batch per case. Rates describe only the specified weak
+baseline and tiny observed batches, not numerical LER accuracy, recovery guarantees,
+performance or thresholds. The two tutorial Python snippets additionally replay
+the same 32 rows and pass raw-immutability/label assertions. Fresh `pip check`
+reports no broken requirements. Runtime/grammar/dependency/version/license metadata
+and final archive/link checks are recorded with the final verification below.
+
+Commands executed (temporary source/dist/env/scripts stay outside Git):
+
+```text
+.venv/bin/python -m pytest -n 8 tests/test_installed_consumer.py tests/test_lstim_packaging.py --tb=short --durations=5
+.venv/bin/python -m ruff check src tests examples
+copy_package_source(<temporary-directory>/source)
+.venv/bin/python -m build --outdir <temporary-directory>/dist
+.venv/bin/python -m venv <temporary-directory>/runtime-venv
+<fresh-python> -m pip install <temporary-directory>/dist/logical_to_stim_converter-0.0.1-py3-none-any.whl
+<fresh-python> -I <temporary-directory>/verify_runtime.py <temporary-directory> <checkout>
+<fresh-python> -m pip check
+git diff --check
+```
+
+Initial focused checkpoint: **5 passed in 17.77 s** (before two CLI-count cases
+were added). An earlier installed-wheel attempt failed a newly authored assertion
+that every channel must directly follow TICK, then another assertion incorrectly
+excluded all prior-cycle channels from later preparation prefixes. The tests were
+corrected to the existing physical contract above; no compiler/noise implementation
+changed. Final focused and regression results appear below.
+
+**Compatibility and remaining work:** Internal 0.0.1 consumer shapes/contracts are
+now exercised from an actual built distribution, with no new runtime API, physics,
+version, dependency revision, allocator, production decoder or adaptive controller.
+This addresses the bounded public-only workflow/tutorial acceptance of #2/#5;
+issues remain open/unmodified. Detailed P1 #6/#7 worked guides and production joint
+inference are not claimed complete. Phase 5's complete suite/all-example/platform
+integration gate and license choice remain separate tasks. The full suite and
+nine-example CI matrix are not run as a Phase 5 gate here; this phase runs the
+focused checks below and fresh runtime consumer/tutorial smokes. No new remote CI,
+Windows/Python 3.11, cold-cache Git install, license grant, tag/release or publication
+is claimed. Stop after this single authorized commit/push.
+
+**Final focused regression:** `.venv/bin/python -m pytest -n 8
+tests/test_installed_consumer.py tests/test_lstim_packaging.py tests/test_lstim_api.py
+tests/test_epoch_stages_frames.py tests/test_record_frames.py
+tests/test_resource_preparation_models.py tests/test_resource_preparation_e2e.py
+--tb=short --durations=8`: **117 passed in 146.14 s**, no failures or skips.
+This includes all six new local cases and the extended shared-build wheel consumer,
+plus related API/epoch/frame/M9 d=3/5 signed same-raw regressions. Ruff
+src/tests/examples and whitespace checks pass. The existing CI pytest command
+collects these tests without requiring a new workflow job or extra runtime deps.
+
+**Final documentation/package review:** README is 110 lines. **240 relative links
+across 18 documents** resolve with exact filenames/GitHub-style heading anchors;
+new root status targets also resolve. The final private-source build refreshes
+wheel/sdist from the completed tree. Metadata checks retain 0.0.1, Python >=3.11,
+exact runtime declarations and no license assertion; archive checks compare the
+README payload, every runtime/grammar byte and all scoped source/docs/test assets.
+Build products, environments, scripts/logs and sampled arrays stay outside Git.

@@ -3,8 +3,10 @@
 The [README](../README.md#quick-start) has a standalone installed LSTIM quick start.
 The Python blocks here also use installed runtime APIs. Commands under `examples/`
 require a checkout/sdist; decoder/plotting commands additionally need `.[dev]`.
-Example-layer functions are not installed consumer APIs. Complete installed
-consumer tutorials remain Phase 4; see the [API reference](api_reference.md).
+Example-layer functions are not installed consumer APIs. Installed runtime-only
+workflows are documented in the
+[ordinary memory tutorial](ordinary_memory_tutorial.md) and
+[Knill tutorial](knill_memory_tutorial.md); see also the [API reference](api_reference.md).
 
 ## Ordinary memory
 

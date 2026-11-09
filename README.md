@@ -88,6 +88,8 @@ orders, reference-relative labels and source-bound offline correction contracts.
 - [Documentation index and current scope](docs/index.md)
 - [Installation, development and dependency pins](docs/development.md)
 - [Public consumer API reference and glossary](docs/api_reference.md)
+- Installed workflows: [ordinary memory](docs/ordinary_memory_tutorial.md) and
+  [three-patch Knill with M9](docs/knill_memory_tutorial.md)
 - [LSTIM guide](docs/lstim.md), [v1 specification](docs/lstim_v1.md) and
   [certification matrix](docs/lstim_certification.md)
 - [Ordinary memory and Clifford/Knill examples](docs/examples.md) and

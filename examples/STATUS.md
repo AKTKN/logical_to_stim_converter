@@ -1,5 +1,27 @@
 # STATUS — Examples
 
+## Phase 4 — Public-only installed consumer (2026-11-09)
+
+installed_consumer.py is a standalone external consumer asset using public root/
+decoding imports, NumPy and the standard library. Copy it and the two existing
+.lstim inputs outside the checkout; no examples/test/reference/PyMatching imports
+are needed. CLI sampling happens once; analyses replay the same immutable batch.
+Memory preserves exact global/local DEMs and evaluates zero-flip predictions.
+Knill resolves observed random preparation sectors with binary elimination,
+source/use/column-bound corrections and causal frame propagation. This is a
+noiseless-sector / identity-readout baseline, not reliable noisy decoding.
+
+Fresh runtime-only installed-wheel checks pass six 32-shot seed41 cases and both
+linked tutorial snippets. Memory raw/events shapes are [32,49]/[32,40]; Knill
+[32,255]/[32,192], seven uses, final D at P0/2. Final logical arrays are [32,1].
+M9-only conditional windows have 54 categorical atoms, with 639 when ordinary
+background noise is also enabled. The phase ledger records empirical failures
+without LER accuracy/threshold claims. Six local focused cases cover independent
+source/physical maps, strict frames, signed labels and once-only sampling; the
+combined related eight-worker regression passes 117 tests in 146.14 s. Ruff passes.
+No existing example behavior or installed runtime source changes; Phase 5 remains
+separate. Full provenance and limits are in docs/research_beta_0.0.1_plan_and_verification.md.
+
 ## Export publication review — 2026-11-09
 
 Current M9 example artifacts still equal all six pending Stim snapshots exactly;

@@ -2,6 +2,24 @@
 
 **As of:** 2026-11-09
 
+## Phase 4 — Installed consumers and tutorials (2026-11-09)
+
+Added [ordinary memory](ordinary_memory_tutorial.md) and
+[three-patch Knill](knill_memory_tutorial.md) tutorials with complete supplied
+sources, external script/installation instructions, exact shape/order/label
+conventions and explicit decoder limitations. README/index/API/examples/development
+navigation links the workflows. The script and inputs are separate consumer
+assets, not automatically installed wheel resources. Historical records below
+retain their original checkpoint outcomes.
+
+A fresh runtime-only installed wheel passes all six ideal/noisy/M9 CLI cases
+and both tutorial snippets from outside the checkout with optional/example/test/
+reference imports blocked. Full final metadata/archive/link evidence is in the
+[Phase 4 ledger](research_beta_0.0.1_plan_and_verification.md#phase-4--installed-consumers-and-tutorials-2026-11-09).
+Focused eight-worker physical/API/packaging regressions pass **117 tests in
+146.14 s**; Ruff and whitespace checks pass. No runtime behavior/dependency/license
+changes. Phase 5, license choice and detailed P1 worked guides remain deferred.
+
 ## Phase 2 + Phase 3 — 0.0.1 consumer documentation
 
 The concise root README, documentation index/current implementation matrix,

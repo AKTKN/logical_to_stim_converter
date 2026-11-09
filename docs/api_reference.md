@@ -598,7 +598,8 @@ assert len(request.target_ids) == len(request.checks) + 1
 A concrete restricted external adapter is in
 [knill_memory_offline_decoding.py](../examples/knill_memory_offline_decoding.py);
 its temporal/capacity approximations are documented in the [example guide](examples.md#external-knill-decoding-demonstrations).
-No new installed-consumer StageDecoder/tutorial is introduced here (Phase 4).
+The [installed Knill tutorial](knill_memory_tutorial.md) supplies a small
+consumer-owned observed-sector adapter without optional decoder dependencies.
 [Stage source](../src/logical_to_stim_converter/decoding/stages.py),
 [epoch stage/frame checks](../tests/test_epoch_stages_frames.py).
 
@@ -775,5 +776,6 @@ The [scope matrix](index.md#current-implementation-and-limitations),
 [beta verification ledger](research_beta_0.0.1_plan_and_verification.md) state actual
 bounded physics and installed-wheel evidence. External examples use optional
 PyMatching/Matplotlib and restricted models; installed consumers supply their own
-algorithms. Phase 4's fuller consumer/tutorial integration and P1's detailed
-single-fault worked guides remain separate work.
+algorithms. The [ordinary memory](ordinary_memory_tutorial.md) and [Knill](knill_memory_tutorial.md)
+tutorials exercise the installed contract. P1's broader detailed single-fault
+worked guides and Phase 5's final beta gate remain separate work.

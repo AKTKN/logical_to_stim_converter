@@ -1,5 +1,36 @@
 # STATUS — Tests
 
+## Phase 4 — Installed consumer contract (2026-11-09)
+
+Extended test_lstim_packaging.py's existing private wheel/sdist build rather than
+adding another build. It copies the public-only consumer and installed checks to
+an external directory; the same wheel serves ordinary ideal/noisy and three-patch
+ideal/ordinary/M9-only/M9-background cases. installed_consumer_checks.py blocks
+optional/checkout imports, verifies installed module paths (including negative
+leakage checks), current raw/reference/view ordering, seven uses/relocations,
+M9 tags/targets/cuts/exclusive atoms and same-raw causal correction replay. Wrong
+bindings, fingerprints, shapes, epochs, column order, duplicate application and
+unsupported intermediate operand SE cuts fail explicitly. A previous-cycle
+channel legitimately survives in a later physical prefix; probes exclude their
+own post-SE channel, not all historical noise.
+
+test_installed_consumer.py adds six independent cases: ordinary/Knill exact source
+versus separately authored public-operation references, reused-epoch conditional
+atom propagation with the existing Stim oracle, strict noiseless physical-frame
+comparison, signed two-observable remapping/labels and once-only memory/Knill CLI
+sampling. No oracle enters consumer inputs. The zero-noise test demands nonzero
+random-gauge corrections, not assumed positive stabilizers.
+
+`.venv/bin/python -m pytest -n 8 tests/test_installed_consumer.py
+tests/test_lstim_packaging.py tests/test_lstim_api.py tests/test_epoch_stages_frames.py
+tests/test_record_frames.py tests/test_resource_preparation_models.py
+tests/test_resource_preparation_e2e.py --tb=short --durations=8`:
+**117 passed in 146.14 s**. Ruff src/tests/examples and whitespace pass. A separate
+fresh runtime-only wheel environment passes six CLI and two tutorial snippets;
+source inputs/consumer/tut sources are audited in sdist. Full suite/all examples
+and new platform CI are left to Phase 5, without weakening any existing physics
+assertion. No installed runtime or dependency changes. See the Phase 4 ledger.
+
 ## Authorized beta/export integration — 2026-11-09
 
 The combined 0.0.1/inspection-export tree passes the full existing suite:

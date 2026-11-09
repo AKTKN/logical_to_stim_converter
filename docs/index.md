@@ -16,6 +16,7 @@ durable stability promise for all low-level exports. License decision pending.
 | Physical architecture / identity / time | [Architecture](architecture.md) | [Use/lifecycle glossary](architecture.md#identity-and-lifecycle-glossary-m7-a), [parallel time](architecture.md#parallel-assembly-and-time) |
 | Noise / M9 | [Noise policy API](api_reference.md#noise-policy) | [Ordinary noise](architecture.md#noise), [resource preparation](resource_preparation_noise.md) |
 | DEMs / conditional models / frames | [Decoder views](api_reference.md#decoder-views-and-index-maps) | [Stages](api_reference.md#temporal-and-readout-stage-requests), [frames](api_reference.md#offline-frame-plans-and-corrections), [conditional Bell actions](api_reference.md#conditional-bell-fault-actions) |
+| Installed consumers | [Ordinary memory tutorial](ordinary_memory_tutorial.md) | [Three-patch Knill tutorial](knill_memory_tutorial.md), [standalone script](../examples/installed_consumer.py) |
 | Practical examples | [Memory, Clifford and Knill examples](examples.md) | [Three-patch reuse](three_patch_knill.md), [physical circuit inspection (Japanese)](../examples/stim_circuit_guide_ja.md) |
 | Development / certification | [Development](development.md) | [LSTIM physical/simulation certification](lstim_certification.md), [tests ledger](../tests/STATUS.md) |
 | Roadmap / history | [Deferred work](deferred_work.md) | [Language milestones](future_logical_syntax.md), [root status](../STATUS.md), [beta phase ledger](research_beta_0.0.1_plan_and_verification.md) |
@@ -40,10 +41,10 @@ hardware timing or numerical error thresholds.
 | Other families / non-Clifford | Color/QLDPC backends, non-Clifford gates and a general quantum-programming frontend are unsupported; a CSS mathematical model does not supply physical compilation | [Deferred work](deferred_work.md), [code-family placeholder](../src/logical_to_stim_converter/backends/color_code.py) |
 | Allocation / adaptive execution | Caller selects patches and static barriers; no allocator, factory scheduler, shot-dependent gates, retries/postselection policy or runtime branching; rounds expand, so record/history size grows | [Architecture](architecture.md#parallel-assembly-and-time), [language limits](future_logical_syntax.md#deferred-features) |
 
-The larger installed-consumer integration and two end-to-end tutorials remain
-Phase 4 ([#2](https://github.com/AKTKN/logical_to_stim_converter/issues/2),
-[#5](https://github.com/AKTKN/logical_to_stim_converter/issues/5)); the final beta
-gate remains Phase 5. This index/reference addresses
+Phase 4 supplies the public-only installed-consumer workflows and tutorials
+([#2](https://github.com/AKTKN/logical_to_stim_converter/issues/2),
+[#5](https://github.com/AKTKN/logical_to_stim_converter/issues/5)); its observed-sector / identity-readout baseline is deliberately
+limited under noise. The final beta gate remains Phase 5. This index/reference addresses
 [#3](https://github.com/AKTKN/logical_to_stim_converter/issues/3) and
 [#4](https://github.com/AKTKN/logical_to_stim_converter/issues/4) without claiming
 the detailed worked examples requested by P1

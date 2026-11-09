@@ -4,6 +4,39 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research beta 0.0.1 — Phase 4 (2026-11-09)
+
+Implemented the public-only installed-consumer integration and two reproducible
+ordinary-memory/three-patch Knill tutorials. examples/installed_consumer.py is a
+self-contained external asset copied beside separately supplied .lstim inputs;
+it imports only public converter APIs and runtime dependencies. The existing
+private-wheel packaging test reuses one distribution for six ideal/noisy/M9
+workflow cases, validates module isolation and rejects source/use/shape/model
+mistakes. Tests independently compare source/direct operations, physical
+conditional atoms, strict noiseless frame replay, signed observable ordering and
+one physical sampling call per CLI. Random preparation gauges require real
+nonzero sector representatives even in the ideal control. The illustrative
+observed-last-sector / identity-readout adapter makes no noisy accuracy claim.
+
+Focused eight-worker regression (`test_installed_consumer`, `test_lstim_packaging`,
+`test_lstim_api`, `test_epoch_stages_frames`, `test_record_frames`,
+`test_resource_preparation_models`, `test_resource_preparation_e2e`): **117 passed
+in 146.14 s**. Ruff src/tests/examples and whitespace pass. A private isolated
+0.0.1 wheel/sdist build and fresh runtime-only installation pass all six CLI
+cases and both tutorial snippets outside the checkout with optional/test/example/
+reference imports blocked; pip check passes. Shapes are raw [32,49]/[32,255],
+global events [32,40]/[32,192], logical values/failures [32,1]. The
+[Phase 4 record](docs/research_beta_0.0.1_plan_and_verification.md#phase-4--installed-consumers-and-tutorials-2026-11-09)
+contains artifacts, assumptions, observed finite counts, negatives and final
+archive/link results. README stays concise at 110 lines.
+
+No installed runtime source, physics, dependencies, version or license changes.
+#2/#5 bounded installed-workflow/tutorial acceptance is addressed; issues remain
+open/unmodified. Phase 5 full suite/all-example/platform gate, license selection,
+detailed P1 worked guides and production decoder inference remain separate work.
+Earlier future-work statements below describe their original checkpoints. The
+maintainer authorized this one commit/push, not tags/releases or publication.
+
 ## Research beta 0.0.1 — Phase 2 + Phase 3 (2026-11-09)
 
 Implemented the authorized combined documentation phase: root README shrinks from

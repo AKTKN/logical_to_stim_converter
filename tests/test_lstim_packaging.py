@@ -15,6 +15,7 @@ CONSUMER = r'''
 import importlib.abc
 import pathlib
 import sys
+import runpy
 from importlib.metadata import distribution
 from importlib.resources import files
 
@@ -44,6 +45,7 @@ assert installed_distribution.version == '0.0.1'
 assert pathlib.Path(installed_distribution.locate_file('')).resolve() == installed.resolve()
 grammar = files('logical_to_stim_converter.language').joinpath('grammar.lark')
 assert 'start:' in grammar.read_text(encoding='utf-8')
+artifacts = {}
 for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]:
     path = samples / name
     program = parse_logical_file(path)
@@ -64,6 +66,7 @@ for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]
         4, separate_observables=True,
     )
     assert not events.any() and not obs.any()
+    special = None
     if width == 51:
         from logical_to_stim_converter.decoding import make_stage_requests
         assert make_stage_requests(first) is not None
@@ -86,6 +89,9 @@ for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]
             model = make_conditional_readout_model(special, bell)
             assert 'before post-SE' in model.boundary_convention
             assert len(model.faults) == 54
+    artifacts[name] = (program, first, second, special)
+sys.path.insert(0, str(pathlib.Path.cwd()))
+runpy.run_path('consumer_checks.py')['run'](installed, samples, artifacts)
 for name, module in tuple(sys.modules.items()):
     if name == 'logical_to_stim_converter' or name.startswith('logical_to_stim_converter.'):
         assert pathlib.Path(module.__file__).is_relative_to(installed), (name, module.__file__)
@@ -128,6 +134,12 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
             example = (root / "examples/lstim" / name).read_bytes()
             assert archive.extractfile(prefix + "/examples/lstim/" + name).read() == example
             assert example.decode("utf-8").rstrip("\n") in contract
+        for name, tutorial in (("memory_d3.lstim", "ordinary_memory_tutorial.md"),
+                               ("three_patch_knill_d3.lstim", "knill_memory_tutorial.md")):
+            text = archive.extractfile(prefix + "/docs/" + tutorial).read().decode("utf-8")
+            assert (root / "examples/lstim" / name).read_text(encoding="utf-8").rstrip("\n") in text
+        assert archive.extractfile(prefix + "/examples/installed_consumer.py").read() == (
+            root / "examples/installed_consumer.py").read_bytes()
     installed = tmp_path / "installed"
     with zipfile.ZipFile(wheel) as archive:
         assert archive.read(grammar) == expected
@@ -147,6 +159,9 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
         (samples / name).write_bytes((root / "examples/lstim" / name).read_bytes())
     consumer_cwd = tmp_path / "consumer"
     consumer_cwd.mkdir()
+    for origin, name in ((root / 'examples/installed_consumer.py', 'installed_consumer.py'),
+                         (root / 'tests/installed_consumer_checks.py', 'consumer_checks.py')):
+        (consumer_cwd / name).write_bytes(origin.read_bytes())
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     result = subprocess.run(
@@ -156,3 +171,5 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "installed public API and both source samples passed" in result.stdout
+    assert ("installed consumer workflows, source/use/shape/model/import negatives passed"
+            in result.stdout)
