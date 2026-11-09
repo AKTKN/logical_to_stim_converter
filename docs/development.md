@@ -1,5 +1,56 @@
 # Development environment and verification
 
+## Install the 0.0.1 internal research beta
+
+Version **0.0.1** is intended for trusted collaborators using this package as a
+reproducible research dependency. Distribution is through GitHub at an explicitly
+selected commit. There is no PyPI publication or GitHub Release, and this version
+does not imply a version tag. The license is **not yet selected; decision deferred**.
+Research-beta APIs may evolve; no long-term API stability or production decoder is
+promised.
+
+Use Python 3.11 or later with a compatible Stim wheel, Git on PATH, and network
+access to GitHub and the package index for runtime/build dependencies. The
+configured CI matrix is Ubuntu/Windows with Python 3.11/3.12; all four jobs passed
+for baseline `d8654898` in [run 42552076079](https://github.com/AKTKN/logical_to_stim_converter/actions/runs/42552076079).
+That is baseline evidence, not a CI result for the local 0.0.1 change. Other
+Python versions/platforms are not certified by that matrix.
+
+Create a clean environment, then replace the clearly marked placeholder below
+with the **full 40-character commit SHA containing version 0.0.1** that the
+maintainer has made available on GitHub. The historical `d8654898` commit still
+declares 0.0.0; it is not a 0.0.1 install target. The Phase 1 commit is initially
+local and cannot be installed from GitHub until a separately authorized push.
+
+```bash
+python -m venv .venv
+# Linux/macOS:
+source .venv/bin/activate
+# Windows PowerShell instead:
+# .\.venv\Scripts\Activate.ps1
+python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@<FULL_COMMIT_SHA_CONTAINING_0.0.1>"
+python -c "from importlib.metadata import version; print(version('logical-to-stim-converter'))"
+```
+
+The version command should print `0.0.1`. A commit pin fixes this repository's
+source, not every transitive dependency. If repository authentication is needed,
+configure Git credentials separately; do not put credentials in the install URL.
+The install fetches the pinned stimflow Git source listed below as well as this
+repository. Without Git/network access it cannot resolve that source dependency;
+there is no bundled upstream checkout or automatic offline fallback. An offline
+installation requires separately prepared compatible dependency artifacts.
+
+Normal installation includes Stim, stimflow, NumPy, SciPy and Lark. It does not
+require PyMatching, Matplotlib, pytest, pytest-xdist, Ruff or build; those are
+optional `.[dev]` tools for examples, tests and development. Decoder algorithms,
+LER experiments/sweeps and shot-dependent scheduling belong to downstream
+consumers such as `knill_bench` and `lomatching`.
+
+For the approved decisions, exact phase evidence and remaining work, see the
+[research-beta plan and verification record](research_beta_0.0.1_plan_and_verification.md).
+
+## Develop from a checkout
+
 The memory-core implementation uses Python 3.11+ and a `src/` package layout.
 Create a local virtual environment and install the editable package:
 
@@ -47,7 +98,7 @@ minimum versions; this is an integration pin, not a full transitive lockfile.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
-and all eight circuit/view/ordinary-memory/Knill-memory/LSTIM examples. Tests use
+and nine circuit/view/ordinary-memory/Knill-memory/LSTIM/M9 examples. Tests use
 pytest-xdist 3.8.0 (`.[dev]`) with eight workers; build tests use private source
 trees to avoid shared setuptools output. The isolated wheel test runs outside
 the checkout with optional/example/test/reference imports blocked, exercises

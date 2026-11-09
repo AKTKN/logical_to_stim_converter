@@ -4,6 +4,20 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research beta 0.0.1 — Phase 1 (2026-11-09)
+
+Phase 1 sets the distribution version to 0.0.1 and documents GitHub installation
+at an explicit commit for trusted research collaborators. License selection is
+deferred; REL-01 remains partial. Dependency pins and M1-M9 runtime/physics are
+unchanged. Work is isolated from pre-existing user edits on a dedicated branch.
+The [decision and verification record](docs/research_beta_0.0.1_plan_and_verification.md)
+tracks scoped changes, actual checks and remaining phases. No push/publication,
+tag or issue closure is authorized; Phase 2 requires separate instruction.
+Focused eight-worker packaging/public-API checks: 26 passed in 8.68 s. Ruff,
+isolated wheel/sdist build, runtime-only fresh-venv import/LSTIM compile/native
+DEM/sample, version metadata and pip check pass. Full integration and new remote
+CI are not claimed for this phase; the record distinguishes baseline CI evidence.
+
 ## M9 follow-up: DEM-compatible probability and injector safety — 2026-11-09
 
 Baseline main b35acb08426572a9f567d7dfe437ded755f2c1a7 matches fetched origin/main.
