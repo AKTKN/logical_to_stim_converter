@@ -193,3 +193,126 @@ These are local Linux/WSL2 Python 3.12.7 results. The successful four-job CI run
 cited earlier remains baseline evidence; new push/CI outcomes are reported only
 after observing them. This handoff does not complete the remaining beta phases
 or the unresolved license-dependent acceptance of REL-01.
+
+## Phase 2 + Phase 3 — Documentation and public consumer API (2026-11-09)
+
+**Scope and authorization:** The maintainer requested the combined phase brief,
+parallel pytest verification, one commit and a push, then reiterated “Commit and
+push it.” This explicitly authorizes the Git push deferred by the brief's default
+restriction. It does not authorize later phases, tags/releases, publication,
+license selection or issue edits/closures. Baseline `main` and reachable remote
+main both resolved to `8a409593ab09441c189ec3fe8742ab3f64055cce`; the working tree
+was clean, so no isolation worktree was needed and no unrelated edits were staged.
+
+Read root AGENTS/STATUS, the Phase 1 ledger, manifest/CI/metadata, live root and
+decoding exports, signatures, source and physics/API/packaging test usage.
+Read the current descriptions and all comments for #1–#7 through the GitHub
+connector, including #4's M9 injector/boundary addendum. Main targets are
+[#3 DOC-01](https://github.com/AKTKN/logical_to_stim_converter/issues/3) and
+[#4 DOC-02](https://github.com/AKTKN/logical_to_stim_converter/issues/4).
+#2/#5 inform consumer needs without authorizing Phase 4; #6/#7 remain detailed
+P1 physics/worked-example documentation rather than automatically completed work.
+
+**Commit subject:** `Document v0.0.1 consumer API and reconcile current scope`
+
+### README relocation map and changed files
+
+The inspected README had **987 lines**; the new entry point has **108**. It
+contains one 18-line standalone Python quick start, capabilities/limits, a reachable
+full-SHA 0.0.1 install, short navigation and pending-license text. Existing
+physical explanations were mapped before removal:
+
+| Old README material | Authoritative destination / treatment |
+| --- | --- |
+| Installation and test/dependency detail | README minimum plus [development](development.md); replace stale local/unpushed placeholder with reachable Phase 1 integration |
+| LSTIM source/format/file/errors and certification | Existing [usage](lstim.md), [v1 contract](lstim_v1.md), [certification](lstim_certification.md); new [API language entry points](api_reference.md#language-entry-points) |
+| Two-patch memory and ordinary-memory decoding | New [examples guide](examples.md#ordinary-memory); source example, graphlike/correlation limits, reference-relative labels and preserved historical report URL |
+| Explicit BindPatch reuse and use-specific selection | Existing [architecture glossary/use contracts](architecture.md#identity-and-lifecycle-glossary-m7-a), new [API identities](api_reference.md#identities-and-physical-meaning) and [view contracts](api_reference.md#decoder-views-and-index-maps) |
+| Interfaces/metadata/affine frames and canonical-detector migration | New [compiled artifact](api_reference.md#compiler-and-compiled-artifacts) and [metadata](api_reference.md#measurement-and-protocol-metadata) reference; existing architecture preserves detailed physical contracts |
+| Noise and M9 | Existing architecture/noise and [M9 guide](resource_preparation_noise.md), plus [API policy/injector contract](api_reference.md#noise-policy) |
+| H/CNOT/Bell round trip and Pauli modes | New [Clifford example guide](examples.md#logical-clifford-and-bell-round-trip), existing orientation/flow/affine architecture sections and executable source |
+| Bell/Knill/open continuation and preparation frame selection | New [open continuation example](examples.md#knill-relocation-and-open-continuation), existing physical-frame architecture, new [frame API](api_reference.md#offline-frame-plans-and-corrections) |
+| Offline views, record flips, stages and conditional models | New API sections with shapes/order/source/errors and executable fragments; detailed existing architecture and M9 boundary guide remain authoritative |
+| M6-D fresh resources and M7-C repeated three-patch decoding | New [external examples](examples.md#external-knill-decoding-demonstrations), existing [three-patch guide](three_patch_knill.md); retain explicit limitations/timing and distinguish source adapters from installed runtime |
+| Physical text/line-map inspection | Preserve navigation to [Japanese guide](../examples/stim_circuit_guide_ja.md), CSV, snapshots and exporter through README/examples/index |
+| Milestone status / future work / obsolete local report link | New [index matrix](index.md#current-implementation-and-limitations), reconciled [deferred work](deferred_work.md); old outcomes stay historical in STATUS and old ordinary-memory reports retain a commit URL |
+
+Changed files: README; docs/index.md, api_reference.md and examples.md (new);
+architecture.md, deferred_work.md, development.md and future_logical_syntax.md;
+this ledger; root STATUS.md and new docs/STATUS.md. No source, test, manifest,
+workflow, version, dependency, license or external reference source changes.
+
+**Rationale and API decision:** Keep documentation organized around consumer
+contracts rather than copying the old README or generating a source dump. The
+index matrix links supported M7/M8/M9 behavior and limitations to source/tests.
+The reference documents actual public import paths, signatures, metadata,
+record/index/array ordering, source-bound correction hypotheses, raw immutability,
+exact physical marginal DEMs versus categorical conditional Bell actions, and
+private/example boundaries. Documented consumer APIs target internal 0.0.1
+integration without promising durable semantic versioning for all low-level root
+exports. The reachable install pin fixes runtime source, not transitive ranges.
+
+### Verification and acceptance
+
+Local execution uses Linux/WSL2 Python 3.12.7, pytest 9.2.0 / pytest-xdist 3.8.0,
+Ruff 0.17.4 and the unchanged pinned integration. Temporary build source,
+distributions, checking scripts and the fresh consumer environment are outside
+the checkout. Build inputs use the existing private-tree helper so parallel
+setuptools tests do not race with the manual build.
+
+| Command/check | Observed result |
+| --- | --- |
+| `git status --short --branch`, `git log -4`, `git ls-remote origin refs/heads/main` | Clean main at reachable full SHA `8a409593ab09441c189ec3fe8742ab3f64055cce`; its metadata declares 0.0.1 |
+| Live `inspect.signature`, annotations, exported names and source/test inspection | Reference reconciled with actual language/compiler/noise/decoding APIs, fields and consumer array conventions |
+| `.venv/bin/python -m ruff check src tests examples` | All checks passed |
+| Private `copy_package_source`, then `.venv/bin/python -m build --outdir <temporary-directory>/dist` from the copied tree | Isolated build passed; 0.0.1 sdist and wheel built, with wheel built from sdist |
+| Wheel/sdist audit with `BytesParser`, `tarfile`, `zipfile`, current pyproject and exact source bytes | Correct version/name/Python/dependencies, no license assertion; new README metadata payload matches; runtime/grammar bytes unchanged; new guides included in sdist |
+| `.venv/bin/python -m venv <temporary-directory>/runtime-venv`, then that environment's `python -m pip install <wheel>` | Fresh runtime-only install passed; no dev extras/system-site packages. Exact pinned stimflow wheel resolved from pip cache, not a new cold Git clone |
+| Fresh environment `python -I <temporary-directory>/verify_snippets.py <checkout> <environment>` from an outside-checkout consumer directory | All **7** new Python blocks pass: standalone README, four connected API blocks and two independent practical-example blocks. Converter imports verified inside environment, optional/test/example/reference/downstream imports blocked, optional decoder/test distributions absent |
+| Installed README output / independent ideal check | Prints `17 40 1`; raw shape `[4,49]`; ideal four-shot events and observable flips all zero; noisy native DEM and metadata validation pass |
+| Installed view/stage/frame and M9 example checks | Caller record permutation, event reconstruction, stage target shape, source/use/column-bound identity correction and unchanged raw batch pass; M9 example has two resource boundaries and 639 categorical fault atoms, native canonical DEM valid |
+| Fresh environment `python -m pip check` | No broken requirements found |
+| Lightweight relative-link/anchor checker over README, all docs and Japanese inspection guide | All relative filenames/anchors resolve; ignores fenced/inline code and checks GitHub-style heading slugs. Final count recorded below |
+| `git diff --check` and docs/source scope review | Passed; documentation-only change, no runtime/decoder behavior or upstream source modified |
+
+The first temporary link audit exposed an incorrect version-heading anchor, which
+was fixed; code-like LSTIM labels were then excluded from link parsing. An initial
+metadata audit compared a MIME-decoded replacement string for Unicode; decoding
+the raw payload as UTF-8 fixed the checker and the exact README comparison passed.
+Neither audit required changing package behavior. Fresh runtime direct dependency
+versions were Stim 1.15.0, stimflow 1.17.dev0, NumPy 2.5.4, SciPy 1.18.1 and Lark 1.3.1.
+
+**Document review:** Checked current/deferred claims across README, architecture,
+deferred work, development and future syntax. Removed present-tense M7/M8/M7-C
+contradictions and the stale claim that assembly-derived Pauli maps/conditional
+models remained unimplemented. Retained historical records and the intentional
+old-report Git URL. Documentation contains no machine-specific installation paths,
+new dead artifact links, invented tag, license permission or decoder optimality /
+threshold guarantee. Exact M9 [0,.75], enabled-zero, direct omitted-versus-empty
+boundary contract and intermediate-operand-SE rejection are preserved.
+
+**Acceptance progress:** #3's current implementation reconciliation/matrix and
+#4's consumer API/glossary documentation are addressed in this combined phase,
+with source/test links and actual installed snippet evidence. No issue is closed
+or edited. Detailed #6/#7 worked single-fault/epoch guides are not claimed complete.
+
+**Remaining work and limits:** Phase 4's fuller public-only installed-consumer
+StageDecoder workflow and two end-to-end tutorials (#2/#5), Phase 5's final beta
+integration gate and the license decision (#1) remain separate authorization.
+The nine workflow CLI examples are not separately rerun in this documentation
+phase; their underlying regression tests run in the full suite. Windows/Python
+3.11 and new remote CI are not executed/claimed here. No cold-cache Git install,
+release/tag, upload, published artifacts or numeric LER/threshold certification.
+
+**Final parallel regression:** `.venv/bin/python -m pytest -n 8 --tb=short
+--durations=10` passes **1367 tests in 365.99 s**, eight workers, no failures or
+skips. This includes existing focused packaging/API tests and all signed-flow,
+physical/noise/provenance/reuse/LSTIM/decoder-neutral regressions. No runtime
+implementation is left unverified by a new source change because source is
+unchanged. All newly authored executable Python blocks are separately verified
+as described above; broader deferred capabilities are not implied.
+
+**Final link review:** **204 relative links across 16 documents** resolve,
+including exact heading anchors and new status/ledger navigation. Root status's
+new relative targets were also checked. The final package build is refreshed
+from the completed documentation tree; local artifacts stay outside Git.

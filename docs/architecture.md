@@ -1,9 +1,10 @@
 # Architecture and implemented circuit contracts
 
-**2026-11-08:** Rotated-surface memory, M3 H/CNOT/Pauli, M5 Bell/Knill
-teleportation, and M6-A/B global detector/provenance and offline-view contracts are implemented.
-M6-C/D demonstrate external ordinary/Knill memory decoding without a runtime decoder.
-See [repository status](../STATUS.md).
+**2026-11-09:** Rotated-surface memory, H/CNOT/Pauli, Bell/Knill, M7 explicit
+reuse, M8 LSTIM and M9 resource-preparation noise are implemented. External
+examples demonstrate ordinary and repeated three-patch Knill decoding; runtime
+decoder algorithms remain downstream. See the [current scope matrix](index.md#current-implementation-and-limitations),
+[consumer API](api_reference.md) and [repository status](../STATUS.md).
 
 ## Implemented pipeline
 
@@ -288,7 +289,7 @@ syndrome sign references. Terminal same-basis checks close through data parity;
 conjugate checks/logicals are explicitly discarded at destructive readout.
 
 The wrapper adds module/operation IDs, logical input/output identity, block/frame
-transition information, future stage provenance, and finalized measurement records.
+transition information, stage provenance, and finalized measurement records.
 It does not implement another stabilizer-flow engine. A memory frame has no
 assumed logical correction; the first conjugate-basis syndrome keys are retained
 as preparation-sector information. No decoder-dependent Pauli correction is made.
@@ -379,10 +380,14 @@ No new operation, decoder, allocator, scheduler or LSTIM field is introduced.
 
 ## Deferred boundaries
 
-No production decoder, text grammar/CLI, other code-family backend, S/other logical
-Clifford gates, adaptive per-shot quantum operations, physical block reuse, or LER
-benchmark is implemented. Relocation currently follows the Knill contract. `knill_bench` remains
-a downstream experiment runner. This package never imports it.
+LSTIM v1, explicit BindPatch reuse and the repeated three-patch Knill example
+are implemented. Other code-family backends, S/other logical Clifford gates,
+non-Clifford gates, automatic allocation, a CLI and adaptive per-shot quantum
+execution remain unsupported. External examples report finite-sample LERs with
+restricted decoders; production decoders, experiment orchestration and scheduling
+policies belong downstream. Conditional inference across intermediate Bell-operand
+SE measurements remains unsupported as described in the M9 section above.
+Relocation follows the Knill contract. The package never imports `knill_bench`.
 
 
 ## M3 code orientation and multi-block gate contract
@@ -687,10 +692,11 @@ Python loops. All raw/mask inputs remain unchanged.
 
 RecordFlipMap accepts caller-defined correction bits and their linear effects on
 future global records. It verifies source identity and bit/shot dimensions, not
-whether a decoder chose a correct correction. Automatic Pauli-to-record maps,
-conditional Bell checks, noisy preparation decoding and LER demonstrations remain
-separate work. A selected DEM is a physical marginal; using it after a conditional
-record-frame update may require a later decoder-specific conditional model.
+whether a decoder chose a correct correction. M6-D implements assembly-derived
+Pauli-to-record maps, conditional Bell fault actions and restricted noisy
+preparation/LER examples, described below; production joint inference remains
+downstream. A selected DEM is a physical marginal; using it after a conditional
+record-frame update can require a decoder-specific conditional model.
 
 Reference inspections: lomatching b55a7a65969a106a547622287b620f0da2cb5e39 uses
 observable observing regions plus physical-circuit annotation selection and DEM

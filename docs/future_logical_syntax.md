@@ -4,6 +4,9 @@ M8-A implements the grammar-backed lexer/parser and immutable syntax tree.
 M8-B adds semantic validation, bounded lowering and existing-compiler integration.
 M8-C adds package-root text/file APIs, typed file errors and canonical formatting.
 M8-D adds independent exact physical and same-raw offline-decoding certification.
+These are implemented milestones, despite this page's historical filename.
+See the [API reference](api_reference.md#language-entry-points) and
+[current scope matrix](index.md#current-implementation-and-limitations).
 The canonical specification and complete examples are in [LSTIM v1](lstim_v1.md).
 The former R/TH/TCNOT sketch is superseded; those names are not accepted v1 syntax.
 

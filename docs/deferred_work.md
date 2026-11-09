@@ -1,4 +1,4 @@
-# Deferred decoder and DEM work
+# Deferred work and downstream responsibilities
 
 M6-A/B (2026-11-08) export the canonical full detector circuit, exact global
 record/parity mappings, causal preparation ancestry, stage-boundary candidates,
@@ -12,7 +12,14 @@ noisy MWPM/LER as an external consumer of one shared raw batch; it adds no runti
 decoder framework. M6-D now supplies typed temporal boundary targets, exact
 conditional Bell fault
 actions and static batch frame maps, with a restricted noisy modular demonstration.
-These remaining requirements are future work; no GitHub issue creation is claimed.
+M7 adds explicit physical reuse and the repeated three-patch Knill demonstration;
+M8 adds LSTIM v1; M9 adds opt-in Bell-resource initialization noise. See the
+[current scope matrix](index.md#current-implementation-and-limitations) and
+[API reference](api_reference.md) for implemented contracts. The items below
+remain future work or downstream responsibilities. The documentation backlog is
+tracked in [#6](https://github.com/AKTKN/logical_to_stim_converter/issues/6) and
+[#7](https://github.com/AKTKN/logical_to_stim_converter/issues/7); this page does
+not assert that their detailed worked-example acceptance is complete.
 
 - Production state-preparation decoding: improve temporal boundary estimates
   beyond the M6-D MWPM baseline, including ambiguous parallel-edge fault labels.
@@ -33,8 +40,16 @@ These remaining requirements are future work; no GitHub issue creation is claime
   The M5 test-only final-sector helper remains inadequate for noisy inference.
   M6-D adds temporal estimates and honest finite-noise LER, without claiming
   perfect noisy sectors, optimized performance or exact maximum likelihood.
-- Adaptive SE, postselection, retries, physical block reuse, and scheduling
-  optimization. Current Knill demonstrations use fixed one-/two-teleportation Clifford programs.
+- Adaptive SE, postselection, retries, automatic allocation and scheduling
+  optimization. Explicit physical reuse is implemented: the
+  [three-patch guide](three_patch_knill.md) demonstrates repeated caller-authored
+  Knill cycles. The fresh-resource M6-D example remains separate.
+- Conditional inference across intermediate Bell-operand preparation/SE
+  measurements in enabled nonzero M9 windows. Pure gate/idle waiting is supported;
+  the unsupported modular cut raises `UnsupportedProjectionError`, while canonical
+  physical circuits/DEMs remain available. See [M9 boundaries](resource_preparation_noise.md).
+- Other code-family backends (including color/QLDPC), non-Clifford operations,
+  additional logical Cliffords such as S, a language CLI and runtime branching.
 
 Production decoder interfaces must keep correction selection separate from linear
 physical Clifford propagation. A correction result must identify its physical

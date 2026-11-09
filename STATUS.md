@@ -4,6 +4,37 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research beta 0.0.1 — Phase 2 + Phase 3 (2026-11-09)
+
+Implemented the authorized combined documentation phase: root README shrinks from
+987 to 108 lines with one installed-runtime quick start; docs/index.md provides a
+current implementation/limitations matrix linked to source/tests; api_reference.md
+specifies actual public language/compiler/noise/metadata/view/stage/frame/conditional
+contracts; examples.md retains practical physical and external-decoder guidance.
+Architecture, deferred work, development and language milestone navigation now
+reflect implemented M7 reuse, M8 LSTIM, M9 resource noise and repeated three-patch
+Knill demonstrations. The reachable full-SHA 0.0.1 Phase 1 integration replaces
+stale local/unpushed install instructions. Historical checkpoint records below
+remain unchanged; their future-work statements describe their original dates.
+
+`.venv/bin/python -m pytest -n 8 --tb=short --durations=10`: **1367 passed in
+365.99 s**, including packaging/API and all existing physics regressions. Ruff
+src/tests/examples and whitespace checks pass. Private isolated wheel/sdist build
+and metadata/runtime/grammar-byte audits pass. Seven new Python blocks pass from
+a fresh runtime-only installed wheel outside the checkout with optional/example/
+test/reference imports blocked; memory prints 17/40/1 with raw [4,49], ideal events
+are zero, and view/stage/frame/M9 conditional checks pass. Pip check passes. All
+relative documentation links/anchors resolve. The [combined phase ledger](docs/research_beta_0.0.1_plan_and_verification.md#phase-2--phase-3--documentation-and-public-consumer-api-2026-11-09)
+records the README relocation map, commands, results, API compatibility decision
+and limits; [documentation status](docs/STATUS.md) tracks current docs ownership.
+
+No runtime, test, dependency pin, version, license or upstream source changes.
+#3/#4 documentation acceptance is addressed without issue edits/closure. Phase 4
+consumer/tutorial integration, Phase 5 final beta gate, license choice and detailed
+P1 noise/model worked examples remain separate work. No new remote CI or Windows/
+Python 3.11 execution is claimed. The maintainer explicitly authorized commit and
+push; no tag, release, artifact publication or later phase is included.
+
 ## Authorized beta/export integration — 2026-11-09
 
 The maintainer separately requested committing/pushing the latest local changes

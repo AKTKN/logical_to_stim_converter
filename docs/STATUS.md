@@ -1,0 +1,27 @@
+# STATUS — Documentation
+
+**As of:** 2026-11-09
+
+## Phase 2 + Phase 3 — 0.0.1 consumer documentation
+
+The concise root README, documentation index/current implementation matrix,
+public consumer API reference and ordinary/Clifford/Knill examples guide are
+implemented. Existing architecture, development, deferred-work and language
+milestone pages are reconciled with implemented M7 reuse, M8 LSTIM and M9 noise.
+The Phase 1 integration is documented as pushed and reachable at the full pinned
+0.0.1 commit. Historical checkpoint outcomes remain in the root/phase ledgers.
+
+Verification and the original README-to-docs relocation map are recorded in the
+[combined phase ledger](research_beta_0.0.1_plan_and_verification.md#phase-2--phase-3--documentation-and-public-consumer-api-2026-11-09).
+README has 108 lines and one standalone 18-line Python quick start. Seven new
+Python blocks pass from an isolated installed wheel outside the checkout with
+runtime dependencies only and optional/example/test/reference imports blocked.
+Ruff, wheel/sdist metadata/runtime-byte audits and the relative-link review pass.
+Full parallel regression: `.venv/bin/python -m pytest -n 8 --tb=short
+--durations=10` passes **1367 tests in 365.99 s**. The root ledger records
+remaining verification limits.
+
+No runtime physics/decoder behavior, dependency pin, version or license changes.
+Phase 4 installed-consumer/tutorial work, Phase 5 final beta gate, license choice
+and P1's detailed noise/DEM/frame worked examples remain separate tasks. This
+phase does not close or edit issues, tag/release or publish artifacts.

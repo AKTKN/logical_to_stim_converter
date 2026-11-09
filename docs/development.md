@@ -13,14 +13,14 @@ Use Python 3.11 or later with a compatible Stim wheel, Git on PATH, and network
 access to GitHub and the package index for runtime/build dependencies. The
 configured CI matrix is Ubuntu/Windows with Python 3.11/3.12; all four jobs passed
 for baseline `d8654898` in [run 42552076079](https://github.com/AKTKN/logical_to_stim_converter/actions/runs/42552076079).
-That is baseline evidence, not a CI result for the local 0.0.1 change. Other
-Python versions/platforms are not certified by that matrix.
+That run is historical baseline evidence, not CI for this documentation revision.
+Other Python versions/platforms are not certified by that matrix.
 
-Create a clean environment, then replace the clearly marked placeholder below
-with the **full 40-character commit SHA containing version 0.0.1** that the
-maintainer has made available on GitHub. The historical `d8654898` commit still
-declares 0.0.0; it is not a 0.0.1 install target. The Phase 1 commit is initially
-local and cannot be installed from GitHub until a separately authorized push.
+The Phase 1 integration was pushed to GitHub. The full SHA below was verified
+reachable on `origin/main` on 2026-11-09 and contains version **0.0.1**. It is
+the installed runtime baseline described by these docs; this Phase 2 + Phase 3
+revision changes documentation only. A version check alone cannot distinguish
+commits that share 0.0.1; retain the installation SHA in downstream records.
 
 ```bash
 python -m venv .venv
@@ -28,7 +28,7 @@ python -m venv .venv
 source .venv/bin/activate
 # Windows PowerShell instead:
 # .\.venv\Scripts\Activate.ps1
-python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@<FULL_COMMIT_SHA_CONTAINING_0.0.1>"
+python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@8a409593ab09441c189ec3fe8742ab3f64055cce"
 python -c "from importlib.metadata import version; print(version('logical-to-stim-converter'))"
 ```
 
@@ -73,6 +73,7 @@ python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 
 python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
 python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733
 python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826
+python examples/knill_resource_preparation_noise.py --shots 32 --p 0.001 --p-st 0.003
 ```
 
 In Windows `cmd.exe`, activate with `.venv\Scripts\activate.bat`. Alternatively,
@@ -112,8 +113,10 @@ ordering. The implementation uses its mathematical convention, with explicit
 small-distance support fixtures and independent Stim flow/fault checks. It does
 not import surface-sim. Hex/lomatching remain references only.
 
-Optional local source checkouts are described in `external_lib/README.md` and
-`external_lib/STATUS.md`. Do not edit, vendor, or commit those copies. Package
+Optional local source checkouts are described in
+[external-reference instructions](../external_lib/README.md) and
+[reference status](../external_lib/STATUS.md). Do not edit, vendor, or commit those
+copies. Package
 imports and tests must not depend on their presence or machine-specific paths.
 
 ## Contracts to preserve
@@ -155,8 +158,8 @@ both after this milestone's implementation and verification.
 
 The development extra pins **PyMatching 2.3.1**; tests import it unconditionally.
 It is absent from mandatory runtime dependencies and production imports. CI runs
-the full physics suite and, since M6-D, all six examples on Ubuntu/Windows
-Python 3.11/3.12.
+the full physics suite and nine examples on Ubuntu/Windows Python 3.11/3.12.
+The M5/M6 sections below retain the regression rationale for those milestones.
 The Knill example generates circuits without any decoder.
 
 Keep the 173 M1–M3 regressions. M5 tests must resolve nonzero preparation sectors
@@ -210,11 +213,12 @@ Windows long-double DEM text rounding; schema v2 stores exact immutable
 instructions instead. Circuit text also rounds arbitrary arguments on Linux, so
 fingerprints/snapshots must avoid that roundtrip too. Keep exact equality checks.
 
-Run all five examples plus build/lint/full tests on the supported CI matrix.
-The memory example's fixed suite uses only 128 shots/case in CI. The documented
-local figure command uses 20,000 shots/case. `implementation_files/e2etest` stores
-requested aggregate reports/figures; raw samples and large local logs stay ignored,
-and the directory is pruned from wheel/source distributions.
+Run the workflow examples plus build/lint/full tests on the supported CI matrix.
+The memory example's fixed suite uses only 128 shots/case in CI. The
+ordinary-memory [example guide](examples.md#ordinary-memory) documents
+local report generation. The old tracked reports were archived in Git history;
+new aggregate reports/figures are local outputs under `implementation_files/e2etest`.
+Raw samples and large logs stay ignored, and that directory is pruned from distributions.
 
 
 ## M6-D regression and wall-time requirements
