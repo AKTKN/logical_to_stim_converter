@@ -33,7 +33,7 @@ sys.meta_path.insert(0, NoOptionalImports())
 import logical_to_stim_converter as package
 from logical_to_stim_converter import (
     CompiledCircuit, LogicalProgram, NoiseModel, format_logical_circuit,
-    parse_logical_circuit, parse_logical_file,
+    ResourcePreparationNoise, parse_logical_circuit, parse_logical_file,
 )
 assert pathlib.Path(package.__file__).is_relative_to(installed)
 grammar = files('logical_to_stim_converter.language').joinpath('grammar.lark')
@@ -67,6 +67,19 @@ for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]
             assert any(c.composite_id == label for c in first.composites)
             assert any(label in f.composite_ids for f in first.fragments)
         assert first.logical_to_block['D'] == 'P0'
+        special = program.compile(noise_model=NoiseModel(
+            resource_preparation=ResourcePreparationNoise(True, .003)))
+        assert special.ideal_circuit == first.ideal_circuit
+        special.validate_metadata()
+        assert len(special.resource_preparation_boundaries) == 6
+        assert sum(len(special.circuit[b.channel_instruction].targets_copy())
+                   for b in special.resource_preparation_boundaries) == 54
+        from logical_to_stim_converter.decoding import make_conditional_readout_model
+        assert len(make_stage_requests(special).boundaries) > 6
+        for bell in special.bell_measurements:
+            model = make_conditional_readout_model(special, bell)
+            assert 'before post-SE' in model.boundary_convention
+            assert len(model.faults) == 54
 for name, module in tuple(sys.modules.items()):
     if name == 'logical_to_stim_converter' or name.startswith('logical_to_stim_converter.'):
         assert pathlib.Path(module.__file__).is_relative_to(installed), (name, module.__file__)

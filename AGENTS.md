@@ -114,3 +114,12 @@ M6-D fresh-resource behavior and its result format. Report corrected physical
 readout XOR intended state, honest restricted-decoder limitations and separate
 setup/sampling/events/decoding/frame/report wall phases. Keep orchestration,
 PyMatching and plotting outside the installed runtime package.
+
+M9 adds opt-in ResourcePreparationNoise at noise compilation time. Only the two
+LogicalInit primitives structurally owned by BellStatePrep have ideal reset/SE
+intervals; other gates/uses and waiting layers keep ordinary noise. Post-SE
+DEPOLARIZE1 targets layout data sites once per BlockUseId, after existing final
+TICK/idle accounting and before resource CNOT, with distinct stochastic provenance.
+Keep preparation probes before these channels and conditional Bell models starting
+at them. Reject unsupported intervening operand SE boundaries explicitly. Preserve
+disabled circuits/fingerprints and canonical ideal schedules; no new LSTIM syntax.

@@ -1,5 +1,19 @@
 # STATUS — Package root
 
+## M9 update — 2026-11-09
+
+Root and noise now export the frozen ResourcePreparationNoise policy. Default
+compilation retains M1-M8 behavior; opt-in Bell resource initialization alone is
+ideal and receives distinctly tagged data-only noise after SE. Compiled artifacts
+retain immutable boundary/use/site/index provenance and append preserves the full
+noise model. No language, physical gate/flow, code-family or decoder API is added.
+Installed-wheel consumers compile the unchanged LSTIM source with the new option
+while optional/repository imports are blocked. Exact local checkpoint, full-suite,
+build, example and remote CI evidence is in root STATUS. The documented supported
+matrix is d=3/5 signed X/Z, three-cycle P0/P1/P2 memory. See
+../../docs/resource_preparation_noise.md for the full contract and explicit limits.
+
+
 ## M8-D certification — 2026-11-08
 
 No installed Python/runtime APIs changed. Independent public-operation references

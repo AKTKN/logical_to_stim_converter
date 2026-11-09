@@ -48,7 +48,7 @@ from .language import (
     parse_logical_file,
 )
 from .noise.injector import NoiseInjector
-from .noise.model import NoiseModel, NoiseOverride, NoiseParameters
+from .noise.model import NoiseModel, NoiseOverride, NoiseParameters, ResourcePreparationNoise
 from .operations.base import OperationModule
 from .operations.bell_preparation import BellStatePrep
 from .operations.binding import BindPatch
@@ -88,6 +88,7 @@ __all__ = [
     "NoiseModel",
     "NoiseOverride",
     "NoiseParameters",
+    "ResourcePreparationNoise",
     "OperationModule",
     "PhysicalLayout",
     "RotatedSurfaceCodeBackend",

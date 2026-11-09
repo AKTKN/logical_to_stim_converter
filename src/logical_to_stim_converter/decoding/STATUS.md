@@ -1,5 +1,23 @@
 # STATUS — `decoding`
 
+## M9 update — 2026-11-09
+
+Conditional Bell windows now start at their two explicitly indexed post-SE
+channels when present, retaining the original readout end, exclusive Pauli atoms
+and joint record/check/logical/survivor actions. Preparation model-only probes
+already end at the existing final TICK; channels follow it, so no ambiguous prefix
+index helper or extra canonical probe is required. Independent d=3/5 physical
+X/Y/Z injections verify every new atom and global signature, including recycled
+uses and reversed/delayed explicit resources. Gate/idle delays are modeled;
+enabled nonzero windows crossing an intermediate preparation/SE measurement on a
+Bell operand fail explicitly because another temporal-sector hypothesis is needed.
+Views preserve every physical stochastic instruction and exact marginals. Optional
+resource_preparation_v1 metadata fingerprints enabled boundary contracts without
+changing disabled v3 identity. Corrupt cuts/indices/sites/epochs and stale requests
+fail. Root STATUS records full regression/build/CI evidence and pinned over-mixing
+DEM limitations. No decoder algorithm or noisy frame truth is introduced.
+
+
 ## M7-B update — 2026-11-08
 
 DetectorSelector adds independent BlockUseId filters with anchor/touching/strict

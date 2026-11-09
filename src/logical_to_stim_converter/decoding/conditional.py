@@ -12,6 +12,7 @@ import numpy as np
 import stim
 
 from ..core.lifecycle import BlockUseId
+from ..noise.resource_preparation import validate_resource_preparation_provenance
 from .errors import DecoderViewError, UnsupportedProjectionError
 from .records import GF2Map
 from .stages import module_end
@@ -58,7 +59,7 @@ class ConditionalReadoutModel:
 
 
 def make_conditional_readout_model(compiled, bell):
-    """Preserve every Pauli atom from resource CNOT through destructive readout.
+    """Preserve resource-CNOT/readout atoms, including explicit post-SE channels.
 
     Faults before this interval are represented only through the supplied incoming
     sector/frame hypothesis, whose accuracy is not asserted. Model construction
@@ -76,7 +77,33 @@ def make_conditional_readout_model(compiled, bell):
     resource = candidates[-1]
     circuit = compiled.circuit
     start = next(i for i, inst in enumerate(circuit) if inst.tag == resource.module_id)
+    try:
+        validate_resource_preparation_provenance(compiled)
+    except ValueError as ex:
+        raise DecoderViewError(str(ex)) from ex
+    boundaries = [b for b in compiled.resource_preparation_boundaries
+                  if b.resource_entangling_module_id == resource.module_id]
+    injected = [b.channel_instruction for b in boundaries if b.channel_instruction is not None]
+    if injected:
+        if {b.block_use_id for b in boundaries} != set(resource.block_use_ids):
+            raise DecoderViewError("Resource post-SE channels disagree with Bell resource uses")
+        start = min(injected)
     end = module_end(circuit, bell.z_readout.module_id)
+    if injected:
+        # A temporal decoder at an intervening SE boundary would also own part
+        # of this widened window. Its measured-sector hypothesis is not one of
+        # this model's inputs. Reject that unsupported modular cut explicitly.
+        operand_blocks = {bell.data_block_id, bell.first_resource_block_id, bell.output_block_id}
+        operand_sites = {i for (b, _), i in compiled.physical_qubit_map.items()
+                         if b in operand_blocks}
+        terminal_modules = {bell.x_readout.module_id, bell.z_readout.module_id}
+        if any(stim.gate_data(inst.name).produces_measurements
+               and inst.tag not in terminal_modules
+               and any(t.value in operand_sites for t in inst.targets_copy())
+               for inst in circuit[start:end]):
+            raise UnsupportedProjectionError(
+                "Post-SE conditional interval crosses an intermediate preparation/SE measurement "
+                "on a Bell operand; intervening temporal-decoder hypotheses are unsupported")
     keys = compiled.measurement_index_by_key
     readouts = (bell.x_readout, bell.z_readout)
     record_ids = tuple(keys[k] for r in readouts for k in r.records)
@@ -185,7 +212,9 @@ def make_conditional_readout_model(compiled, bell):
         bell.composite_id,
         start,
         end,
-        "Condition on predicted sectors/frames immediately before resource CNOT; "
+        ("Condition on predicted sectors/frames immediately before post-SE depolarizing channels; "
+         if injected else
+         "Condition on predicted sectors/frames immediately before resource CNOT; ") +
         "earlier residual errors are not inferred by this conditional model. "
         "Depolarizing atoms in one exclusive_group are mutually exclusive.",
         tuple(faults),

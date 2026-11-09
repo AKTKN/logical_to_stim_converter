@@ -1,5 +1,21 @@
 # STATUS — Compiler
 
+## M9 update — 2026-11-09
+
+Compilation now validates ideal public metadata before resolving the optional
+Bell-resource noise plan. CompiledCircuit.resource_preparation_boundaries retains
+immutable composite/module/use/data-site/cut/channel indices. Final noisy metadata
+is revalidated; append retains the complete original NoiseModel. Ideal circuit,
+flows, physical indices/TICKs, measurement/detector/observable order, random sectors
+and logical frame assembly remain unchanged. Explicit and nested Bell preparations
+are handled structurally, including recycled epochs and unequal parallel work.
+Pinned Stim over-mixing p>3/4 is isolated as sampling-only: remaining channels are
+validated with only tagged post-SE channels temporarily capped, while canonical
+DEM/view extraction reports its native limitation. Root STATUS records exact
+checkpoint/full-suite/build/example and remote platform evidence. General
+conditional inference across intermediate operand SE boundaries remains deferred.
+
+
 ## M7-B update — 2026-11-08
 
 Metadata/provenance reconstruct detector anchor/source uses, active-layer uses

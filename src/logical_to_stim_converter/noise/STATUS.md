@@ -1,5 +1,23 @@
 # STATUS — Noise
 
+## M9 update — 2026-11-09
+
+model.py adds immutable ResourcePreparationNoise with strict bool, finite
+probability and config-type checks. resource_preparation.py resolves actual
+BellStatePrep composite children, PreparationInfo, BlockUseIds, tagged final SE
+measurements/TICKs and layout data sites into immutable cuts. Public provenance
+audits reject ambiguous membership, missing/duplicate uses/sites and misplaced
+channels. NoiseInjector consumes indexed cuts, suppresses only the two resource
+initialization modules' gates and per-use inclusive preparation idles, and emits
+one tagged independent DEPOLARIZE1 per data target after the existing final TICK.
+Waiting D/spectators and later resource waiting/gate/readout noise retain their
+ordinary precedence. Enabled zero suppresses preparation noise without a channel;
+disabled mode matches independent original-rule circuits and exact DEMs. Root
+STATUS records full exact physical-location, p=1 sampling, regression and CI
+checks. Stim cannot extract an exact DEM for over-mixing p>3/4; sampling remains
+supported with the canonical probability unchanged. No upstream pins/source changed.
+
+
 ## M7-B update — 2026-11-08
 
 NoiseInjector audits idle eligibility with TimeLayer.active_use_ids, preserving

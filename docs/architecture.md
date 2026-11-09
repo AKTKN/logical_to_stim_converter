@@ -350,6 +350,29 @@ the global default. Never-initialized and retired sites receive no idle errors.
 Full stage-specific/nested-composite noise selection is deferred; fragments already
 carry an optional stage field for a later additive interface extension.
 
+## Opt-in Bell-resource noise (M9)
+
+ResourcePreparationNoise is a compilation-time policy, disabled by default. After
+ideal assembly and public metadata validation, a structural resolver relates each
+BellStatePrep CompositeInfo to its ordered initialization/CNOT fragments, actual
+PreparationInfo/BlockUseIds and tagged final SE/TICK cuts. Immutable boundaries
+retain physical data-site keys and injected noisy instruction indices. The injector
+suppresses only those initialization gates and inclusive per-use preparation idles,
+then emits one distinctly tagged DEPOLARIZE1 per resource patch after its existing
+final TICK, before resource CNOT. All other active/waiting/gate noise is ordinary.
+Ideal circuits, records, annotations, flows, random sectors and scheduling remain
+unchanged; standalone BellStatePrep also opts in, bare init pairs do not.
+
+Preparation model-only prefixes end before the post-SE channels. Conditional
+models widen their start to the earliest actual channel, retaining exclusive
+Pauli atoms and joint raw/survivor actions. Intervening gates/idles are included;
+intermediate operand SE measurements in enabled nonzero windows fail explicitly
+because they need another temporal-sector hypothesis. Global physical circuits
+remain usable. Optional resource_preparation_v1 fingerprint metadata preserves
+disabled v3 identities. See [the full contract](resource_preparation_noise.md),
+including sampling-only support for Stim over-mixing probabilities above 3/4.
+No new operation, decoder, allocator, scheduler or LSTIM field is introduced.
+
 ## Deferred boundaries
 
 No production decoder, text grammar/CLI, other code-family backend, S/other logical

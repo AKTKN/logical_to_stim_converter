@@ -1,8 +1,137 @@
 # STATUS — Repository-wide development ledger
 
-**As of:** 2026-11-08
+**As of:** 2026-11-09
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M8_D_CERTIFIED` (bounded exact physical and same-raw simulation matrix)
+**Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
+
+## M9 Bell-resource preparation noise — 2026-11-09
+
+Baseline main d2f88ca4b13b3dfecee05f6cc7642f5ac4bc00bb. Existing uncommitted
+inspection/export documentation, examples, snapshots and report deletions are
+preserved outside this change. Pinned Stim 1.15.0/stimflow 1.17.dev0 at ffe0d043
+remain unchanged; inspected installed tagged CircuitInstruction, NoiseModel/
+NoiseRule, physical TICK/measurement and FlipSimulator APIs before integration.
+Local environment is Linux/WSL2 Python 3.12.7, pytest 9.2.0/xdist 3.8.0, Ruff
+0.17.4, NumPy 2.5.4, SciPy 1.18.1, Lark 1.3.1, PyMatching 2.3.1, build 1.6.1.
+
+Implemented ResourcePreparationNoise(enabled=False, p_st_transversal=0) with
+strict bool/probability/type validation, exported at root/noise. An enabled policy
+suppresses every ordinary gate/result/idle channel only on the two structurally
+owned BellStatePrep LogicalInit modules and their actual inclusive reset/final-SE
+use intervals, overriding inherited positive settings. D and spectators remain
+noisy. Outside these intervals all original rules and waiting idles resume.
+Each resource then receives independent physical DEPOLARIZE1(p) on its layout
+data sites once, after final idle accounting/existing TICK and before resource
+CNOT. Zero probability still suppresses prep noise. Ideal circuits, signed flows,
+random sectors, records/annotations/TICKs, frames and physical indices are unchanged.
+
+noise/resource_preparation.py resolves explicit composite/fragment/preparation/use
+relationships into immutable per-patch boundaries; detects missing/ambiguous uses,
+duplicate sites/epochs and unsafe cuts; and validates distinct stochastic tags and
+exact noisy instruction indices. CompiledCircuit retains these cuts and the noise
+policy on append. No stage/name/geometry heuristics or new LSTIM syntax. Both nested
+and explicit/separately consumed Bell resources work; bare init pairs are excluded.
+Three-cycle d=3 memory has 54 stochastic targets (d=5:150) over six distinct uses.
+
+ConditionalReadoutModel starts at its two exact post-SE channels and retains the
+old readout end, categorical exclusive atoms and joint raw/check/logical/survivor
+actions. Preparation model-only probes remain before the channels, so they are not
+counted twice. Views preserve all physical instructions and exact marginal DEMs.
+Enabled source metadata includes resource_preparation_v1 boundaries; disabled v3
+fingerprints/circuits/models remain compatible. Public validation rejects damaged
+cut/site/index/use metadata and stale source corrections.
+
+Verified limitations: pinned Stim samples the full [0,1] probability range but
+cannot exactly factor over-mixing DEPOLARIZE1(p>3/4) into a DEM. Such compilation
+retains the actual circuit for sampling, checks remaining channels with only the
+specific post-SE channels capped at .75 in a temporary copy, and leaves native
+DEM/view failures explicit. No approximate canonical model. Enabled nonzero
+conditional windows crossing an intermediate SE/preparation measurement on a Bell
+operand fail explicitly: an additional temporal-sector hypothesis is required.
+Delays containing gates/idles work and their faults are retained. Canonical
+circuits/global DEMs remain available for unsupported conditional intervals.
+General cross-boundary inference and production decoder algorithms stay deferred.
+
+### Checkpoint evidence
+
+All pytest commands below use eight pytest-xdist workers. Initial test-harness
+path/API mistakes were corrected; no tests were skipped or physics assertions
+weakened. The p=1 test exposed the documented pinned DEM limitation; a delayed
+operand-SE fault test exposed the need for explicit unsupported-window rejection.
+
+- A: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_noise.py
+  tests/test_noise.py tests/test_knill_noise.py tests/test_patch_reuse.py
+  tests/test_global_detector_provenance.py --tb=short`: **109 passed, 27.55 s**.
+  `.venv/bin/python -m ruff check src tests` passes.
+- B: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_noise.py
+  tests/test_noise.py tests/test_knill_noise.py tests/test_epoch_views_noise.py
+  --tb=short`: **80 passed, 22.39 s**. Exact nonuniform gate/result/idle/channel
+  counts at d=3/5, X/Z, rounds1/d, positive overrides, waiting D/spectators,
+  unequal parallel work, simultaneous Bell preparations, zero and p=1 sampling.
+- C: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_models.py
+  tests/test_resource_preparation_noise.py tests/test_epoch_stages_frames.py
+  --tb=short`: **73 passed, 24.87 s**. Every new X/Y/Z atom at every d=3/5 data
+  site is injected into independently authored ideal physical primitives and
+  checked with Stim FlipSimulator. Raw/check/logical/survivor maps and exclusive
+  groups match; independent deterministic physical faults match full canonical
+  detector/observable signatures. Exact full-precision view marginals, prep-probe
+  exclusion, reversed/delayed explicit resources and corrupt boundary rejection.
+- D: `.venv/bin/python -m pytest -q -n 8 tests/test_resource_preparation_e2e.py
+  --tb=short --durations=5 --maxfail=1`: **40 passed, 128.28 s**. Three P0/P1/P2
+  cycles, d=3/5, X/Z, bits0/1, p_st=0/.003/.017, zero/.001 background and disabled
+  mode. Exact independently authored direct/source circuits, DEMs, metadata,
+  histories, channel locations, views/plans/requests/source identity and same-seed
+  raw batches match. Shared-raw baseline/replacement adapters match causal events,
+  predictions, CorrectionBatch identities, record/physical frames, logical bits,
+  failure vectors/counts/LER and chunked replay; quantum execution is prohibited
+  during replay. No numerical LER target or decoder optimality claim.
+- E focused: `.venv/bin/python -m pytest -q -n 8
+  tests/test_resource_preparation_noise.py tests/test_resource_preparation_models.py
+  tests/test_lstim_packaging.py --tb=short`: **56 passed, 13.18 s**. This includes
+  independent direct-Stim original-rule exact disabled circuit/DEM references and
+  a real isolated wheel consumer compiling M9 with optional/repository imports
+  blocked. `.venv/bin/python -m ruff check src tests examples` passes. New paired
+  example --shots8 --p.001 --p-st.003 passes (51 wires/255 records/192 detectors,
+  54 new target locations); finite eight-shot zero failures are not an LER target.
+
+### Final staged verification
+
+An exact index export (tree 92fcf4e64b95eaa71142f9a67b2ca27a71aa9f34) excludes
+all pre-existing user changes. `PYTHONPATH=src python -m pytest -n 8 --tb=short
+--durations=10` there passes **1302 tests in 417.77 s**, retaining all 1205 M1-M8
+cases and adding 97 M9 cases. The final runtime/test bytes match this export;
+subsequent changes only complete these documentation ledgers. The additional
+recycled-epoch fault checkpoint (`test_resource_preparation_models.py -k recycled
+-n 8 --tb=short`) passes **2 tests in 19.85 s** at d=3/5.
+
+The export's `python -m ruff check src tests examples` passes, and `python -m build
+--outdir /tmp/m9-dist` builds wheel and sdist. The full suite includes the genuine
+isolated-wheel M9 consumer and private parallel-safe builds. `python -m pip check`,
+working/index whitespace checks and exact final code-byte comparison pass.
+All nine workflow example commands pass from the export:
+
+- `python examples/two_patch_memory.py`
+- `python examples/two_patch_bell_roundtrip.py`
+- `python examples/knill_ec_single_round.py`
+- `python examples/offline_dem_views.py`
+- `python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731`
+- `python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732`
+- `python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13
+  --p 0.001 --seed 733`
+- `python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826`
+- `python examples/knill_resource_preparation_noise.py --shots 32 --p 0.001 --p-st 0.003`
+
+The new seed929 finite batch reports two restricted-baseline failures / 32 shots
+(LER .0625), 54 post-SE target locations and exact direct/source equality. This
+observation is not a numerical target or decoder optimality statement.
+Verified behavior is the documented bounded physical/simulation matrix. There is
+no claimed unverified runtime feature; the explicit unsupported intervals and
+sampling-only over-mixing case above are limitations, not silently implemented
+capabilities. General intermediate-sector conditional inference remains deferred.
+
+Ubuntu/Windows Python 3.11/3.12 CI includes the same full suite, build, existing
+eight examples and new opt-in example. Remote CI runs on push; its observed result is reported separately from local
+Linux evidence. No local Windows or Python 3.11 execution is claimed.
 
 ## M8-D independent physical and simulation certification — 2026-11-08
 

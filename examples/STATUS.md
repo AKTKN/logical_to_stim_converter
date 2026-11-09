@@ -1,5 +1,24 @@
 # STATUS — Examples
 
+## M9 update — 2026-11-09
+
+knill_resource_preparation_noise.py opts into ideal Bell resource initialization
+plus post-SE independent data depolarization. It reuses the independently authored
+explicit Python reference and unchanged three-cycle LSTIM file, comparing exact
+ideal/noisy circuits, canonical DEMs/source identities, same-seed raw samples and
+same-raw existing external decoding. No decoder implementation is added.
+
+The new CI command --shots32 --p.001 --p-st.003 passes locally from the exact
+staged export: 51 wires/255 records/192 detectors, six resource uses and 54 new
+data targets; the finite seed929 batch has two restricted-baseline failures
+(LER .0625), an observation without a threshold/optimality assertion. All eight
+previous CI example commands also pass. Probability zero remains opt-in ideal
+preparation; this DEM/decoder demo rejects p_st>3/4 explicitly, while the physical
+API supports sampling through p=1. Root STATUS records full tests/build and
+remote Ubuntu/Windows Python 3.11/3.12 results separately. Exact physics and
+conditional limits are in docs/resource_preparation_noise.md.
+
+
 ## M8-D paired source/physical/offline demonstration — 2026-11-08
 
 lstim_equivalence.py independently writes direct public-operation references for

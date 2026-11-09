@@ -1,5 +1,28 @@
 # STATUS — Tests
 
+## M9 update — 2026-11-09
+
+Added 97 cases while preserving all 1205 M1-M8 cases: 40 policy/structural/exact
+noise tests, 17 independent physical/model/provenance tests and 40 three-cycle
+same-raw E2E cases. test_lstim_packaging.py also certifies opt-in compilation in a
+real isolated wheel consumer with optional/repository imports blocked.
+
+The location oracle enumerates every ordinary/special gate/result/idle target,
+probability and layer, including positive overrides, spectators, unequal waiting,
+concurrent Bell preparations, d=3/5, X/Z, rounds1/d, p=0/1 and bare-init exclusion.
+A direct-Stim original-rule reference compares exact disabled circuits and DEMs.
+Independent primitive ideal references and Stim physical X/Y/Z injections verify
+raw/check/logical/survivor maps, exclusive groups and full global signatures;
+recycled-epoch atom propagation is also checked at d=3/5. Preparation probes exclude
+new faults, exact views retain them and corrupted/stale provenance is rejected.
+Three-cycle independent Python/LSTIM sources cover signed X/Z, p_st0/.003/.017,
+ordinary background0/.001 and disabled mode. Baseline/replacement external decoders
+receive one shared raw batch with quantum execution prohibited; stage inputs,
+corrections, record/physical frames, final labels/failure vectors/LER and chunked
+replay agree. No arbitrary LER target is asserted. Root STATUS records checkpoint
+commands/counts, final full-suite/build/examples and remote CI status separately.
+
+
 ## M8-D certification — 2026-11-08
 
 Added 164 tests while retaining every one of the 1041 prior cases:

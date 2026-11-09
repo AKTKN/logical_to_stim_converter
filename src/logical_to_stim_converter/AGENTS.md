@@ -42,3 +42,9 @@ probes remain model-only, and canonical raw records/noise stay unchanged.
 M7-A exports BindPatch, BlockUseId, BlockUseInfo, PatchBindingEvent and UseOwnerEvent.
 Bindings are compiler directives, separate from OperationModule. Physical-use
 history and per-use measurement keys survive resource retirement/rebinding.
+
+M9 exports ResourcePreparationNoise from root/noise. The compiled artifact exposes
+immutable resource_preparation_boundaries with module/use/site/index provenance.
+Default disabled behavior and source identities remain compatible; enabled cuts
+participate in fingerprints. See docs/resource_preparation_noise.md for exact
+physical and conditional boundaries and the pinned over-mixing DEM limitation.

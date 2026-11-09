@@ -9,6 +9,7 @@ from ..core.compiler_context import TimeLayer
 from ..core.logical_block import GlobalSiteId
 from ..core.module_fragment import ModuleFragment
 from .model import NoiseModel
+from .resource_preparation import ResourcePreparationBoundary
 
 
 class NoiseInjector:
@@ -21,6 +22,7 @@ class NoiseInjector:
         physical_map: Mapping[GlobalSiteId, int],
         layers: tuple[TimeLayer, ...],
         fragments: tuple[ModuleFragment, ...],
+        resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] = (),
     ) -> stim.Circuit:
         """Return a noisy copy using inclusive reset-to-readout use intervals.
 
@@ -29,6 +31,17 @@ class NoiseInjector:
         """
         if ideal != ideal.without_noise():
             raise ValueError("Noise must be applied once to a noiseless ideal circuit")
+        if resource_preparation_boundaries and not model.resource_preparation.enabled:
+            raise ValueError("Resource preparation boundaries require an enabled policy")
+        eligible = {b.preparation_module_id for b in resource_preparation_boundaries}
+        intervals = {b.block_use_id: (b.first_layer, b.final_se_layer)
+                     for b in resource_preparation_boundaries}
+        insertions = {}
+        for boundary in resource_preparation_boundaries:
+            insertions.setdefault(boundary.ideal_boundary_instruction, []).append(boundary)
+        if (len(eligible) != len(resource_preparation_boundaries)
+                or len(intervals) != len(resource_preparation_boundaries)):
+            raise ValueError("Duplicate resource preparation module/use epoch")
         by_module = {f.module_id: f for f in fragments}
         by_block: dict[str, set[int]] = {}
         for (block, _), index in physical_map.items():
@@ -43,6 +56,9 @@ class NoiseInjector:
             """Insert each active use's unused physical sites once for this TICK interval."""
             layer = layers[layer_index]
             for use in layer.active_use_ids:
+                interval = intervals.get(use)
+                if interval is not None and interval[0] <= layer_index <= interval[1]:
+                    continue
                 block = use.block_id
                 module = layer.operation_by_block.get(block)
                 resolved = parameters[module] if module else model.default
@@ -50,13 +66,22 @@ class NoiseInjector:
                 if idle and resolved.idle:
                     result.append("DEPOLARIZE1", idle, resolved.idle)
 
-        for instruction in ideal:
+        for index, instruction in enumerate(ideal):
             if isinstance(instruction, stim.CircuitRepeatBlock):
                 raise ValueError("Noise injection expects the exported expanded time schedule")
             if instruction.name == "TICK":
                 append_idle()
                 result.append(instruction)
                 layer_index += 1
+                for boundary in insertions.get(index + 1, ()):
+                    p = model.resource_preparation.p_st_transversal
+                    if p:
+                        result.append(
+                            "DEPOLARIZE1", [physical_map[s] for s in boundary.data_sites],
+                            p, tag=boundary.channel_tag,
+                        )
+            elif instruction.tag in eligible:
+                result.append(instruction)
             elif instruction.tag in by_module:
                 single = stim.Circuit()
                 single.append(instruction)

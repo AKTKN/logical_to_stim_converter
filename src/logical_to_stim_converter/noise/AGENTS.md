@@ -21,3 +21,10 @@ M7-B: audit idle eligibility through TimeLayer.active_use_ids, inclusive from
 each actual reset through destructive readout. Available/reserved/measured gaps
 receive no idle channel; explicit bindings add no time/noise. Reuse does not
 change the physical rule priorities or permit duplicate composite injection.
+
+M9: ResourcePreparationNoise is an immutable explicit opt-in above ordinary noise
+precedence only within verified BellStatePrep LogicalInit intervals. Resolve
+boundaries structurally after ideal validation; use data layouts/maps and actual
+BlockUseIds. Suppress gate and inclusive per-use idle faults, then inject distinctly
+tagged data-only DEPOLARIZE1 after the existing final TICK. Do not infer eligibility
+from stage strings, current logical names, coordinate ranges or bare init pairs.

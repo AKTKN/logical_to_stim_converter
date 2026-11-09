@@ -70,3 +70,10 @@ compare exact gate/noise sites and selected deterministic fault truth tables;
 compare independent noisy streams with explicit confidence bounds. Check static
 sampling calls, causal once-only corrections, chunk-identical predictions and
 physical readout failure labels. Ten-cycle smoke bounds physical width only.
+
+M9 tests independently enumerate exact ordinary/special physical noise locations,
+author primitive ideal references and inject every post-SE X/Y/Z data fault with
+Stim. Compare raw/check/logical/survivor/global signatures, exclusive groups and
+preparation probe exclusion. Three-cycle d=3/5 signed X/Z source/direct pairs
+replay the same raw batch through both existing external adapters. Disabled mode
+must match an independently spelled original noise circuit and exact DEM.

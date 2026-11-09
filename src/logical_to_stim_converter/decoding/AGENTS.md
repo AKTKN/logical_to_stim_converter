@@ -53,3 +53,10 @@ use the Bell instance's actual resource uses/CNOT window, including existing
 resources. CorrectionBatch optionally labels its use and input ordering; explicit
 stale epochs/orderings fail. Schema v3 fingerprints include occupancy/timing/
 ancestry histories; regenerate old v1/v2 views/plans while keeping exact snapshots.
+
+M9: optional resource_preparation_v1 source metadata binds explicit post-SE cuts
+and stochastic indices without changing disabled v3 fingerprints. Preparation
+prefixes end at the existing TICK before the channels. Conditional Bell models
+start at their actual two resource channels; preserve every categorical atom and
+survivor correlation. Enabled nonzero windows crossing intermediate operand SE
+measurements require unsupported extra temporal hypotheses and fail explicitly.

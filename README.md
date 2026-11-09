@@ -947,3 +947,28 @@ restricted external MWPM/capacity adapters, with no decoder in the converter.
 Reports include actual use tables, epoch/stage/view provenance, canonical DEM
 identity, honest final-readout failure labels and separate wall phases.
 See [the physical-use and verification guide](docs/three_patch_knill.md).
+
+## Opt-in Bell-resource preparation noise (M9)
+
+`ResourcePreparationNoise(enabled=True, p_st_transversal=.003)` makes each
+`BellStatePrep` resource's reset/SE ideal and adds independent data-only
+depolarization after final SE and before resource CNOT. Ordinary noise continues
+on input/spectator patches, waiting layers and subsequent gates. The default is
+disabled; enabled probability zero still suppresses resource preparation noise.
+
+```python
+from logical_to_stim_converter import NoiseModel, ResourcePreparationNoise, parse_logical_file
+
+noise = NoiseModel(
+    default=NoiseModel.uniform_depolarizing(.001).default,
+    resource_preparation=ResourcePreparationNoise(enabled=True, p_st_transversal=.003),
+)
+compiled = parse_logical_file("examples/lstim/three_patch_knill_d3.lstim").compile(noise_model=noise)
+```
+
+Run `python examples/knill_resource_preparation_noise.py --shots 32` for paired
+direct-Python/LSTIM compilation and same-raw external decoding. Three d=3 cycles
+add 54 stochastic data targets without extra TICKs or changed ideal records.
+See [exact physics, provenance and decoder boundaries](docs/resource_preparation_noise.md),
+including Stim's exact-DEM restriction for probabilities above 3/4 and conditional
+model rejection of intermediate SE measurements on Bell operands.

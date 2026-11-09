@@ -34,6 +34,11 @@ from ..core.protocol import (
 )
 from ..noise.injector import NoiseInjector
 from ..noise.model import NoiseModel
+from ..noise.resource_preparation import (
+    ResourcePreparationBoundary,
+    resolve_resource_preparation_boundaries,
+    validate_resource_preparation_provenance,
+)
 from ..operations.base import OperationModule
 from ..operations.binding import BindPatch
 from ._logical import LogicalFlowTracker, detector_metadata, prepare_part
@@ -79,6 +84,7 @@ class CompiledCircuit:
     binding_history: tuple[PatchBindingEvent, ...] = ()
     available_blocks: tuple[str, ...] = ()
     use_preparation_dependencies: Mapping[BlockUseId, tuple[str, ...]] = field(default_factory=dict)
+    resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] = ()
     _evaluation_steps: tuple = field(default=(), repr=False, compare=False)
     _compiler: object = field(default=None, repr=False, compare=False)
     _program: tuple = field(default=(), repr=False, compare=False)
@@ -134,6 +140,7 @@ class CompiledCircuit:
         from ._provenance import validate_metadata
 
         validate_metadata(self)
+        validate_resource_preparation_provenance(self)
 
     def make_decoder_view(self, **options):
         """Select offline decoder inputs from this physical experiment; never resample."""
@@ -229,6 +236,8 @@ class CircuitCompiler:
         Binding reserves a named fixed patch. Only LogicalInit emits a reset and
         starts a use. Output observables are ordered by historical logical name.
         """
+        if noise_model is not None and not isinstance(noise_model, NoiseModel):
+            raise ValueError("noise_model must be NoiseModel or None")
         context = CompilerContext(self.blocks, self.logical_to_block)
         program = tuple(entry if isinstance(entry, (OperationModule, BindPatch)) else tuple(entry)
                         for entry in operations)
@@ -371,19 +380,9 @@ class CircuitCompiler:
             )
             for f in fragment_tuple
         )
-        noisy = None
-        if noise_model is not None:
-            noisy = NoiseInjector().apply(
-                ideal,
-                model=noise_model,
-                physical_map=physical_map,
-                layers=context.layers,
-                fragments=fragment_tuple,
-            )
-            noisy.detector_error_model()
         result = CompiledCircuit(
             ideal,
-            noisy,
+            None,
             physical_map,
             context.logical_to_block,
             context.measurements,
@@ -410,4 +409,38 @@ class CircuitCompiler:
             _program=program, _noise_model=noise_model,
         )
         result.validate_metadata()
+        if noise_model is not None:
+            boundaries = ()
+            if noise_model.resource_preparation.enabled:
+                boundaries = resolve_resource_preparation_boundaries(result, context.blocks)
+            noisy = NoiseInjector().apply(
+                ideal, model=noise_model, physical_map=physical_map,
+                layers=context.layers, fragments=fragment_tuple,
+                resource_preparation_boundaries=boundaries,
+            )
+            try:
+                noisy.detector_error_model()
+            except ValueError as ex:
+                # Stim 1.15 samples over-mixing channels, but cannot factor them
+                # into an exact DEM. Keep the physical circuit for sampling;
+                # public DEM/view construction still reports this limitation.
+                policy = noise_model.resource_preparation
+                if not (policy.enabled and policy.p_st_transversal > .75
+                        and str(ex).startswith("Can't analyze over-mixing DEPOLARIZE1 errors")):
+                    raise
+                validation = stim.Circuit()
+                tags = {b.channel_tag for b in boundaries}
+                for inst in noisy:
+                    if inst.tag in tags:
+                        validation.append(inst.name, inst.targets_copy(), .75, tag=inst.tag)
+                    else:
+                        validation.append(inst)
+                validation.detector_error_model()
+            channel_tags = {b.channel_tag for b in boundaries}
+            channels = {inst.tag: i for i, inst in enumerate(noisy) if inst.tag in channel_tags}
+            boundaries = tuple(replace(b, channel_instruction=channels.get(b.channel_tag))
+                               for b in boundaries)
+            result = replace(result, noisy_circuit=noisy,
+                             resource_preparation_boundaries=boundaries)
+            result.validate_metadata()
         return result

@@ -61,11 +61,34 @@ class NoiseParameters(NoiseOverride):
 
 
 @dataclass(frozen=True)
+class ResourcePreparationNoise:
+    """Ideal Bell-resource initialization followed by independent data depolarization.
+
+    Zero probability still suppresses ordinary initialization/SE noise when enabled.
+    This policy applies to explicit BellStatePrep composites, including nested ones.
+    """
+
+    enabled: bool = False
+    p_st_transversal: float = 0.0
+
+    def __post_init__(self) -> None:
+        if type(self.enabled) is not bool:
+            raise ValueError("enabled must be a boolean")
+        p = self.p_st_transversal
+        if (not isinstance(p, (int, float)) or isinstance(p, bool)
+                or not math.isfinite(p) or not 0 <= p <= 1):
+            raise ValueError("p_st_transversal must be a finite probability in [0, 1]")
+
+
+@dataclass(frozen=True)
 class NoiseModel:
     default: NoiseParameters = field(default_factory=NoiseParameters)
     operation_overrides: Mapping[str, NoiseOverride] = field(default_factory=dict)
+    resource_preparation: ResourcePreparationNoise = field(default_factory=ResourcePreparationNoise)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.resource_preparation, ResourcePreparationNoise):
+            raise ValueError("resource_preparation must be ResourcePreparationNoise")
         if not isinstance(self.default, NoiseParameters):
             raise ValueError("default must be NoiseParameters")
         for operation, override in self.operation_overrides.items():

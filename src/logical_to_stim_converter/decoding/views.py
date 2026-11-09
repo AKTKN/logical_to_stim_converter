@@ -156,6 +156,11 @@ def source_fingerprint(compiled):
         )
     }
     metadata["sites"] = sorted(compiled.physical_qubit_map.items())
+    if compiled.resource_preparation_boundaries:
+        # Optional extension preserves exact v3 identities for disabled M1-M8
+        # artifacts while binding enabled requests to their stochastic cuts.
+        metadata["resource_preparation_v1"] = [
+            asdict(b) for b in compiled.resource_preparation_boundaries]
     metadata["locations"] = sorted(compiled.logical_to_block.items())
     metadata["dependencies"] = sorted(compiled.preparation_dependencies.items())
     metadata["use_dependencies"] = [(asdict(u), deps) for u, deps in sorted(
@@ -218,6 +223,12 @@ def _parities(circuit):
 
 def _validate_source(compiled):
     """Validate public raw/annotation/use provenance without private compiler state."""
+    from ..noise.resource_preparation import validate_resource_preparation_provenance
+
+    try:
+        validate_resource_preparation_provenance(compiled)
+    except ValueError as ex:
+        raise DecoderViewError(str(ex)) from ex
     circuit = compiled.circuit
     for name, size in (
         ("measurements", circuit.num_measurements),
