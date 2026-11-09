@@ -982,6 +982,51 @@ proof remain M7-B/M7-C. There is no automatic allocator or production decoder.
 The unchanged Ubuntu/Windows Python 3.11/3.12 matrix runs on push; final remote
 results are reported after observing that run, with no local Windows claim.
 
+## Physical circuit inspection export — 2026-11-08
+
+Generated six exact Stim text snapshots in examples/: two_patch_memory ideal/noisy
+and knill_ec_single_round open/closed ideal/noisy (p=0.001). Existing example mains
+now return their artifacts; export_stim_circuits.py calls those exact programs
+and validates lossless Stim text roundtrips. No logical program, core compiler,
+physical gate/noise or canonical detector policy is changed.
+
+Japanese stim_circuit_guide_ja.md records all physical index/block/local roles and
+check supports, D relocation, actual logical-operation line ranges, both 9-pair
+transversal CNOT directions, H orientation, raw/global record interpretation and
+exact observable equations. stim_line_map.csv covers all 1,552 instruction lines,
+including modules/stages, logical operands, global measurements/detectors and all
+supporting detector blocks. Parallel operation spans are explicitly not exclusive;
+untagged global idle noise remains unassigned to a single module. examples/STATUS
+and README document usage; the source distribution includes these inspection files.
+
+Verification: all six source/text circuits exactly agree and build DEMs; metadata,
+100-shot noiseless detectors/observables and same-raw noisy detector/observable
+reconstruction pass. All CSV line references and key gate/observable equations
+are checked against actual text and artifact metadata. Pins remain Stim 1.15.0
+and stimflow ffe0d043 (1.17.dev0); inspected pinned Stim tag escaping/serialization.
+Full regression: **440 passed in 381.08 s**. Ruff (`src tests examples`) and
+`python -m build` pass. Source-archive contents include all six circuits, guide,
+CSV and exporter. Repeated export produces byte-identical circuit files.
+
+No additional decoding or recovery behavior is claimed. The guide and CSV are
+snapshot documentation; future circuit changes require updated line references.
+
+### Export publication review — 2026-11-09
+
+The pending exporter, six text snapshots, Japanese guide, 1,552-row map and
+source-manifest changes were reviewed against current M9 main. All snapshots
+equal the generated Stim objects, build native DEMs and pass ideal 100-shot
+detector/observable checks. Every CSV instruction, layer, measurement index,
+detector ID/support and fragment/operand/stage field matches current metadata.
+The actual exporter reproduces all six files byte-for-byte in a temporary copy.
+Ruff and whitespace checks pass; the isolated packaging test passes with eight
+workers (1 passed in 9.30 s), and its sdist contains every new inspection file.
+
+The reviewed removal of eight old ordinary-memory report/figure/log files is
+included in the cleanup; their historical Git versions remain available. README
+now links to the preserved historical report instead of promising local files.
+No runtime source, physical/noise semantics or decoder algorithm changes here.
+
 ## M6-D implemented and verified — 2026-11-08
 
 Baseline local/remote commit: `c927e4b72f72c488d7bc5d853d5f812ac6ab4e86`.

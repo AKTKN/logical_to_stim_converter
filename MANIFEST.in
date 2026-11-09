@@ -1,7 +1,8 @@
 include AGENTS.md STATUS.md
 recursive-include docs *.md
-recursive-include examples *.py
+recursive-include examples *.py *.md *.stim
 recursive-include examples/lstim *.lstim
+include examples/stim_line_map.csv
 recursive-include tests *.py *.md
 recursive-include src *.md
 include external_lib/README.md external_lib/AGENTS.md external_lib/STATUS.md

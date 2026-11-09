@@ -1,5 +1,16 @@
 # STATUS — Examples
 
+## Export publication review — 2026-11-09
+
+Current M9 example artifacts still equal all six pending Stim snapshots exactly;
+their native DEMs and ideal 100-shot checks pass. Every one of the 1,552 CSV rows
+matches current instruction/layer/record/detector/fragment/operand/stage metadata.
+Running the real exporter from a temporary copy reproduces all six files
+byte-for-byte without changing this checkout. Ruff and the eight-worker isolated
+packaging test pass (1 passed in 9.30 s), including all inspection files in sdist.
+README references removed memory reports through their historical Git version.
+The earlier 2026-11-08 evidence below remains historical.
+
 ## M9 follow-up — 2026-11-09
 
 The M9 paired example now describes --p-st in [0,.75] as a policy-level DEM
@@ -64,6 +75,37 @@ pass from the exact staged export, including the three-patch 32-shot/13-row-batc
 suite. Root STATUS records full commands and regression/build evidence;
 full M8-D noisy E2E equivalence remains separate.
 
+## Physical Stim inspection snapshots — 2026-11-08
+
+Added six UTF-8/LF `.stim` files generated from the actual two_patch_memory.main
+artifact and knill_ec_single_round.main open/closed artifacts. Each has an ideal
+and p=0.001 noisy version; logical programs and physical/annotation/noise semantics
+are unchanged. Those main functions now return the compiled artifacts after their
+existing output/checks. export_stim_circuits.py reuses them and rejects any lossy
+Stim text roundtrip before writing. It samples no new persistent data.
+
+stim_circuit_guide_ja.md explains every physical index/site/check support, logical
+block lifetime and D relocation, primitive logical-operation line ranges, exact
+transversal control/target pairs, SE versus logical CNOT, H/code orientation,
+Bell/readout records, rec reference convention and final affine observable parity.
+stim_line_map.csv maps all 1,552 instruction lines with module/stage/logical/block,
+measurement/global-detector IDs and detector support. Untagged idle/gate noise is
+not incorrectly attributed to one parallel module. Guide/CSV are snapshots and
+need corresponding updates if the logical examples or dependencies change.
+
+Verified: all six texts parse and equal their generating Stim objects exactly;
+metadata, DEM construction, noiseless 100-shot events/observables and same-raw
+noisy parity reconstruction pass. Every CSV row equals its cited text line;
+key logical-gate line references and final observable equations are checked.
+Root STATUS records full pytest/Ruff/build results. Source distributions include
+circuits/guide/CSV; the installed runtime package still has no decoder dependency.
+Pins remain Stim 1.15.0 and stimflow 1.17.dev0 at
+ffe0d043598ed5df0851a3e6b4920359a23fafbd. No new physics/decoder is claimed.
+
+Existing examples: two_patch_memory, two_patch_bell_roundtrip,
+knill_ec_single_round, offline_dem_views, memory_offline_decoding and
+knill_memory_offline_decoding. M6-C/D LER and execution-time evidence remains
+historically recorded in root STATUS. No upstream source is changed.
 
 ## M7-C explicit three-patch Knill memory — 2026-11-08
 

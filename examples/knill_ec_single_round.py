@@ -51,6 +51,7 @@ def main():
     assert not closed.ideal_circuit.compile_detector_sampler(seed=9).sample(100).any()
     print("Noiseless physical-frame recovery is verified by tests/helpers/preparation_matching.py.")
     print("Preparation corrections remain unresolved here; no decoded recovery or LER is claimed.")
+    return opened, closed
 
 
 if __name__ == "__main__":

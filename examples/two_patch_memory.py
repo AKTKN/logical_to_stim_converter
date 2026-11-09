@@ -14,7 +14,7 @@ from logical_to_stim_converter import (
 )
 
 
-def main() -> None:
+def main():
     code = CodeSpec.rotated_surface(3)
     blocks = [LogicalBlock.placed(f"patch{i}", code, patch_index=i) for i in range(2)]
     compiler = CircuitCompiler(blocks, logical_to_block={"data0": "patch0", "data1": "patch1"})
@@ -46,8 +46,9 @@ def main() -> None:
             f"{observable.logical_id}: observable {observable.index}, "
             f"raw measurement indices {observable.measurement_indices}"
         )
-    # compiled.ideal_circuit / compiled.noisy_circuit are available for optional export.
+    # Return the artifact so the companion exporter uses this exact example program.
     # Detector-event and observable samples alone are not decoded logical error rates.
+    return compiled
 
 
 if __name__ == "__main__":

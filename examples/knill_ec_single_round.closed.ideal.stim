@@ -1,0 +1,254 @@
+QUBIT_COORDS(0, 2) 0
+QUBIT_COORDS(1, 1) 1
+QUBIT_COORDS(1, 3) 2
+QUBIT_COORDS(1, 5) 3
+QUBIT_COORDS(2, 2) 4
+QUBIT_COORDS(2, 4) 5
+QUBIT_COORDS(2, 6) 6
+QUBIT_COORDS(3, 1) 7
+QUBIT_COORDS(3, 3) 8
+QUBIT_COORDS(3, 5) 9
+QUBIT_COORDS(4, 0) 10
+QUBIT_COORDS(4, 2) 11
+QUBIT_COORDS(4, 4) 12
+QUBIT_COORDS(5, 1) 13
+QUBIT_COORDS(5, 3) 14
+QUBIT_COORDS(5, 5) 15
+QUBIT_COORDS(6, 4) 16
+QUBIT_COORDS(8, 2) 17
+QUBIT_COORDS(9, 1) 18
+QUBIT_COORDS(9, 3) 19
+QUBIT_COORDS(9, 5) 20
+QUBIT_COORDS(10, 2) 21
+QUBIT_COORDS(10, 4) 22
+QUBIT_COORDS(10, 6) 23
+QUBIT_COORDS(11, 1) 24
+QUBIT_COORDS(11, 3) 25
+QUBIT_COORDS(11, 5) 26
+QUBIT_COORDS(12, 0) 27
+QUBIT_COORDS(12, 2) 28
+QUBIT_COORDS(12, 4) 29
+QUBIT_COORDS(13, 1) 30
+QUBIT_COORDS(13, 3) 31
+QUBIT_COORDS(13, 5) 32
+QUBIT_COORDS(14, 4) 33
+QUBIT_COORDS(16, 2) 34
+QUBIT_COORDS(17, 1) 35
+QUBIT_COORDS(17, 3) 36
+QUBIT_COORDS(17, 5) 37
+QUBIT_COORDS(18, 2) 38
+QUBIT_COORDS(18, 4) 39
+QUBIT_COORDS(18, 6) 40
+QUBIT_COORDS(19, 1) 41
+QUBIT_COORDS(19, 3) 42
+QUBIT_COORDS(19, 5) 43
+QUBIT_COORDS(20, 0) 44
+QUBIT_COORDS(20, 2) 45
+QUBIT_COORDS(20, 4) 46
+QUBIT_COORDS(21, 1) 47
+QUBIT_COORDS(21, 3) 48
+QUBIT_COORDS(21, 5) 49
+QUBIT_COORDS(22, 4) 50
+RX[module0000] 1 2 3 7 8 9 13 14 15
+TICK
+RX[module0000] 0 5 11 16
+R[module0000] 4 6 10 12
+TICK
+CX[module0000] 2 4 5 3 7 10 9 12 11 8 16 15
+TICK
+CX[module0000] 5 2 8 4 11 7 13 10 15 12 16 14
+TICK
+CX[module0000] 0 2 1 4 3 6 5 9 8 12 11 14
+TICK
+CX[module0000] 0 1 5 8 7 4 9 6 11 13 14 12
+TICK
+MX[module0000] 0 5 11 16
+M[module0000] 4 6 10 12
+DETECTOR[check:["physical_D","X1","module0000"\C](0, 2, 0) rec[-8]
+DETECTOR[check:["physical_D","X2","module0000"\C](2, 4, 0) rec[-7]
+DETECTOR[check:["physical_D","X3","module0000"\C](4, 2, 0) rec[-6]
+DETECTOR[check:["physical_D","X4","module0000"\C](6, 4, 0) rec[-5]
+SHIFT_COORDS(0, 0, 1)
+TICK
+RX[module0001] 18 19 20 24 25 26 30 31 32
+R[module0002] 35 36 37 41 42 43 47 48 49
+TICK
+RX[module0001] 17 22 28 33
+R[module0001] 21 23 27 29
+RX[module0002] 34 39 45 50
+R[module0002] 38 40 44 46
+TICK
+CX[module0001] 19 21 22 20 24 27 26 29 28 25 33 32
+CX[module0002] 36 38 39 37 41 44 43 46 45 42 50 49
+TICK
+CX[module0001] 22 19 25 21 28 24 30 27 32 29 33 31
+CX[module0002] 39 36 42 38 45 41 47 44 49 46 50 48
+TICK
+CX[module0001] 17 19 18 21 20 23 22 26 25 29 28 31
+CX[module0002] 34 36 35 38 37 40 39 43 42 46 45 48
+TICK
+CX[module0001] 17 18 22 25 24 21 26 23 28 30 31 29
+CX[module0002] 34 35 39 42 41 38 43 40 45 47 48 46
+TICK
+MX[module0001] 17 22 28 33
+M[module0001] 21 23 27 29
+MX[module0002] 34 39 45 50
+M[module0002] 38 40 44 46
+DETECTOR[check:["physical_A","X1","module0001"\C](8, 2, 0) rec[-16]
+DETECTOR[check:["physical_A","X2","module0001"\C](10, 4, 0) rec[-15]
+DETECTOR[check:["physical_A","X3","module0001"\C](12, 2, 0) rec[-14]
+DETECTOR[check:["physical_A","X4","module0001"\C](14, 4, 0) rec[-13]
+DETECTOR[check:["physical_B","Z1","module0002"\C](18, 2, 0) rec[-4]
+DETECTOR[check:["physical_B","Z2","module0002"\C](18, 6, 0) rec[-3]
+DETECTOR[check:["physical_B","Z3","module0002"\C](20, 0, 0) rec[-2]
+DETECTOR[check:["physical_B","Z4","module0002"\C](20, 4, 0) rec[-1]
+SHIFT_COORDS(0, 0, 1)
+TICK
+RX[module0001] 17 22 28 33
+R[module0001] 21 23 27 29
+RX[module0002] 34 39 45 50
+R[module0002] 38 40 44 46
+TICK
+CX[module0001] 19 21 22 20 24 27 26 29 28 25 33 32
+CX[module0002] 36 38 39 37 41 44 43 46 45 42 50 49
+TICK
+CX[module0001] 22 19 25 21 28 24 30 27 32 29 33 31
+CX[module0002] 39 36 42 38 45 41 47 44 49 46 50 48
+TICK
+CX[module0001] 17 19 18 21 20 23 22 26 25 29 28 31
+CX[module0002] 34 36 35 38 37 40 39 43 42 46 45 48
+TICK
+CX[module0001] 17 18 22 25 24 21 26 23 28 30 31 29
+CX[module0002] 34 35 39 42 41 38 43 40 45 47 48 46
+TICK
+MX[module0001] 17 22 28 33
+M[module0001] 21 23 27 29
+MX[module0002] 34 39 45 50
+M[module0002] 38 40 44 46
+DETECTOR[check:["physical_A","X1","module0001"\C](8, 2, 0) rec[-32] rec[-16]
+DETECTOR[check:["physical_A","Z1","module0001"\C](10, 2, 0) rec[-28] rec[-12]
+DETECTOR[check:["physical_A","X2","module0001"\C](10, 4, 0) rec[-31] rec[-15]
+DETECTOR[check:["physical_A","Z2","module0001"\C](10, 6, 0) rec[-27] rec[-11]
+DETECTOR[check:["physical_A","Z3","module0001"\C](12, 0, 0) rec[-26] rec[-10]
+DETECTOR[check:["physical_A","X3","module0001"\C](12, 2, 0) rec[-30] rec[-14]
+DETECTOR[check:["physical_A","Z4","module0001"\C](12, 4, 0) rec[-25] rec[-9]
+DETECTOR[check:["physical_A","X4","module0001"\C](14, 4, 0) rec[-29] rec[-13]
+DETECTOR[check:["physical_B","X1","module0002"\C](16, 2, 0) rec[-24] rec[-8]
+DETECTOR[check:["physical_B","Z1","module0002"\C](18, 2, 0) rec[-20] rec[-4]
+DETECTOR[check:["physical_B","X2","module0002"\C](18, 4, 0) rec[-23] rec[-7]
+DETECTOR[check:["physical_B","Z2","module0002"\C](18, 6, 0) rec[-19] rec[-3]
+DETECTOR[check:["physical_B","Z3","module0002"\C](20, 0, 0) rec[-18] rec[-2]
+DETECTOR[check:["physical_B","X3","module0002"\C](20, 2, 0) rec[-22] rec[-6]
+DETECTOR[check:["physical_B","Z4","module0002"\C](20, 4, 0) rec[-17] rec[-1]
+DETECTOR[check:["physical_B","X4","module0002"\C](22, 4, 0) rec[-21] rec[-5]
+SHIFT_COORDS(0, 0, 1)
+TICK
+RX[module0001] 17 22 28 33
+R[module0001] 21 23 27 29
+RX[module0002] 34 39 45 50
+R[module0002] 38 40 44 46
+TICK
+CX[module0001] 19 21 22 20 24 27 26 29 28 25 33 32
+CX[module0002] 36 38 39 37 41 44 43 46 45 42 50 49
+TICK
+CX[module0001] 22 19 25 21 28 24 30 27 32 29 33 31
+CX[module0002] 39 36 42 38 45 41 47 44 49 46 50 48
+TICK
+CX[module0001] 17 19 18 21 20 23 22 26 25 29 28 31
+CX[module0002] 34 36 35 38 37 40 39 43 42 46 45 48
+TICK
+CX[module0001] 17 18 22 25 24 21 26 23 28 30 31 29
+CX[module0002] 34 35 39 42 41 38 43 40 45 47 48 46
+TICK
+MX[module0001] 17 22 28 33
+M[module0001] 21 23 27 29
+MX[module0002] 34 39 45 50
+M[module0002] 38 40 44 46
+DETECTOR[check:["physical_A","X1","module0001"\C](8, 2, 0) rec[-32] rec[-16]
+DETECTOR[check:["physical_A","Z1","module0001"\C](10, 2, 0) rec[-28] rec[-12]
+DETECTOR[check:["physical_A","X2","module0001"\C](10, 4, 0) rec[-31] rec[-15]
+DETECTOR[check:["physical_A","Z2","module0001"\C](10, 6, 0) rec[-27] rec[-11]
+DETECTOR[check:["physical_A","Z3","module0001"\C](12, 0, 0) rec[-26] rec[-10]
+DETECTOR[check:["physical_A","X3","module0001"\C](12, 2, 0) rec[-30] rec[-14]
+DETECTOR[check:["physical_A","Z4","module0001"\C](12, 4, 0) rec[-25] rec[-9]
+DETECTOR[check:["physical_A","X4","module0001"\C](14, 4, 0) rec[-29] rec[-13]
+DETECTOR[check:["physical_B","X1","module0002"\C](16, 2, 0) rec[-24] rec[-8]
+DETECTOR[check:["physical_B","Z1","module0002"\C](18, 2, 0) rec[-20] rec[-4]
+DETECTOR[check:["physical_B","X2","module0002"\C](18, 4, 0) rec[-23] rec[-7]
+DETECTOR[check:["physical_B","Z2","module0002"\C](18, 6, 0) rec[-19] rec[-3]
+DETECTOR[check:["physical_B","Z3","module0002"\C](20, 0, 0) rec[-18] rec[-2]
+DETECTOR[check:["physical_B","X3","module0002"\C](20, 2, 0) rec[-22] rec[-6]
+DETECTOR[check:["physical_B","Z4","module0002"\C](20, 4, 0) rec[-17] rec[-1]
+DETECTOR[check:["physical_B","X4","module0002"\C](22, 4, 0) rec[-21] rec[-5]
+SHIFT_COORDS(0, 0, 1)
+TICK
+CX[module0003] 18 35 19 36 20 37 24 41 25 42 26 43 30 47 31 48 32 49
+TICK
+CX[module0004] 1 18 2 19 3 20 7 24 8 25 9 26 13 30 14 31 15 32
+TICK
+MX[module0005] 15 14 13 9 8 7 3 2 1
+M[module0006] 32 31 30 26 25 24 20 19 18
+DETECTOR[check:["physical_D","X1","module0005"\C](3, 2, 0) rec[-74] rec[-34] rec[-26] rec[-11] rec[-10]
+DETECTOR[check:["physical_D","X2","module0005"\C](5, 4, 0) rec[-73] rec[-33] rec[-25] rec[-15] rec[-14] rec[-12] rec[-11]
+DETECTOR[check:["physical_D","X3","module0005"\C](7, 2, 0) rec[-72] rec[-32] rec[-24] rec[-17] rec[-16] rec[-14] rec[-13]
+DETECTOR[check:["physical_D","X4","module0005"\C](9, 4, 0) rec[-71] rec[-31] rec[-23] rec[-18] rec[-17]
+DETECTOR[check:["physical_A","Z1","module0006"\C](8, 2, 0) rec[-70] rec[-30] rec[-5] rec[-4] rec[-2] rec[-1]
+DETECTOR[check:["physical_A","Z2","module0006"\C](8, 6, 0) rec[-69] rec[-29] rec[-6] rec[-3]
+DETECTOR[check:["physical_A","Z3","module0006"\C](10, 0, 0) rec[-68] rec[-28] rec[-7] rec[-4]
+DETECTOR[check:["physical_A","Z4","module0006"\C](10, 4, 0) rec[-67] rec[-27] rec[-9] rec[-8] rec[-6] rec[-5]
+SHIFT_COORDS(0, 0, 1)
+TICK
+RX[module0007] 34 39 45 50
+R[module0007] 38 40 44 46
+TICK
+CX[module0007] 36 38 39 37 41 44 43 46 45 42 50 49
+TICK
+CX[module0007] 39 36 42 38 45 41 47 44 49 46 50 48
+TICK
+CX[module0007] 34 36 35 38 37 40 39 43 42 46 45 48
+TICK
+CX[module0007] 34 35 39 42 41 38 43 40 45 47 48 46
+TICK
+MX[module0007] 34 39 45 50
+M[module0007] 38 40 44 46
+DETECTOR[check:["physical_B","X1","module0007"\C](16, 2, 0) rec[-34] rec[-8]
+DETECTOR[check:["physical_B","Z1","module0007"\C](16, 2, 1) rec[-38] rec[-30] rec[-4]
+DETECTOR[check:["physical_B","X2","module0007"\C](18, 4, 0) rec[-33] rec[-7]
+DETECTOR[check:["physical_B","Z2","module0007"\C](16, 6, 0) rec[-37] rec[-29] rec[-3]
+DETECTOR[check:["physical_B","Z3","module0007"\C](18, 0, 0) rec[-36] rec[-28] rec[-2]
+DETECTOR[check:["physical_B","X3","module0007"\C](20, 2, 0) rec[-32] rec[-6]
+DETECTOR[check:["physical_B","Z4","module0007"\C](18, 4, 1) rec[-35] rec[-27] rec[-1]
+DETECTOR[check:["physical_B","X4","module0007"\C](22, 4, 0) rec[-31] rec[-5]
+SHIFT_COORDS(0, 0, 2)
+TICK
+RX[module0007] 34 39 45 50
+R[module0007] 38 40 44 46
+TICK
+CX[module0007] 36 38 39 37 41 44 43 46 45 42 50 49
+TICK
+CX[module0007] 39 36 42 38 45 41 47 44 49 46 50 48
+TICK
+CX[module0007] 34 36 35 38 37 40 39 43 42 46 45 48
+TICK
+CX[module0007] 34 35 39 42 41 38 43 40 45 47 48 46
+TICK
+MX[module0007] 34 39 45 50
+M[module0007] 38 40 44 46
+DETECTOR[check:["physical_B","X1","module0007"\C](16, 2, 0) rec[-16] rec[-8]
+DETECTOR[check:["physical_B","Z1","module0007"\C](18, 2, 0) rec[-12] rec[-4]
+DETECTOR[check:["physical_B","X2","module0007"\C](18, 4, 0) rec[-15] rec[-7]
+DETECTOR[check:["physical_B","Z2","module0007"\C](18, 6, 0) rec[-11] rec[-3]
+DETECTOR[check:["physical_B","Z3","module0007"\C](20, 0, 0) rec[-10] rec[-2]
+DETECTOR[check:["physical_B","X3","module0007"\C](20, 2, 0) rec[-14] rec[-6]
+DETECTOR[check:["physical_B","Z4","module0007"\C](20, 4, 0) rec[-9] rec[-1]
+DETECTOR[check:["physical_B","X4","module0007"\C](22, 4, 0) rec[-13] rec[-5]
+SHIFT_COORDS(0, 0, 1)
+TICK
+H[module0008] 35 36 37 41 42 43 47 48 49
+TICK
+M[module0009] 49 48 47 43 42 41 37 36 35
+DETECTOR[check:["physical_B","X1","module0009"\C](16, 2, 0) rec[-17] rec[-2] rec[-1]
+DETECTOR[check:["physical_B","X2","module0009"\C](18, 4, 0) rec[-16] rec[-6] rec[-5] rec[-3] rec[-2]
+DETECTOR[check:["physical_B","X3","module0009"\C](20, 2, 0) rec[-15] rec[-8] rec[-7] rec[-5] rec[-4]
+DETECTOR[check:["physical_B","X4","module0009"\C](22, 4, 0) rec[-14] rec[-9] rec[-8]
+OBSERVABLE_INCLUDE(0) rec[-41] rec[-38] rec[-35] rec[-17] rec[-16] rec[-15] rec[-14] rec[-9] rec[-6] rec[-3]

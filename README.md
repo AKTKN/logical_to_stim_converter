@@ -153,6 +153,13 @@ compiler does not automatically move operations across them. Mixed X/Z bases,
 different SE round counts, and waiting patches are supported. A memory experiment
 is a composition of these three primitives; there is no dedicated experiment class.
 
+To inspect the generated physical text circuits, see
+[the Japanese circuit/operation guide](examples/stim_circuit_guide_ja.md) and
+[the complete line mapping](examples/stim_line_map.csv). The six `.stim` snapshots
+cover this memory example and the open/closed Knill example, each ideal/noisy.
+Run `python examples/export_stim_circuits.py` to regenerate the circuits beside
+the examples; the guide explains how its line numbers relate to these snapshots.
+
 ## Explicit reuse of one physical patch (M7-A)
 
 `BindPatch` reserves an explicitly selected available patch for a fresh logical
@@ -716,8 +723,9 @@ runs X/Z memory at d=3/5, R=d, and concurrent independent X/Z patches at d=3.
 It writes aggregate JSON/CSV and PNG/SVG figures when an output directory is
 specified. Each experiment samples exactly once; all decoding strategies reuse
 that raw batch. The figures show 95% Wilson intervals, with no threshold claim.
-Full-suite verification results and figures from this task are in
-[`implementation_files/e2etest`](implementation_files/e2etest).
+The original ordinary-memory verification reports and figures are preserved in
+[the historical results](https://github.com/AKTKN/logical_to_stim_converter/blob/d8654898e22248ba23afa9a65032eb7a9d83d075/implementation_files/e2etest/README.md).
+Use the suite command above to regenerate local aggregate reports and figures.
 
 The importable source example exposes `run_memory`, `build_memory` and
 `analyze_memory`. `run_memory(noise_model=your_noise, shots=..., seed=...)` accepts
