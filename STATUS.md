@@ -4,6 +4,30 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research validation Phase 1 — code capacity (2026-11-09)
+
+Added a research-only `validation/` harness and tests for one independent data-X
+layer in ideal Z memory. Hand-authored d=3/5 Z-check supports, a brute-force
+minimum-syndrome solver and PyMatching agree: d=3 has all 512 failure counts
+`[0,0,18,56,57,69,28,18,9,1]`, exact polynomial leading `18q²-70q³`;
+d=5 has all 15,276 patterns through weight 4 with `N₃=292, N₄=4333`,
+leading `292q³-2091q⁴`. All 512 and 15,276 corresponding physical Stim
+fault responses match independent GF(2) Z syndrome and signed logical-Z labels.
+Physical one-layer X/depolarizing Z-component equivalence is checked separately.
+
+The [Phase 1 protocol/report](validation/reports/phase1_2026-11-09/REPORT.md)
+records two-worker local sampling (653,952 shots, 1,399 failures, 19.33 s),
+two d=5 nominal-interval outliers and the independent fixed-shot replication
+(1,200,000 shots, 582 failures, 39.98 s) whose four intervals cover rigorous
+bounds. Low-q fits and their broad finite-q/statistical limits are stated there.
+Compiler `src/`, pins, package version and unresolved license are unchanged.
+This is Phase 1 only; Phases 2/3 and production decoding remain deferred.
+Full eight-worker pytest: **1381 passed in 602.93 s**, two multiprocessing fork
+warnings from the original validator pool. The final research pool uses explicit
+spawn; focused final eight-worker validator tests then pass **8 in 9.30 s** with
+no warnings. The full suite was not repeated after this narrow pool change;
+no runtime source or other test behavior changed. Ruff src/tests/validation passes.
+
 ## Research beta 0.0.1 — Phase 5 final integration gate (2026-11-09)
 
 Verified committed Phases 1–4 and the clean pushed baseline c45bf1f19081b55a414db7183557a1ec34b9a797.

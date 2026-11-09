@@ -1,0 +1,267 @@
+{
+  "assumptions": [
+    "ideal Z memory with one post-preparation independent data X layer",
+    "uniform-prior MWPM, same syndrome and reference-relative logical-Z failure",
+    "edited Stim circuit is verification-only and has no compiled source fingerprint"
+  ],
+  "census": {
+    "5": {
+      "A": 292,
+      "B": -2091,
+      "counts": [
+        0,
+        0,
+        0,
+        292,
+        4333
+      ],
+      "distance": 5,
+      "minimum_ties": 5620,
+      "power_coefficients": null,
+      "syndrome_classes": 2564,
+      "t": 3,
+      "visited": [
+        1,
+        25,
+        300,
+        2300,
+        12650
+      ]
+    }
+  },
+  "circuits": {
+    "5": {
+      "cut_convention": "after LogicalInit final TICK, before SyndromeExtraction ancilla reset",
+      "cut_instruction": 78,
+      "data_wires": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        12,
+        13,
+        14,
+        15,
+        16,
+        22,
+        23,
+        24,
+        25,
+        26,
+        32,
+        33,
+        34,
+        35,
+        36,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "ideal_sha256": "fe41dbd4d06a00c748f0dd145a890ec0c5ede8c37984a8953e37d92368a261e2",
+      "inserted_circuit_sha256_at_first_q": "ce05e6bf8a6a06ed57d376007d671360b59363e28c3aa95f3c12a4c1ae80ff6b"
+    }
+  },
+  "compiler_source_sha": "be734ce71c5140a9e01ccd1fdb2d181678cef663",
+  "depolarizing_checks": {
+    "5": {
+      "channels": {
+        "DEPOLARIZE1": {
+          "circuit_sha256": "e1d4aeeae9137d2ee5bbd93fe6c498af8d6704ca04a583b5baa9ab27bc5d6e92",
+          "failures": 300,
+          "probability": 0.06,
+          "shots": 20000,
+          "wilson_95": [
+            0.0134061261296705,
+            0.016780148844750986
+          ]
+        },
+        "X_ERROR": {
+          "circuit_sha256": "0367e284cff76db96df850911c269935852e35d57095e466086b9621d3af7577",
+          "failures": 274,
+          "probability": 0.04,
+          "shots": 20000,
+          "wilson_95": [
+            0.012179828372192605,
+            0.015406945895974753
+          ]
+        }
+      },
+      "p": 0.06,
+      "q": 0.04,
+      "scope": "selected Z-check detectors and logical-Z only; X-check response differs"
+    }
+  },
+  "fits": {
+    "d5_algebra": {
+      "fixed_curvature": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      },
+      "fixed_power": {
+        "A": 246.4356699372237,
+        "A_95": [
+          219.52144629459204,
+          276.64968704656525
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 2,
+        "status": "ok",
+        "weighted_log_residual": 0.7018071664829935
+      },
+      "free_curvature": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      },
+      "free_power": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      }
+    },
+    "d5_physical": {
+      "fixed_curvature": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      },
+      "fixed_power": {
+        "A": 253.30128943371162,
+        "A_95": [
+          225.99342659882498,
+          283.9088914859373
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 2,
+        "status": "ok",
+        "weighted_log_residual": 0.7825734821854663
+      },
+      "free_curvature": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      },
+      "free_power": {
+        "n": 2,
+        "status": "insufficient_nonzero_points"
+      }
+    }
+  },
+  "implementation_version": "phase1-2",
+  "physical_checks": {
+    "5": {
+      "distance": 5,
+      "patterns": 15276,
+      "syndrome_rows": 12
+    }
+  },
+  "points": [
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 33,
+      "mode": "algebra",
+      "normalized_rate": 214.84375,
+      "q": 0.008,
+      "rate": 0.00011,
+      "reference_lower": 0.00014028121546663788,
+      "reference_upper": 0.00014180455596545622,
+      "shots": 300000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 0.1929525070015643,
+      "wall_seconds": 0.9407366940001793,
+      "wilson_95": [
+        7.833082171812761e-05,
+        0.0001544710600213792
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 44,
+      "mode": "physical",
+      "normalized_rate": 286.4583333333333,
+      "q": 0.008,
+      "rate": 0.00014666666666666666,
+      "reference_lower": 0.00014028121546663788,
+      "reference_upper": 0.00014180455596545622,
+      "shots": 300000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 36.402251669001316,
+      "wall_seconds": 18.24418509399993,
+      "wilson_95": [
+        0.000109264020822928,
+        0.00019687025523866877
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 254,
+      "mode": "algebra",
+      "normalized_rate": 250.86419753086423,
+      "q": 0.015,
+      "rate": 0.0008466666666666667,
+      "reference_lower": 0.0008664338290826852,
+      "reference_upper": 0.0008978332554687014,
+      "shots": 300000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 0.2066765040001428,
+      "wall_seconds": 0.13678430400000252,
+      "wilson_95": [
+        0.0007487845729706358,
+        0.0009573317765126786
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 251,
+      "mode": "physical",
+      "normalized_rate": 247.90123456790127,
+      "q": 0.015,
+      "rate": 0.0008366666666666667,
+      "reference_lower": 0.0008664338290826852,
+      "reference_upper": 0.0008978332554687014,
+      "shots": 300000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 37.464947391000806,
+      "wall_seconds": 18.79029315599996,
+      "wilson_95": [
+        0.0007393994670766085,
+        0.0009467171385006813
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "settings": {
+    "batch_size": 4096,
+    "cpu_count": 20,
+    "max_seconds": 120.0,
+    "max_shots": 300000,
+    "seed": 732,
+    "target_failures": 0,
+    "workers": 2
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pymatching": "2.3.1",
+    "stim": "1.15.0"
+  },
+  "wall_seconds": 39.98486291600011
+}

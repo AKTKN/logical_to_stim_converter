@@ -1,5 +1,20 @@
 # STATUS — Tests
 
+## Research validation Phase 1 — code-capacity validator (2026-11-09)
+
+`test_validation_code_capacity.py` adds eight focused tests: hand-authored d=3/5
+supports and GF(2) parity; exact integer/polynomial/rational results; real
+PyMatching versus independent minimum-syndrome classes and tie consistency;
+exhaustive physical Stim response on 512/15,276 patterns; wrong-order/support/cut
+negative controls, random preparation gauges, channel-component equivalence,
+process task/worker seed identity, invalid and partial caps, zero-failure Wilson,
+synthetic fits and quick CLI artifacts. Focused combined memory/layout/offline
+decoding run: **97 passed in 67.62 s**. Full eight-worker suite: **1381 passed
+in 602.93 s**, with two fork-in-multithread warnings from the initial validator
+pool. Final explicit-spawn validator tests pass **8 in 9.30 s** under eight
+workers, without warnings; this narrow pool change was not followed by another
+full suite run. Ruff src/tests/validation passes.
+
 ## Phase 5 — Full integration verification (2026-11-09)
 
 Fresh `.venv/bin/python -m pytest -n 8 --tb=short --durations=10`: **1373 passed

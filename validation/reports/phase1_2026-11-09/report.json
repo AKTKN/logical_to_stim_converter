@@ -1,0 +1,850 @@
+{
+  "assumptions": [
+    "ideal Z memory with one post-preparation independent data X layer",
+    "uniform-prior MWPM, same syndrome and reference-relative logical-Z failure",
+    "edited Stim circuit is verification-only and has no compiled source fingerprint"
+  ],
+  "census": {
+    "3": {
+      "A": 18,
+      "B": -70,
+      "counts": [
+        0,
+        0,
+        18,
+        56,
+        57,
+        69,
+        28,
+        18,
+        9,
+        1
+      ],
+      "distance": 3,
+      "minimum_ties": 10,
+      "power_coefficients": [
+        0,
+        0,
+        18,
+        -70,
+        99,
+        -6,
+        -168,
+        240,
+        -144,
+        32
+      ],
+      "syndrome_classes": 16,
+      "t": 2,
+      "visited": [
+        1,
+        9,
+        36,
+        84,
+        126,
+        126,
+        84,
+        36,
+        9,
+        1
+      ]
+    },
+    "5": {
+      "A": 292,
+      "B": -2091,
+      "counts": [
+        0,
+        0,
+        0,
+        292,
+        4333
+      ],
+      "distance": 5,
+      "minimum_ties": 5620,
+      "power_coefficients": null,
+      "syndrome_classes": 2564,
+      "t": 3,
+      "visited": [
+        1,
+        25,
+        300,
+        2300,
+        12650
+      ]
+    }
+  },
+  "circuits": {
+    "3": {
+      "cut_convention": "after LogicalInit final TICK, before SyndromeExtraction ancilla reset",
+      "cut_instruction": 38,
+      "data_wires": [
+        1,
+        2,
+        3,
+        7,
+        8,
+        9,
+        13,
+        14,
+        15
+      ],
+      "ideal_sha256": "877fc1d134c753ce85e65a359887073703d31e638f9022bac03e848033a13f5a",
+      "inserted_circuit_sha256_at_first_q": "aa1bae468ebb63357c92c3dcfe1e689baef6ae81ecc9dc7f71eb760813b37c70"
+    },
+    "5": {
+      "cut_convention": "after LogicalInit final TICK, before SyndromeExtraction ancilla reset",
+      "cut_instruction": 78,
+      "data_wires": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        12,
+        13,
+        14,
+        15,
+        16,
+        22,
+        23,
+        24,
+        25,
+        26,
+        32,
+        33,
+        34,
+        35,
+        36,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "ideal_sha256": "fe41dbd4d06a00c748f0dd145a890ec0c5ede8c37984a8953e37d92368a261e2",
+      "inserted_circuit_sha256_at_first_q": "ce05e6bf8a6a06ed57d376007d671360b59363e28c3aa95f3c12a4c1ae80ff6b"
+    }
+  },
+  "compiler_source_sha": "be734ce71c5140a9e01ccd1fdb2d181678cef663",
+  "depolarizing_checks": {
+    "3": {
+      "channels": {
+        "DEPOLARIZE1": {
+          "circuit_sha256": "a68271ee49c3e47a3b4a8c3489ceaf20d406f53415dd48e14c1d36cf44a9e472",
+          "failures": 492,
+          "probability": 0.06,
+          "shots": 20000,
+          "wilson_95": [
+            0.02254275745682571,
+            0.026839830425318564
+          ]
+        },
+        "X_ERROR": {
+          "circuit_sha256": "5f4de9b2a2ee1c1206f58b89d378dbaeb2c152e0c46c8f4eec8d3b851303e2b4",
+          "failures": 488,
+          "probability": 0.04,
+          "shots": 20000,
+          "wilson_95": [
+            0.02235131113800684,
+            0.026631353558559875
+          ]
+        }
+      },
+      "p": 0.06,
+      "q": 0.04,
+      "scope": "selected Z-check detectors and logical-Z only; X-check response differs"
+    },
+    "5": {
+      "channels": {
+        "DEPOLARIZE1": {
+          "circuit_sha256": "e1d4aeeae9137d2ee5bbd93fe6c498af8d6704ca04a583b5baa9ab27bc5d6e92",
+          "failures": 300,
+          "probability": 0.06,
+          "shots": 20000,
+          "wilson_95": [
+            0.0134061261296705,
+            0.016780148844750986
+          ]
+        },
+        "X_ERROR": {
+          "circuit_sha256": "0367e284cff76db96df850911c269935852e35d57095e466086b9621d3af7577",
+          "failures": 274,
+          "probability": 0.04,
+          "shots": 20000,
+          "wilson_95": [
+            0.012179828372192605,
+            0.015406945895974753
+          ]
+        }
+      },
+      "p": 0.06,
+      "q": 0.04,
+      "scope": "selected Z-check detectors and logical-Z only; X-check response differs"
+    }
+  },
+  "fits": {
+    "d3_algebra": {
+      "fixed_curvature": {
+        "A": 17.50746858919596,
+        "A_95": [
+          14.376901631857992,
+          21.3197157670245
+        ],
+        "beta": 2,
+        "beta_95": null,
+        "c": -6.398532896897436,
+        "c_95": [
+          -12.289870132492418,
+          -0.507195661302454
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 0.3326011024924662
+      },
+      "fixed_power": {
+        "A": 14.531797180897009,
+        "A_95": [
+          13.189635512732522,
+          16.010535628742108
+        ],
+        "beta": 2,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 4.8641345488277254
+      },
+      "free_curvature": {
+        "A": 17.818081464983283,
+        "A_95": [
+          0.9837181491632465,
+          322.7388122937793
+        ],
+        "beta": 2.0035741150426105,
+        "beta_95": [
+          1.4162429869265152,
+          2.590905243158706
+        ],
+        "c": -6.543220685015825,
+        "c_95": [
+          -31.038643839033774,
+          17.952202469002124
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 0.3324588423759765
+      },
+      "free_power": {
+        "A": 8.330279402842695,
+        "A_95": [
+          4.867231848108202,
+          14.257293898254956
+        ],
+        "beta": 1.851291241471586,
+        "beta_95": [
+          1.7100335982401078,
+          1.9925488847030643
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 0.6065691623005668
+      }
+    },
+    "d3_physical": {
+      "fixed_curvature": {
+        "A": 19.561241065084843,
+        "A_95": [
+          16.07413541703526,
+          23.804835661695375
+        ],
+        "beta": 2,
+        "beta_95": null,
+        "c": -6.9411843457310525,
+        "c_95": [
+          -12.78164141793432,
+          -1.1007272735277844
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 2.5665274379363665
+      },
+      "fixed_power": {
+        "A": 15.939640196294015,
+        "A_95": [
+          14.506900690216948,
+          17.513880808369432
+        ],
+        "beta": 2,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 7.992600380378696
+      },
+      "free_curvature": {
+        "A": 151.0941943792671,
+        "A_95": [
+          9.33753200187293,
+          2444.913235161131
+        ],
+        "beta": 2.4160251636147443,
+        "beta_95": [
+          1.8509210751460334,
+          2.981129252083455
+        ],
+        "c": -23.79320401668545,
+        "c_95": [
+          -47.41732870440174,
+          -0.16907932896916478
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 0.48446166868463475
+      },
+      "free_power": {
+        "A": 9.631338394945484,
+        "A_95": [
+          5.680029435199435,
+          16.331372986044045
+        ],
+        "beta": 1.8645439377717836,
+        "beta_95": [
+          1.7248364898279371,
+          2.00425138571563
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 4.381247589053733
+      }
+    },
+    "d5_algebra": {
+      "fixed_curvature": {
+        "A": 200.79139240585445,
+        "A_95": [
+          150.53571915995178,
+          267.82469628648596
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": 1.4549521290226508,
+        "c_95": [
+          -6.3980903007779455,
+          9.307994558823246
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 2.1125309832586865
+      },
+      "fixed_power": {
+        "A": 210.84457238026897,
+        "A_95": [
+          187.75752613949095,
+          236.77044865403238
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 2.2443972355684076
+      },
+      "free_curvature": {
+        "A": 69.14280345340889,
+        "A_95": [
+          0.9034831348236176,
+          5291.440520724333
+        ],
+        "beta": 2.773974177607485,
+        "beta_95": [
+          1.8563601673377415,
+          3.6915881878772288
+        ],
+        "c": 9.511920642509665,
+        "c_95": [
+          -24.127050475799244,
+          43.150891760818574
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 1.8794492777449208
+      },
+      "free_power": {
+        "A": 231.2728428321262,
+        "A_95": [
+          107.84981893194556,
+          495.94082179594864
+        ],
+        "beta": 3.0262737359704657,
+        "beta_95": [
+          2.8120560736203326,
+          3.2404913983205987
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 2.18660822566592
+      }
+    },
+    "d5_physical": {
+      "fixed_curvature": {
+        "A": 337.47299694455944,
+        "A_95": [
+          260.55990891983157,
+          437.0895896412959
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": -11.053802858651764,
+        "c_95": [
+          -18.514564773554,
+          -3.5930409437495303
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 8.459795434175877
+      },
+      "fixed_power": {
+        "A": 239.40050345824616,
+        "A_95": [
+          213.41979809415986,
+          268.5439756192426
+        ],
+        "beta": 3,
+        "beta_95": null,
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 16.892545137052636
+      },
+      "free_curvature": {
+        "A": 42.682100977890315,
+        "A_95": [
+          0.8295639084338944,
+          2196.0474959983103
+        ],
+        "beta": 2.5676841888952793,
+        "beta_95": [
+          1.7455532306008656,
+          3.389815147189693
+        ],
+        "c": 5.057990597135699,
+        "c_95": [
+          -26.476926337722674,
+          36.59290753199407
+        ],
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 7.397531646942252
+      },
+      "free_power": {
+        "A": 79.4682093292052,
+        "A_95": [
+          38.89750854678279,
+          162.35477617788735
+        ],
+        "beta": 2.6958049193966285,
+        "beta_95": [
+          2.5012991480519484,
+          2.8903106907413085
+        ],
+        "c": null,
+        "c_95": null,
+        "interval_method": "delta-method binomial, conditional on positive counts",
+        "n": 4,
+        "status": "ok",
+        "weighted_log_residual": 7.496360736668265
+      }
+    }
+  },
+  "implementation_version": "phase1-2",
+  "physical_checks": {
+    "3": {
+      "distance": 3,
+      "patterns": 512,
+      "syndrome_rows": 4
+    },
+    "5": {
+      "distance": 5,
+      "patterns": 15276,
+      "syndrome_rows": 12
+    }
+  },
+  "points": [
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 80,
+      "mode": "algebra",
+      "normalized_rate": 16.954210069444446,
+      "q": 0.008,
+      "rate": 0.0010850694444444445,
+      "reference_lower": 0.0011165652638527126,
+      "reference_upper": 0.0011165652638527126,
+      "shots": 73728,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.022206103000598887,
+      "wall_seconds": 0.8840177649999532,
+      "wilson_95": [
+        0.0008720089639042753,
+        0.0013501172651307037
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 81,
+      "mode": "physical",
+      "normalized_rate": 17.1661376953125,
+      "q": 0.008,
+      "rate": 0.0010986328125,
+      "reference_lower": 0.0011165652638527126,
+      "reference_upper": 0.0011165652638527126,
+      "shots": 73728,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 2.059899277000113,
+      "wall_seconds": 1.0453649030000634,
+      "wilson_95": [
+        0.0008841014236507136,
+        0.0013651501281814315
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 84,
+      "mode": "algebra",
+      "normalized_rate": 15.190972222222223,
+      "q": 0.015,
+      "rate": 0.00341796875,
+      "reference_lower": 0.003818755445763423,
+      "reference_upper": 0.003818755445763423,
+      "shots": 24576,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.009848792999946454,
+      "wall_seconds": 0.00887378299989905,
+      "wilson_95": [
+        0.0027618371283508187,
+        0.004229316948398821
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 80,
+      "mode": "physical",
+      "normalized_rate": 17.36111111111111,
+      "q": 0.015,
+      "rate": 0.00390625,
+      "reference_lower": 0.003818755445763423,
+      "reference_upper": 0.003818755445763423,
+      "shots": 20480,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.5662101860002622,
+      "wall_seconds": 0.3410219719999077,
+      "wilson_95": [
+        0.0031400085945085727,
+        0.004858562335171278
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 110,
+      "mode": "algebra",
+      "normalized_rate": 14.91970486111111,
+      "q": 0.03,
+      "rate": 0.013427734375,
+      "reference_lower": 0.01438992688295145,
+      "reference_upper": 0.01438992688295145,
+      "shots": 8192,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.002195160000155738,
+      "wall_seconds": 0.0022276460001648957,
+      "wilson_95": [
+        0.011153557437641098,
+        0.016158032219792666
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 131,
+      "mode": "physical",
+      "normalized_rate": 17.76801215277778,
+      "q": 0.03,
+      "rate": 0.0159912109375,
+      "reference_lower": 0.01438992688295145,
+      "reference_upper": 0.01438992688295145,
+      "shots": 8192,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.23473866299991641,
+      "wall_seconds": 0.11903182200012452,
+      "wilson_95": [
+        0.01349285051111641,
+        0.018943289225894343
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 129,
+      "mode": "algebra",
+      "normalized_rate": 12.597656249999998,
+      "q": 0.05,
+      "rate": 0.031494140625,
+      "reference_lower": 0.0368644319375,
+      "reference_upper": 0.0368644319375,
+      "shots": 4096,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.0015676640000492625,
+      "wall_seconds": 0.002523447999919881,
+      "wilson_95": [
+        0.026569107431640225,
+        0.03729713262926495
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 3,
+      "exact_inside_wilson": true,
+      "failures": 134,
+      "mode": "physical",
+      "normalized_rate": 13.085937499999998,
+      "q": 0.05,
+      "rate": 0.03271484375,
+      "reference_lower": 0.0368644319375,
+      "reference_upper": 0.0368644319375,
+      "shots": 4096,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.11557485900016218,
+      "wall_seconds": 0.11891212499995163,
+      "wilson_95": [
+        0.02768989995031263,
+        0.03861545881809409
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 14,
+      "mode": "algebra",
+      "normalized_rate": 273.43749999999994,
+      "q": 0.008,
+      "rate": 0.00014,
+      "reference_lower": 0.00014028121546663788,
+      "reference_upper": 0.00014180455596545622,
+      "shots": 100000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 0.05666433099986534,
+      "wall_seconds": 0.06136275799985924,
+      "wilson_95": [
+        8.340033335025298e-05,
+        0.0002350020235612634
+      ]
+    },
+    {
+      "bounds_overlap_wilson": false,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 24,
+      "mode": "physical",
+      "normalized_rate": 468.75,
+      "q": 0.008,
+      "rate": 0.00024,
+      "reference_lower": 0.00014028121546663788,
+      "reference_upper": 0.00014180455596545622,
+      "shots": 100000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 12.646745014999624,
+      "wall_seconds": 6.562044509999851,
+      "wilson_95": [
+        0.00016129191248332846,
+        0.0003571027618056714
+      ]
+    },
+    {
+      "bounds_overlap_wilson": false,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 62,
+      "mode": "algebra",
+      "normalized_rate": 183.70370370370372,
+      "q": 0.015,
+      "rate": 0.00062,
+      "reference_lower": 0.0008664338290826852,
+      "reference_upper": 0.0008978332554687014,
+      "shots": 100000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 0.06102909999935946,
+      "wall_seconds": 0.042627281000022776,
+      "wilson_95": [
+        0.00048371782025655256,
+        0.0007946476600668843
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 78,
+      "mode": "physical",
+      "normalized_rate": 231.11111111111114,
+      "q": 0.015,
+      "rate": 0.00078,
+      "reference_lower": 0.0008664338290826852,
+      "reference_upper": 0.0008978332554687014,
+      "shots": 100000,
+      "stop_reason": "max_shots",
+      "sum_task_seconds": 12.20762052200098,
+      "wall_seconds": 6.351892089999865,
+      "wilson_95": [
+        0.00062508868800197,
+        0.0009732645001254402
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 96,
+      "mode": "algebra",
+      "normalized_rate": 217.0138888888889,
+      "q": 0.03,
+      "rate": 0.005859375,
+      "reference_lower": 0.0058852108504203575,
+      "reference_upper": 0.006666184577333054,
+      "shots": 16384,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.015098258999842074,
+      "wall_seconds": 0.010311881000006906,
+      "wilson_95": [
+        0.0048009574672158006,
+        0.007149454630240951
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 88,
+      "mode": "physical",
+      "normalized_rate": 265.2391975308642,
+      "q": 0.03,
+      "rate": 0.007161458333333333,
+      "reference_lower": 0.0058852108504203575,
+      "reference_upper": 0.006666184577333054,
+      "shots": 12288,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 1.5636538100000053,
+      "wall_seconds": 1.0294299259999207,
+      "wilson_95": [
+        0.005816881039164654,
+        0.008814080434198549
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 110,
+      "mode": "algebra",
+      "normalized_rate": 214.84374999999994,
+      "q": 0.05,
+      "rate": 0.02685546875,
+      "reference_lower": 0.021031808933455395,
+      "reference_upper": 0.028196756836041975,
+      "shots": 4096,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.0035848570000780455,
+      "wall_seconds": 0.004585871000017505,
+      "wilson_95": [
+        0.022330520952623504,
+        0.032267068019775774
+      ]
+    },
+    {
+      "bounds_overlap_wilson": true,
+      "complete": true,
+      "distance": 5,
+      "exact_inside_wilson": null,
+      "failures": 98,
+      "mode": "physical",
+      "normalized_rate": 191.40624999999994,
+      "q": 0.05,
+      "rate": 0.02392578125,
+      "reference_lower": 0.021031808933455395,
+      "reference_upper": 0.028196756836041975,
+      "shots": 4096,
+      "stop_reason": "target_failures",
+      "sum_task_seconds": 0.5262146510001458,
+      "wall_seconds": 0.5276207950000753,
+      "wilson_95": [
+        0.01967285964881211,
+        0.029070844425583456
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "settings": {
+    "batch_size": 4096,
+    "cpu_count": 20,
+    "max_seconds": 60.0,
+    "max_shots": 100000,
+    "seed": 731,
+    "target_failures": 80,
+    "workers": 2
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pymatching": "2.3.1",
+    "stim": "1.15.0"
+  },
+  "wall_seconds": 19.3333161380001
+}
