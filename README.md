@@ -26,8 +26,9 @@ families, non-Clifford gates, automatic allocation and adaptive execution remain
 unsupported. No production decoder or experiment runner ships inside the converter.
 See the [implementation and limitations matrix](docs/index.md#current-implementation-and-limitations).
 The separate [research validators](validation/README.md) record exact d=3/5
-one-layer code-capacity counts and a bounded ordinary-circuit physical fault
-census with eight-worker MWPM sampling.
+one-layer code-capacity counts, an ordinary-circuit physical fault census, and
+complete d=3 weight-two M9 Knill fault assignments with eight-worker MWPM
+sampling.
 
 ## Installation
 

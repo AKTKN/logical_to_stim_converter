@@ -4,6 +4,28 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research validation Phase 3 — M9-only Knill faults (2026-11-09)
+
+Added research-only d=3 one- and three-teleportation M9 Knill fault validation,
+complete categorical weight-0/1/2 assignment coverage, independent physical
+Stim response checks, and frozen external restricted modular MWPM numerical
+fits. The [dated report](validation/reports/phase3_2026-11-09/REPORT.md) and
+[validation ledger](validation/STATUS.md) give exact source/circuit identities,
+commands, complete rank tables, physical/frame checks, statistical intervals
+and limitations. All **1,432 + 13,042** assignments and **1,377 + 12,879**
+physical pairs were checked; no physical mismatch was found. Across 12,582,912
+actual M9-only shots, finite-p effective free-power slopes are 1.949 and 1.964
+for one and three teleports. The sampled quadratic coefficients are 24 and 72,
+but zero sampled single-fault failures do not prove `K1=0` or an exact exponent.
+The finite-p prediction retains a rigorous higher-weight binomial bound.
+Runtime source, dependencies, package API, release and license are unchanged.
+
+The full numerical run completed in **346.09 s** with eight spawned workers;
+the regenerated assignment hashes and all pointwise prediction overlaps were
+audited. Targeted M9/Knill/frame pytest passes **275 in 317.58 s**; the full
+eight-worker repository suite passes **1,397 in 722.79 s**. Ruff
+src/tests/validation and whitespace checks pass.
+
 ## Research validation Phase 2 — ordinary circuit faults (2026-11-09)
 
 Added research-only `validation/ordinary_faults.py` and

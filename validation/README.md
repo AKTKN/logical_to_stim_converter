@@ -92,3 +92,48 @@ pair sample, first-order differences, point counts, fits, settings and wall
 times; `memory_points.csv` provides a flat point summary. The dated
 [Phase 2 report](reports/phase2_2026-11-09/REPORT.md) gives the actual commands,
 results and limits. No raw shot data is stored. `src/` is unchanged.
+
+## Phase 3: M9 Knill fault enumeration and fits
+
+`m9_knill_faults` scans actual M9-only `DEPOLARIZE1` instructions and their
+resource-boundary, physical-site and use-epoch metadata. It ranks every d=3
+categorical assignment of weight 0, 1 or 2. A paired Stim `FlipSimulator`
+checks raw/global detector/observable and survivor responses; the same immutable
+raw record feeds the existing external M6-D restricted modular MWPM and causal
+offline frame replay. Assignment failure probabilities are averaged over
+sampled ideal random gauges and Bell branches. `m9_knill` also samples actual
+noisy circuits with decoder weights frozen at `p_st=0.01`.
+
+Run a capped check or reproduce the full eight-worker experiment:
+
+```sh
+python -m validation.m9_knill --quick --workers 2 \
+  --output-dir validation/output/phase3_quick
+python -m validation.m9_knill --cycles 1 3 --workers 8 --batch-size 128 \
+  --shot-batch-size 8192 --branches 256 --seed 9903 \
+  --max-shots 1048576 --target-failures 0 --max-seconds 240 \
+  --p-values .001 .002 .003 .005 .008 .012 \
+  --reference-probability .01 \
+  --output-dir validation/reports/phase3_2026-11-09
+```
+
+`--max-patterns` selects a deterministic rank prefix and marks coefficients
+incomplete; `--quick` applies that cap. Spawned workers reconstruct their own
+circuit and decoder, with chunk seeds independent of worker count. `report.json`
+schema v1 contains source and circuit hashes, boundary/site/use metadata,
+physical checks, rank coverage, sampled `K_w` and coefficient intervals,
+location/Pauli resolved counts, binomial-tail-bounded predictions, Wilson
+intervals, fits and timing/memory diagnostics. Each compressed
+`assignments_*.csv.gz` row records a rank, fault sites/axes, failed ideal
+branches, physical signature masks and source identity. `memory_points.csv`
+summarizes actual noisy-circuit Monte Carlo. The dated
+[Phase 3 report](reports/phase3_2026-11-09/REPORT.md) explains the results.
+No raw shot arrays are committed.
+
+Assignment locations and physical responses are exhaustive within these
+circuits. `K_1`, `K_2` and fitted slopes remain statistical because ideal branch
+averaging is sampled; zero observed single-fault failures do not prove an exact
+exponent. The finite-p partial probability covers weights through two, and its
+upper interval adds the rigorous higher-weight binomial tail. The decoder is
+restricted modular MWPM, not optimal joint Knill inference. Runtime `src/`
+is unchanged.

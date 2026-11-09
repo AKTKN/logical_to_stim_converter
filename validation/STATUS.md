@@ -1,5 +1,52 @@
 # STATUS — Research validation
 
+## Phase 3 — M9-only Knill fault enumeration and fits (2026-11-09)
+
+Implemented research-only `m9_knill_faults.py` and `m9_knill.py`, with a
+metadata/Stim-verified d=3 post-SE data-site inventory, exhaustive categorical
+weight-0/1/2 assignment ranks, paired Stim physical Pauli oracle, conditional
+raw/check/logical/survivor map audit, epoch and stage ownership checks, and
+source-bound external restricted modular MWPM replay. An independent frozen
+decoder at `p_ref=.01` reads only the same immutable physical record and causal
+stage data. No runtime `src/` code, package pin, API or license changed. The
+[dated report](reports/phase3_2026-11-09/REPORT.md), schema-v1 JSON,
+assignment CSV.gz tables and point CSV contain the full protocol and results.
+
+At d=3, one teleportation has 18 M9 sites and complete assignment counts
+`1+54+1377=1432`; reused three-patch, three-cycle Knill has 54 sites, seven
+physical uses, three relocations and `1+162+12879=13042`. All 14,474 ranks
+were evaluated with 256 independent ideal branches per rank; all 14,256 pairs
+passed independent physical GF(2) action checks. All 54/162 single atoms match
+the six conditional maps, own preparation-prefix exclusions and Bell-window
+ownership; all 81 selected retired-support epoch checks pass in r=3. Six
+selected deterministic physical circuits per case pass. Both 512-branch ideal
+baselines have zero failure. No physical/frame mismatch was found.
+
+Observed `K1=0` but its 95% upper bound is 0.01599 for each case; sampled
+`K2=216 [212.41,219.59]` for r=1 and `648 [637.03,658.97]` for r=3. The
+corresponding `a2=K2/9-(N-1)K1/3` estimates are `24 [23.51,24.40]` and
+`72 [70.50,73.22]`. These are statistical branch averages, not exact
+analytical coefficients or proof of exponent 2. Twelve actual noisy-circuit
+fixed-shot points use 12,582,912 total shots with eight spawned workers. Their
+nominal Wilson intervals all overlap the weight-<=2 prediction interval plus
+rigorous binomial weight->=3 tail. Free-power effective slopes are 1.949
+`[1.892,2.007]` and 1.964 `[1.930,1.998]`; finite-p curvature fits are in
+the report. This is evidence for the bounded M9-only circuits and frozen
+restricted modular MWPM, not optimal joint decoding. Ordinary-background noise
+and exact branch enumeration remain outside scope.
+
+The full numerical command in the dated report completed in **346.09 s** with
+eight spawned workers; largest observed worker peak RSS was **386.5 MB**. Its
+assignment-table hashes, unique rank coverage, fixed-shot stops, frozen
+decision checks and all 12 Wilson/prediction interval overlaps were audited
+from the regenerated JSON/CSV.gz files. Focused new tests pass **8 in 34.93 s**;
+the targeted eight-worker M9/Knill/frame regression passes **275 in 317.58 s**.
+Ruff format/check on the new code and Ruff check on src/tests/validation pass.
+The full eight-worker repository suite passes **1,397 in 722.79 s**. `git
+diff --check` passes. No unexpected mismatch or confirmed new physical error
+was found; restricted-MWPM inference and unsampled ideal branch possibilities
+remain limitations, not confirmed converter defects.
+
 ## Phase 2 — ordinary circuit fault census (2026-11-09)
 
 Implemented a research-only noisy ordinary-memory location scanner, independently

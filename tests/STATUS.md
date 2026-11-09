@@ -1,5 +1,18 @@
 # STATUS — Tests
 
+## Research validation Phase 3 — M9 Knill faults (2026-11-09)
+
+`test_validation_m9_knill.py` adds eight focused tests for exact d=3 18/54
+M9 sites and 1,432/13,042 ranks, exclusive channel semantics, a hand-authored
+Bell physical fault truth table, all single physical conditional maps and
+selected pair GF(2) composition, stale/wrong-cut/duplicate-correction/omitted
+byproduct negatives, source-bound causal stage inputs, synthetic low-noise
+algebra including the `-(N-1)K1/3` term, binomial tail and fit behavior,
+seed/worker rank invariance, and a capped quick CLI report. Focused tests pass
+**8 in 34.93 s**. The selected eight-worker M9/frame/Knill regression passes
+**275 in 317.58 s**. The full eight-worker repository suite passes
+**1,397 in 722.79 s**; Ruff src/tests/validation passes.
+
 ## Research validation Phase 1 — code-capacity validator (2026-11-09)
 
 `test_validation_code_capacity.py` adds eight focused tests: hand-authored d=3/5
