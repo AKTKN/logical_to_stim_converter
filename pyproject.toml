@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "logical-to-stim-converter"
-version = "0.0.0"
+version = "0.0.1"
 description = "Verified rotated-surface Clifford and Knill circuits from logical operations"
 readme = "README.md"
 requires-python = ">=3.11"

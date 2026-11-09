@@ -4,6 +4,39 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Authorized beta/export integration — 2026-11-09
+
+The maintainer separately requested committing/pushing the latest local changes
+and leaving the worktrees clean. Reviewed circuit inspection assets and report
+cleanup (aeeeabc) are combined with the preserved Phase 1 commit (6072ab0) on main.
+Distribution version is 0.0.1; runtime source and dependency pins remain identical
+to the M9 follow-up baseline. The ordinary-memory report link now targets the
+preserved historical Git version. No Phase 2 work or license selection is included.
+
+Combined-tree verification: `python -m pytest -n 8 --tb=short --durations=10`
+passes **1367 tests in 384.11 s**. Ruff src/tests/examples and whitespace checks
+pass. A private-source isolated build produces matching 0.0.1 wheel/sdist metadata,
+unchanged exact runtime/grammar bytes and all nine inspection assets in sdist.
+A fresh runtime-only wheel environment compiles/samples both LSTIM sources,
+extracts native DEMs and checks all three M9 conditional models/six boundaries;
+version is 0.0.1 and pip check passes. No remote CI result is inferred from this.
+The research-beta record retains original Phase 1 evidence plus this handoff.
+
+## Research beta 0.0.1 — Phase 1 (2026-11-09)
+
+Phase 1 sets the distribution version to 0.0.1 and documents GitHub installation
+at an explicit commit for trusted research collaborators. License selection is
+deferred; REL-01 remains partial. Dependency pins and M1-M9 runtime/physics are
+unchanged. Work is isolated from pre-existing user edits on a dedicated branch.
+The [decision and verification record](docs/research_beta_0.0.1_plan_and_verification.md)
+tracks scoped changes, actual checks and remaining phases. The original Phase 1
+instruction did not authorize push/publication, tags or issue closure; the later
+push request is recorded above. Phase 2 still requires separate instruction.
+Focused eight-worker packaging/public-API checks: 26 passed in 8.68 s. Ruff,
+isolated wheel/sdist build, runtime-only fresh-venv import/LSTIM compile/native
+DEM/sample, version metadata and pip check pass. Full integration and new remote
+CI are not claimed for this phase; the record distinguishes baseline CI evidence.
+
 ## M9 follow-up: DEM-compatible probability and injector safety — 2026-11-09
 
 Baseline main b35acb08426572a9f567d7dfe437ded755f2c1a7 matches fetched origin/main.

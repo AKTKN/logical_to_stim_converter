@@ -1,5 +1,29 @@
 # STATUS — Tests
 
+## Authorized beta/export integration — 2026-11-09
+
+The combined 0.0.1/inspection-export tree passes the full existing suite:
+`python -m pytest -n 8 --tb=short --durations=10`: **1367 passed in 384.11 s**.
+Ruff src/tests/examples, whitespace and a private-source isolated wheel/sdist
+build pass. A fresh runtime-only installed wheel validates memory and three-patch
+LSTIM circuits, native DEMs, physical sampling and all three M9 conditional Bell
+models. Optional/example/test/reference imports are blocked; pip check passes.
+Runtime source and dependency pins are unchanged. This is local Linux/WSL2
+Python 3.12 evidence, not a new remote matrix result or later beta phase.
+
+## Research beta 0.0.1 — Phase 1 (2026-11-09)
+
+The existing private-tree wheel/sdist test now checks matching 0.0.1 metadata,
+unchanged distribution name/runtime requirements, Python requirement and absent
+license assertions. Its isolated consumer also verifies the installed distribution
+version/location before exercising the unchanged public LSTIM and M9 paths with
+optional/repository imports blocked. Actual commands/results are recorded in
+[the phase record](../docs/research_beta_0.0.1_plan_and_verification.md).
+`PYTHONPATH=src python -m pytest -n 8 tests/test_lstim_packaging.py
+tests/test_lstim_api.py --tb=short --durations=5`: 26 passed in 8.68 s. Ruff,
+wheel/sdist build and a separate runtime-only fresh-venv compile/DEM/sample smoke
+pass. Full integration and remote Phase 1 CI are deferred, not reported as run.
+
 ## M9 follow-up — 2026-11-09
 
 Expanded policy negatives to both enabled states, including .7500000001/.9/1,

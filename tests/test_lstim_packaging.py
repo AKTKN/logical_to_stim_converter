@@ -4,7 +4,9 @@ import os
 import subprocess
 import sys
 import tarfile
+import tomllib
 import zipfile
+from email.parser import BytesParser
 from pathlib import Path
 
 from tests.helpers.package_build import copy_package_source
@@ -13,6 +15,7 @@ CONSUMER = r'''
 import importlib.abc
 import pathlib
 import sys
+from importlib.metadata import distribution
 from importlib.resources import files
 
 installed, checkout, build_tree, samples = map(pathlib.Path, sys.argv[1:])
@@ -36,6 +39,9 @@ from logical_to_stim_converter import (
     ResourcePreparationNoise, parse_logical_circuit, parse_logical_file,
 )
 assert pathlib.Path(package.__file__).is_relative_to(installed)
+installed_distribution = distribution('logical-to-stim-converter')
+assert installed_distribution.version == '0.0.1'
+assert pathlib.Path(installed_distribution.locate_file('')).resolve() == installed.resolve()
 grammar = files('logical_to_stim_converter.language').joinpath('grammar.lark')
 assert 'start:' in grammar.read_text(encoding='utf-8')
 for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]:
@@ -89,6 +95,19 @@ print('installed public API and both source samples passed')
 
 def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_imports(tmp_path):
     root = Path(__file__).resolve().parents[1]
+    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+
+    def check_metadata(contents):
+        metadata = BytesParser().parsebytes(contents)
+        assert metadata["Name"] == project["name"] == "logical-to-stim-converter"
+        assert metadata["Version"] == project["version"] == "0.0.1"
+        assert metadata["Requires-Python"] == project["requires-python"]
+        assert metadata["License"] is None and metadata["License-Expression"] is None
+        runtime = [r for r in metadata.get_all("Requires-Dist", []) if ";" not in r]
+        assert sorted(r.replace(" ", "") for r in runtime) == sorted(
+            r.replace(" ", "") for r in project["dependencies"]
+        )
+
     source = copy_package_source(tmp_path / "source")
     dist = tmp_path / "dist"
     result = subprocess.run(
@@ -102,6 +121,7 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
     expected = (root / "src" / grammar).read_bytes()
     with tarfile.open(sdist) as archive:
         prefix = archive.getmembers()[0].name.split("/")[0]
+        check_metadata(archive.extractfile(prefix + "/PKG-INFO").read())
         assert archive.extractfile(prefix + "/src/" + grammar).read() == expected
         contract = archive.extractfile(prefix + "/docs/lstim_v1.md").read().decode("utf-8")
         for name in ("memory_d3.lstim", "three_patch_knill_d3.lstim"):
@@ -114,6 +134,7 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
         assert not any(name.startswith(("tests/", "examples/", "external_lib/"))
                        for name in archive.namelist())
         metadata, = (name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
+        check_metadata(archive.read(metadata))
         assert "Requires-Dist: lark==1.3.1" in archive.read(metadata).decode("utf-8")
         for name in archive.namelist():
             if name.startswith("logical_to_stim_converter/") and name.endswith((".py", ".lark")):
