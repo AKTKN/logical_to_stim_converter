@@ -1,5 +1,22 @@
 # STATUS — Examples
 
+## Phase 5 — Established example integration gate (2026-11-09)
+
+All nine exact workflow example commands pass, executed from a private source
+copy with its runtime selected. The exporter regenerates six Stim snapshots and
+the full line-map CSV byte-for-byte; no exporter/artifact code changes were needed.
+Fresh built-wheel and uncached GitHub c45bf1f environments both pass six external
+consumer CLI cases with no checkout/example/test/reference/optional imports.
+Both installed tutorial snippets and all remaining Python docs blocks also pass
+against the wheel. Final example commands, shapes, exact source identity, finite
+observations and decoder limits are recorded in the Phase 5 ledger.
+
+Full eight-worker regressions pass **1373 tests in 401.70 s**, and Ruff passes.
+External decoders remain optional consumer/example code; passing finite samples
+is not optimality, numerical LER accuracy or a threshold claim. No runtime,
+example code, dependency, license or publication changes. CI evidence is attributed
+to its observed commit/jobs separately from the local documentation-only gate.
+
 ## Phase 4 — Public-only installed consumer (2026-11-09)
 
 installed_consumer.py is a standalone external consumer asset using public root/

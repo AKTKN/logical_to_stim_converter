@@ -496,3 +496,269 @@ wheel/sdist from the completed tree. Metadata checks retain 0.0.1, Python >=3.11
 exact runtime declarations and no license assertion; archive checks compare the
 README payload, every runtime/grammar byte and all scoped source/docs/test assets.
 Build products, environments, scripts/logs and sampled arrays stay outside Git.
+
+## Phase 5 — Final integration gate and handoff (2026-11-09)
+
+### Scope, source identity and authorization
+
+The maintainer explicitly requested this gate, commit and push. That request
+supersedes the brief's default no-push rule, without authorizing a version bump,
+license, tag/release, PyPI upload, issue edits/closure or product launch. The clean
+starting main and origin/main both identify pushed Phase 4 commit
+**`c45bf1f19081b55a414db7183557a1ec34b9a797`**. Phase 1 integration `8a409593`,
+combined Phase 2+3 `e41c16e` and Phase 4 `c45bf1f` are present and committed.
+Read root/folder instructions/status, all documentation and its links/snippets,
+public exports/signatures, package/manifest/CI configuration, prior phase records,
+and current #1–#5 bodies/comments. No unrelated work needed isolation.
+
+The current local source/wheel and the latest pushed GitHub revision were tested
+separately **before this Phase 5 commit/push**. Local fixes below affect only docs
+and ledgers; all installed Python/grammar bytes, physical behavior, version,
+dependency declarations, tests and example code are identical to c45bf1f. A later
+Phase 5 commit is not retroactively the SHA tested by the GitHub install command.
+
+**Commit subject:** `Record final v0.0.1 integration gate and collaborator handoff`
+
+### Gate 1 — Packaging and two installation routes
+
+Distribution/import identities remain `logical-to-stim-converter` /
+`logical_to_stim_converter`, version **0.0.1**, Python **>=3.11**. Runtime pins:
+Stim 1.15.0, stimflow at **ffe0d043598ed5df0851a3e6b4920359a23fafbd**
+(`glue/stimflow`, installed 1.17.dev0), Lark 1.3.1, NumPy >=1.26 and SciPy >=1.11.
+Optional dev requirements retain PyMatching 2.3.1, pytest-xdist 3.8.0, Matplotlib,
+pytest, Ruff, build, setuptools and wheel. They are absent from both fresh runtime
+installations. No license/COPYING file or license metadata/assertion is introduced.
+
+A private source tree made with the established copy_package_source helper avoids
+parallel setuptools races. The declared setuptools backend builds sdist and a
+wheel from that sdist with isolated build dependencies. Archive checks validate
+name/version/Python/runtime and optional requirements, exact packaged grammar,
+README metadata payload and runtime source bytes; docs/examples/input sources
+belong to sdist, while the wheel has only runtime package/data and dist-info,
+without examples/tests/external reference imports. Final source/docs bytes are
+rechecked after the documentation fixes and completed ledgers.
+
+Two new, separate venvs outside the checkout (no system site packages):
+
+| Route / command | Observed result / identity |
+| --- | --- |
+| `<wheel-python> -m pip install <private-dist>/logical_to_stim_converter-0.0.1-py3-none-any.whl` | PASS; built wheel installed with runtime dependencies only. Initial private build reflects the c45bf1f runtime; final build refreshes changed docs/README, with identical runtime/grammar bytes. |
+| `<github-python> -m pip install --no-cache-dir 'logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797'` | PASS; actual network clone/fetch resolves converter c45bf1f and stimflow ffe0d043. Both wheels built from fetched Git sources, not a cached stimflow wheel. |
+| `importlib.metadata.version('logical-to-stim-converter')` | 0.0.1 in both fresh environments |
+| Installed `direct_url.json` audit | GitHub installation records requested_revision and commit_id equal to the full c45bf1f SHA; stimflow's commit_id is exactly ffe0d043598ed5df0851a3e6b4920359a23fafbd |
+| Exact installed `.py`/`.lark` comparison to local src | PASS for every runtime/grammar file in both environments; no editable/check-out module leakage |
+| `<wheel-python> -m pip check`, `<github-python> -m pip check` | Both PASS, no broken requirements |
+
+Fresh verification runs with `-I` from an external consumer directory. Only the
+standalone consumer asset and explicitly supplied LSTIM inputs are copied there;
+optional/example/test/reference/downstream imports are blocked, distribution
+absence is checked, and every loaded converter module resolves inside its venv.
+Both routes parse, compile, validate metadata, extract canonical/view DEMs, build
+stage/conditional/frame models and sample exactly one raw batch per consumer
+case. No decoder replay resamples quantum state or edits physical raw records.
+
+Each route freshly executes the six 32-shot seed41 cases:
+
+| Workflow / noise | Raw bool shape | Global events shape | Logical/failure shape | Canonical DEM errors | Conditional atoms per Bell | Observed failures / 32 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Memory, ideal | [32,49] | [32,40] | [32,1] | 0 | n/a | 0 |
+| Memory, ordinary p=.001 | [32,49] | [32,40] | [32,1] | 492 | n/a | 3 |
+| Knill, ideal | [32,255] | [32,192] | [32,1] | 0 | 0/0/0 | 0 |
+| Knill, ordinary p=.001 | [32,255] | [32,192] | [32,1] | 2698 | 585/585/585 | 13 |
+| Knill, M9-only p_st=.003 | [32,255] | [32,192] | [32,1] | 138 | 54/54/54 | 1 |
+| Knill, ordinary p=.001 + M9 p_st=.003 | [32,255] | [32,192] | [32,1] | 1093 | 639/639/639 | 9 |
+
+The complete reports agree between routes. They establish interface/source and
+bounded reproducibility evidence, not numerical LER accuracy or correction of
+all noisy shots. The observed-sector/identity-readout consumer deliberately
+ignores temporal/joint fault likelihoods. Both routes use Linux/WSL2 x86_64,
+Python 3.12.7, glibc 2.35, Stim 1.15.0, stimflow 1.17.dev0, Lark 1.3.1,
+NumPy 2.5.4 and SciPy 1.18.1. These dependency versions were observed, not locked
+beyond the project's existing declarations.
+
+### Gate 2 — Fresh full regression and physical evidence
+
+| Command/check | Observed result |
+| --- | --- |
+| `.venv/bin/python -m pytest -n 8 --tb=short --durations=10` | **1373 passed in 401.70 s**, eight pytest-xdist workers, no failures/skips |
+| `.venv/bin/python -m ruff check src tests examples` | All checks passed |
+| Private `python -m build --outdir <private-dist>` | Isolated sdist/wheel build passed; no shared checkout build output |
+| All nine exact `.github/workflows/ci.yml` example commands | PASS, exit 0 each; complete commands listed below |
+| `python examples/export_stim_circuits.py` in private tree | PASS; six .stim snapshots and complete CSV line map reproduce byte-for-byte |
+| Fresh installed package/docs checks | PASS, both installation routes and every Python documentation block as detailed here |
+| Git working/staged whitespace and scope audit | PASS; no runtime/test/example/dependency/CI/upstream source changes |
+
+The full run freshly includes these focused physics/interface groups; prior phase
+results are not substituted for this execution:
+
+| Contract | Executed evidence / bounded conclusion |
+| --- | --- |
+| M7 reuse / relocation / epochs | test_patch_reuse, test_patch_reuse_knill_e2e, test_epoch_stages_frames, test_patch_reuse_offline_replay: repeated explicit three-patch uses, persistent D, reset frame removal and legitimate classical history |
+| M8 source/direct equality | test_lstim_physical_equivalence, test_lstim_simulation_e2e, test_installed_consumer: independent public constructors, matched bindings/labels, exact ideal/noisy/DEM/metadata and same-raw replay |
+| M9 exact physical noise | test_resource_preparation_noise, test_resource_preparation_e2e: disabled compatibility, Bell-owned reset/SE/result/idle suppression, ordinary D/spectator/waiting noise, post-final-SE data targets/tags, no duplicate injection |
+| M9 probability / native DEM | Policy bounds/types for both flags, .75 endpoint, actual noisy native DEM and direct injector omitted/None/empty tuple contract; no capped channel or fallback |
+| Canonical/global and local models | test_decoder_views, test_knill_decoder_views, test_epoch_views_noise, test_global_detector_provenance: full physical fault retention, exact marginals, hyperedges/correlated ^ components and global/local maps |
+| Boundary / conditional models | test_resource_preparation_models and conditional atom tests: preparation probes before their own channels, exclusive categorical atoms and joint raw/survivor actions; intermediate operand-SE cut explicitly rejected |
+| Offline frames / installed consumers | test_record_frames, test_frame_validation_modes, test_installed_consumer, test_lstim_packaging: same immutable raw batch, source/use/shape/column checks, once-only causal edits, strict noiseless replay versus noisy hypotheses |
+
+Established example commands, run from a private copy with its src selected:
+
+```text
+python examples/two_patch_memory.py
+python examples/two_patch_bell_roundtrip.py
+python examples/knill_ec_single_round.py
+python examples/offline_dem_views.py
+python examples/memory_offline_decoding.py --suite --shots 128 --p 0.001 --seed 731
+python examples/knill_memory_offline_decoding.py --suite --shots 64 --p 0.001 --seed 732
+python examples/knill_memory_three_patch_reuse.py --suite --shots 32 --batch-size 13 --p 0.001 --seed 733
+python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826
+python examples/knill_resource_preparation_noise.py --shots 32 --p 0.001 --p-st 0.003
+```
+
+Local dev tools: pytest 9.2.0, pytest-xdist 3.8.0, Ruff 0.17.4, build 1.6.1 and
+PyMatching 2.3.1. The full suite ran concurrently with private example/build
+verification; observed wall times are not performance assertions. Exact remote
+CI results/commit identity are recorded separately below, without treating CI
+configuration or a prior green commit as execution of the new local commit.
+
+### Remote platform gate — exact pushed-source attribution
+
+Inspected [Actions run 42575410209](https://github.com/AKTKN/logical_to_stim_converter/actions/runs/42575410209),
+triggered by the authorized Phase 4 push of
+`c45bf1f19081b55a414db7183557a1ec34b9a797`. The matrix has four observed jobs:
+
+| Job | Observed status during local handoff | Conclusion / action |
+| --- | --- | --- |
+| test (ubuntu-latest, 3.11) | Completed successfully at final inspection | PASS for c45bf1f |
+| test (ubuntu-latest, 3.12) | In progress in full regression at inspection | PENDING final completion |
+| test (windows-latest, 3.11) | In progress in full regression at inspection | PENDING final completion |
+| test (windows-latest, 3.12) | In progress in full regression at inspection | PENDING final completion |
+
+The initial 2026-11-09 07:04 UTC (16:04 JST) inspection showed all jobs running;
+a subsequent pre-commit inspection confirmed Ubuntu/Python 3.11 completed
+successfully. The other three jobs were still in full regression at that final
+inspection. Local Linux execution is PASS; complete current remote platform
+coverage remains **PENDING** until the remaining jobs conclude. No workflow rerun
+or remote mutation was needed/requested. Earlier green baseline run 42552076079
+remains historical evidence only. This new local Phase 5 documentation commit
+has no observed remote CI result before its final authorized push. These pending
+external jobs are a verification limit, not a discovered physics defect.
+
+### Gate 3 — Documentation review and scoped clarifications
+
+Reviewed README, all docs pages, historical ledgers and inspection links. README
+remains about 110 lines, with one compact standalone quick start. Verified public
+import paths/signatures and all **13** fenced Python blocks from the installed
+wheel: README/API continuation, independent practical examples, both installed
+tutorials, LSTIM usage and M9 usage. Two contract fragments (v1 API/certification)
+receive explicit public imports/source/noise/file context; they are not claimed
+standalone. Checkout/sdist-context snippets receive copies of their input files,
+never imports of examples/tests. Both tutorials give full separately supplied
+source text and identify copied consumer assets versus installed wheel contents.
+
+Narrow current-document fixes, without rewriting historical results:
+
+- README, development and ordinary tutorial now pin the **actually installed**
+  pushed c45bf1f revision. The development page identifies fresh uncached Git
+  evidence and distinguishes it from the separate current local wheel.
+- M9's initial sample path is explicitly checkout/sdist context, with an installed
+  tutorial link. Preparation-prefix prose excludes its **own** post-SE channels;
+  legitimate earlier-cycle channels remain. This matches freshly executed tests.
+- The LSTIM specification describes its implemented inspection paths/package
+  structure instead of leaving a former implementation instruction in present
+  tense; no syntax/API behavior changes.
+- Certification labels M8-D's eighth example as historical and states the current
+  nine-example workflow. Current index/API/status navigation points to this gate.
+
+No current claim of deferred M7/M8/M7-C functionality, automatic allocation,
+production decoder, generic QLDPC/universal gates, stable production API, PyPI
+release/tag or granted license was found. Detailed physics stays in docs; snapshots
+remain optional inspection artifacts, not runtime inputs. Link/anchor and final
+archive review results are appended below.
+
+### Gate 4 — Criterion-by-criterion acceptance
+
+PASS means the bounded internal-beta criterion has observed evidence, not issue
+closure, release approval or a durability/decoder-performance guarantee.
+
+| Issue / criterion | Artifact or fresh test | Result | Remaining action / risk |
+| --- | --- | --- | --- |
+| #1 REL-01: version/name/Python/dependency metadata | pyproject, final wheel/sdist audits, test_lstim_packaging | PASS | Source pin does not freeze every transitive dependency |
+| #1 REL-01: real commit-pinned GitHub route | Fresh --no-cache-dir install at c45bf1f; converter/stimflow direct_url.json and runtime byte checks | PASS | Git/network and compatible package wheels remain prerequisites |
+| #1 REL-01: license choice / SPDX-compatible grant | No selected license or license metadata introduced | **PENDING** | Owner must make the legal/release decision; #1 remains partial/open, not a general redistribution grant |
+| #3 DOC-01: concise README / navigation / current scope | README, docs/index, architecture, deferred work, language milestones, link review | PASS | Historical outcomes remain dated; unsupported families/non-Clifford/adaptive scope stays deferred |
+| #4 DOC-02: public imports, signatures, identity glossary | api_reference, root/decoding exports, installed snippets and full API regressions | PASS | Internal 0.0.1 paths only; no durable promise for every root low-level export |
+| #4 DOC-02: shapes/order, source validation, exception limits | View/stage/frame/conditional docs; installed negatives and full epoch/record tests | PASS | Array width alone cannot establish source identity; noisy hypotheses do not prove recovery |
+| #2 REL-02: built/installed public-only consumer | Extended private-wheel test, six fresh cases in each of two runtime-only environments | PASS | Consumer assets/inputs supplied separately; decoder algorithms remain external |
+| #2 REL-02: current platform CI execution | Run 42575410209 at exact c45bf1f SHA | **PENDING** | Observe final conclusions for all four Ubuntu/Windows x Python 3.11/3.12 jobs; local full suite already passes |
+| #2 REL-02: same-raw replay / decoder neutrality / source checks | test_installed_consumer, test_lstim_packaging, frame/stage tests, blocked replay execution | PASS | Illustrative observed-sector/identity-readout adapter is inadequate for general noisy inference |
+| #5 DOC-03: reproducible ordinary memory tutorial | Full input, external script/commands, local/global maps and signed labels, installed snippets | PASS | Empirical rates are specific to supplied predictor and finite batch |
+| #5 DOC-03: reused-patch Knill / M9 tutorial | Seven uses/three relocations, full input, public model/frame hook and conditional atom checks | PASS | Intermediate operand-SE conditional hypotheses remain explicitly unsupported; no optimality/threshold claim |
+
+Issues #1–#5 remain open/unmodified. P1 #6/#7 detailed worked single-fault/temporal
+inference guides are not silently completed by this gate.
+
+### Confirmed defects, investigation risks and handoff
+
+**Confirmed new runtime/packaging defects:** None found in this gate. The scoped
+current-doc ambiguities above are corrected. Their reproducers are inspection of
+c45bf1f's development/M9/spec/certification wording versus the existing executed
+contracts; they did not require a physical/compiler/decoder change.
+
+**Known limits, not new bugs:** The conditional post-SE window rejects an
+intermediate operand preparation/SE measurement with UnsupportedProjectionError;
+no workaround or #23 extension is introduced. Restricted modular MWPM and the
+public-only observed-sector baseline can fail on noisy shots. General code
+families, non-Clifford gates, allocation and adaptive execution remain unsupported.
+
+**Unconfirmed investigation risks:** Performance/conditioning outside the documented
+d=3/5 bounded matrix, larger static circuits, decoder optimality and broader
+platform/transitive-version combinations are not certified. No failing reproducer
+was found that would justify classifying these as confirmed defects or opening
+duplicate issues. Remote coverage is attributed only to observed jobs/SHAs.
+
+**Tested pushed install command** (Git/network access; no fabricated tag):
+
+```sh
+python -m pip install --no-cache-dir "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797"
+```
+
+For collaborator entry points use [README](../README.md),
+[installation and pins](development.md), [public API/glossary](api_reference.md),
+[ordinary memory](ordinary_memory_tutorial.md) and [three-patch Knill](knill_memory_tutorial.md).
+Copy the linked standalone script and inputs outside the checkout as those pages
+instruct. With only installed runtime dependencies, representative commands are:
+
+```text
+python -I installed_consumer.py memory memory_d3.lstim --p .001 --shots 32 --seed 41
+python -I installed_consumer.py knill three_patch_knill_d3.lstim --p .001 --m9 --p-st .003 --shots 32 --seed 41
+```
+
+Use public parse/compile/metadata/DEM/view/stage/frame entry points; supply your
+own decoder. Optional PyMatching/plotting examples require dev dependencies and
+remain separate. This Phase 5 documentation commit was initially ahead of the
+pushed c45bf1f tested above; the maintainer authorized its final commit/push.
+Runtime/tests/example code remain identical, but no new-commit CI/install result
+is inferred before observing it. **License decision pending** is the remaining
+REL-01 legal/release decision; no publication action follows from passing tests.
+
+### Final archive/link review and stop state
+
+All **267 relative Markdown links across 44 tracked documents** resolve, including
+exact heading anchors. README remains **110 lines**. Final isolated wheel/sdist
+content review checks current README metadata, exact runtime/grammar bytes,
+unchanged runtime/dev requirement declarations, all docs and supplied example
+assets, and absence of unapproved license or bundled upstream sources. Both
+working/staged whitespace checks pass. Runtime/test/example source and dependency
+configuration are unchanged from the tested pushed c45bf1f revision.
+
+The final built wheel was reinstalled without changing runtime dependencies;
+installed version/namespace/refreshed README metadata and pip check also pass.
+
+The committed scope is README/installation pin updates, the narrow M9/LSTIM/CI
+wording clarifications, current navigation/status pointers and this Phase 5 record.
+No additional feature implementation is pending within the bounded local gate.
+Complete remote platform conclusions and the owner license decision remain
+PENDING as stated above; broader decoder/performance research remains out of scope.
+Local build/env/sample/log artifacts are not committed or published. Stop after
+the single authorized verification commit and push.

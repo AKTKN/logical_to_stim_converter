@@ -2,6 +2,28 @@
 
 **As of:** 2026-11-09
 
+## Phase 5 — Final integration gate (2026-11-09)
+
+The [final phase record](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09)
+contains criterion-by-criterion #1–#5 acceptance, exact installation identities,
+full local gate evidence, separate CI attribution, limitations and collaborator
+commands. #1 remains partial with license decision pending; #2–#5 bounded internal
+consumer/documentation acceptance is locally verified without issue edits or
+release. The c45bf1f remote platform matrix remains PENDING at inspection;
+its final conclusions must be observed separately.
+
+Full eight-worker suite: **1373 passed in 401.70 s**; Ruff and all nine workflow
+examples pass. Built wheel and actual uncached GitHub full-SHA install both pass
+fresh runtime-only consumer cases and pip check. All 13 documentation Python
+blocks pass against installed runtime with explicit supplied context/inputs where
+needed. Final exact package/content and link review is in the phase ledger.
+
+Narrow docs fixes use tested pushed c45bf1f, clarify own versus prior-cycle M9
+channel ownership, label older CI counts as historical and describe implemented
+LSTIM inspection APIs. README remains concise. No runtime/test/example code or
+physics/dependency/version/license changes. Historical checkpoint outcomes below
+remain unchanged; their pending-phase statements describe their original dates.
+
 ## Phase 4 — Installed consumers and tutorials (2026-11-09)
 
 Added [ordinary memory](ordinary_memory_tutorial.md) and

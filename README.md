@@ -30,8 +30,8 @@ See the [implementation and limitations matrix](docs/index.md#current-implementa
 
 Use Python 3.11+ with a compatible Stim wheel, Git on PATH and network access to
 GitHub and the package index. Configure Git credentials separately if needed.
-The following reachable full commit contains version **0.0.1** and is the runtime
-baseline for these docs (verified 2026-11-09):
+The following pushed full commit contains version **0.0.1**; its GitHub install
+was verified in a fresh environment during Phase 5 (2026-11-09):
 
 ```sh
 python -m venv .venv
@@ -41,7 +41,7 @@ Activate with `source .venv/bin/activate` on Linux/macOS or
 `.\.venv\Scripts\Activate.ps1` in Windows PowerShell, then install:
 
 ```sh
-python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@8a409593ab09441c189ec3fe8742ab3f64055cce"
+python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797"
 python -c "from importlib.metadata import version; print(version('logical-to-stim-converter'))"
 ```
 

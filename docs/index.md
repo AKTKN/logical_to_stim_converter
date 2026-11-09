@@ -44,7 +44,8 @@ hardware timing or numerical error thresholds.
 Phase 4 supplies the public-only installed-consumer workflows and tutorials
 ([#2](https://github.com/AKTKN/logical_to_stim_converter/issues/2),
 [#5](https://github.com/AKTKN/logical_to_stim_converter/issues/5)); its observed-sector / identity-readout baseline is deliberately
-limited under noise. The final beta gate remains Phase 5. This index/reference addresses
+limited under noise. The [Phase 5 final gate and handoff](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09)
+records current verification; the license decision remains pending. This index/reference addresses
 [#3](https://github.com/AKTKN/logical_to_stim_converter/issues/3) and
 [#4](https://github.com/AKTKN/logical_to_stim_converter/issues/4) without claiming
 the detailed worked examples requested by P1

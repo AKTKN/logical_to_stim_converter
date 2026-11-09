@@ -777,5 +777,7 @@ The [scope matrix](index.md#current-implementation-and-limitations),
 bounded physics and installed-wheel evidence. External examples use optional
 PyMatching/Matplotlib and restricted models; installed consumers supply their own
 algorithms. The [ordinary memory](ordinary_memory_tutorial.md) and [Knill](knill_memory_tutorial.md)
-tutorials exercise the installed contract. P1's broader detailed single-fault
-worked guides and Phase 5's final beta gate remain separate work.
+tutorials exercise the installed contract. The
+[Phase 5 gate](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09)
+records final bounded verification and remaining legal/platform decisions.
+P1's broader detailed single-fault worked guides remain separate work.

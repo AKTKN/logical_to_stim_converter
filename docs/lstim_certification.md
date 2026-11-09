@@ -119,8 +119,9 @@ compilation and boundary/conditional setup dominate these small-shot tests;
 pytest-xdist uses eight processes, with no wall-time pass/fail threshold.
 The installed wheel needs no examples/tests/reference copies or optional decoder/
 plotting dependency; both samples compile in an isolated consumer on the existing
-Ubuntu/Windows Python 3.11/3.12 CI matrix. The new paired-source example is an
-eighth CI command, with bounded 32-shot d=3 inputs.
+Ubuntu/Windows Python 3.11/3.12 CI matrix. At M8-D the paired-source example
+became the eighth CI example, with bounded 32-shot d=3 inputs. The current
+workflow has nine examples, including M9 resource-preparation noise.
 
 Resource-creating/labeled REPEAT, automatic allocation, runtime conditionals,
 arbitrary code/backend plugins, non-Clifford gates, text-defined noise/decoders

@@ -19,7 +19,7 @@ Activate it using `source .venv/bin/activate` (Linux/macOS), or
 `.\.venv\Scripts\Activate.ps1` (Windows PowerShell), then:
 
 ```sh
-python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@8a409593ab09441c189ec3fe8742ab3f64055cce"
+python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797"
 ```
 
 Use a new directory outside the repository as the working directory. Save the

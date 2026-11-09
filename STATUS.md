@@ -4,6 +4,36 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Research beta 0.0.1 — Phase 5 final integration gate (2026-11-09)
+
+Verified committed Phases 1–4 and the clean pushed baseline c45bf1f19081b55a414db7183557a1ec34b9a797.
+Full `.venv/bin/python -m pytest -n 8 --tb=short --durations=10` passes **1373 tests
+in 401.70 s**, without failures/skips. Ruff src/tests/examples passes. All nine
+established workflow examples pass from a private source copy; six inspection
+Stim snapshots and the line-map CSV regenerate byte-for-byte. Final private
+wheel/sdist metadata/content and documentation link audits are recorded in the
+[Phase 5 acceptance matrix and handoff](docs/research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09).
+
+Separate fresh runtime-only environments pass the built-wheel route and an actual
+`pip install --no-cache-dir` from the pushed full c45bf1f SHA. Git logs/direct_url
+confirm both converter and pinned stimflow source commits; every installed runtime/
+grammar byte matches local source. Both routes pass all six ideal/noisy memory/
+Knill/M9 consumer cases with raw [32,49]/[32,255], global events [32,40]/[32,192],
+logical outputs [32,1], no optional imports or checkout leakage. Both pip checks
+pass. All 13 documentation Python blocks run from the installed wheel with
+explicit context/inputs for contract fragments and checkout/sdist samples.
+
+Documentation now pins the actually tested pushed SHA and clarifies M9 historical
+prefix noise, implemented LSTIM inspection paths and current versus checkpoint CI
+counts. No runtime, test, example code, dependency, version, license or upstream
+source changes. The final record distinguishes local results and exact remote CI
+commit/jobs; passing a prior job never establishes CI for this documentation commit.
+#2–#5 bounded local acceptance is verified; #1 remains partial/open with
+**license pending**. Current c45bf1f remote platform jobs remain PENDING until
+completion; they are not a new local-commit CI result. Issues are unmodified. Broader decoder/inference/platform/performance
+claims and P1 work remain deferred. The maintainer authorized this single
+verification commit/push, without tags, releases or artifact publication.
+
 ## Research beta 0.0.1 — Phase 4 (2026-11-09)
 
 Implemented the public-only installed-consumer integration and two reproducible

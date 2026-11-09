@@ -14,13 +14,16 @@ access to GitHub and the package index for runtime/build dependencies. The
 configured CI matrix is Ubuntu/Windows with Python 3.11/3.12; all four jobs passed
 for baseline `d8654898` in [run 42552076079](https://github.com/AKTKN/logical_to_stim_converter/actions/runs/42552076079).
 That run is historical baseline evidence, not CI for this documentation revision.
-Other Python versions/platforms are not certified by that matrix.
+Other Python versions/platforms are not certified by that matrix. Current
+observed CI status and its exact SHA are recorded in the
+[Phase 5 gate](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09).
 
-The Phase 1 integration was pushed to GitHub. The full SHA below was verified
-reachable on `origin/main` on 2026-11-09 and contains version **0.0.1**. It is
-the installed runtime baseline described by these docs; this Phase 2 + Phase 3
-revision changes documentation only. A version check alone cannot distinguish
-commits that share 0.0.1; retain the installation SHA in downstream records.
+The full SHA below is the pushed Phase 4 integration, containing version
+**0.0.1**. Phase 5 installed it in a separate fresh environment with pip caching
+disabled, verifying both converter and pinned stimflow Git source fetches. The
+local wheel was checked separately; installed runtime source is identical. See
+the [final gate and handoff](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09).
+A version check alone cannot distinguish commits that share 0.0.1; retain the installation SHA in downstream records.
 
 ```bash
 python -m venv .venv
@@ -28,7 +31,7 @@ python -m venv .venv
 source .venv/bin/activate
 # Windows PowerShell instead:
 # .\.venv\Scripts\Activate.ps1
-python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@8a409593ab09441c189ec3fe8742ab3f64055cce"
+python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797"
 python -c "from importlib.metadata import version; print(version('logical-to-stim-converter'))"
 ```
 

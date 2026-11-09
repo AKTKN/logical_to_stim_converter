@@ -1,5 +1,21 @@
 # STATUS — Tests
 
+## Phase 5 — Full integration verification (2026-11-09)
+
+Fresh `.venv/bin/python -m pytest -n 8 --tb=short --durations=10`: **1373 passed
+in 401.70 s**, eight workers, no failures/skips. This includes all M1–M9 signed
+flow/physical/detector/noise/reuse/LSTIM/decoder-neutral regressions and the six
+Phase 4 consumer cases plus extended shared-build wheel isolation path. No test
+assertion, source file or dependency changes were needed. Ruff passes.
+
+Separate fresh runtime-only built-wheel and uncached GitHub c45bf1f installations
+validate all six ordinary/Knill/M9 CLI cases; metadata/direct-url/runtime-byte and
+pip checks pass. The wheel also runs all 13 documented Python blocks, including
+explicit context for specification fragments. Nine source workflow examples and
+snapshot/CSV export reproduction pass. Exact remote CI SHA/jobs and final archive/
+link audits are recorded separately in the Phase 5 ledger; no CI result for a
+new local documentation commit is inferred. License selection remains pending.
+
 ## Phase 4 — Installed consumer contract (2026-11-09)
 
 Extended test_lstim_packaging.py's existing private wheel/sdist build rather than

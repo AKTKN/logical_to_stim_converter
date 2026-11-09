@@ -125,7 +125,7 @@ Physical `R`, `RX`, `TICK`, `DETECTOR`, `OBSERVABLE_INCLUDE`, `rec[-k]`, physica
 
 ## 5. Module responsibility boundaries
 
-Suggested package layout (adapt conservatively to actual repository style):
+Implemented package layout:
 
 ```text
 src/logical_to_stim_converter/language/
@@ -153,7 +153,11 @@ canonical_text = format_logical_circuit(program)
 program_from_file = parse_logical_file('example.lstim')
 ```
 
-Provide a second documented method/property to inspect the lowered `OperationModule`/`BindPatch` sequence and fixed `LogicalBlock`s without sampling or building a DEM. A text `BIND` must remain an existing `BindPatch` directive in that sequence. No independent decoder, CLI, hidden quantum feedback or new physical code-generation backend.
+`program.to_operations()` and `program.blocks` inspect the lowered
+`OperationModule`/`BindPatch` sequence and fixed `LogicalBlock`s without sampling
+or building a DEM. A text `BIND` remains an existing `BindPatch` directive in
+that sequence. No independent decoder, CLI, hidden quantum feedback or new
+physical code-generation backend is introduced.
 
 ## 6. Validation expectations and future-proofing
 

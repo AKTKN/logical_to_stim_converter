@@ -4,6 +4,8 @@
 `enabled=False`. Existing `NoiseModel()`, `uniform_depolarizing(p)` and ideal
 `noise_model=None` compilation retain their previous behavior. The new option
 needs an explicit `NoiseModel`; it is not an operation or LSTIM language feature.
+The example below uses a checkout/sdist sample path. Installed-wheel users must
+supply that input separately, as in the [Knill tutorial](knill_memory_tutorial.md).
 
 ```python
 from logical_to_stim_converter import (
@@ -102,8 +104,10 @@ complete plan. Standard compilation always supplies an explicit tuple, including
 `()` for resource-free programs. Existing duplicate module/use checks remain.
 
 Preparation `BoundaryRequest` model-only probes stop at the existing final-layer
-TICK, **before** all post-SE channels. Their temporal models therefore do not own
-these faults. The matching conditional Bell model starts at the earliest of its
+TICK, **before their own** post-SE channels. Their temporal models therefore do
+not own these faults. Later physical prefixes retain channels from prior cycles;
+this boundary never deletes legitimate earlier noise. The matching conditional
+Bell model starts at the earliest of its
 two explicitly indexed post-SE channels and keeps the original destructive
 readout end. Its incoming sector/frame hypothesis applies immediately **before
 the post-SE channels**. With no emitted channel the existing resource-CNOT window
