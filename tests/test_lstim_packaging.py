@@ -147,7 +147,7 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
                        for name in archive.namelist())
         metadata, = (name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
         check_metadata(archive.read(metadata))
-        assert "Requires-Dist: lark==1.3.1" in archive.read(metadata).decode("utf-8")
+        assert "Requires-Dist: lark>=1.3.1" in archive.read(metadata).decode("utf-8")
         for name in archive.namelist():
             if name.startswith("logical_to_stim_converter/") and name.endswith((".py", ".lark")):
                 assert archive.read(name) == (root / "src" / name).read_bytes()

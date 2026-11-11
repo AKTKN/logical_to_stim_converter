@@ -1,6 +1,14 @@
 # STATUS — Documentation
 
-**As of:** 2026-11-09
+**As of:** 2026-11-11
+
+## Minimum dependency compatibility (2026-11-11)
+
+README now installs the current checkout. Development, architecture and LSTIM
+contracts describe minimum PyPI versions and the unchanged exact stimflow source
+pin. Original research-beta pin tables are explicitly labelled historical.
+The [compatibility record](dependency_compatibility.md) records both separate
+Stim environments and all verification results, without claiming unrun remote CI.
 
 ## Phase 5 — Final integration gate (2026-11-09)
 

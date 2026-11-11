@@ -1,5 +1,17 @@
 # STATUS — Independent golden memory
 
+## Minimum dependency compatibility (2026-11-11)
+
+Stim acceptance uses the unchanged >=1.15.0 floor and PEP 440 ordering.
+Generation-environment manifest metadata and every frozen byte stay unchanged;
+exact stimflow source/version checks and all physical/DEM assertions remain.
+The [two-version compatibility record](../../docs/dependency_compatibility.md)
+contains installation, focused/full test, lint/build and CI evidence.
+Both Stim wheels pass all 177 existing golden cases in the 202-case focused
+gate (114.54/117.26 s), and all 1,598 full tests (538.12/482.09 s).
+No frozen bytes, generator hashes, physical or DEM assertion changes.
+
+
 ## 2026-11-11
 
 Implemented research-only A ideal semantic equivalence, B elementary shared

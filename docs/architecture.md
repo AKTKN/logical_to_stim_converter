@@ -508,8 +508,8 @@ Pinned stimflow at `ffe0d043598ed5df0851a3e6b4920359a23fafbd` requires equal
 numbers of reflow inputs/outputs, including discarded inputs. Its nonsquare
 `ChunkReflow.verify` diagnostic also unpacks PauliMap keys incorrectly. This code
 does not use nonsquare reflows or patch upstream; physical measurement discards
-and explicit export projection use supported Chunk boundaries. Stim 1.15.0 supplies
-signed flow solving and tableau projection. Dependency pins remain unchanged.
+and explicit export projection use supported Chunk boundaries. Stim >=1.15.0 supplies
+signed flow solving and tableau projection. The stimflow source commit stays pinned.
 
 ## Physical preparation-sector frame evaluation
 
@@ -546,7 +546,7 @@ The original circuit never contains these selected corrections. The ordinary
 affine transport observable remains independently signed and DEM-validated, but
 the public Knill interpretation API requires explicit physical corrections.
 
-PyMatching 2.3.1 is mandatory only in the development extra and CI tests. The
+PyMatching >=2.3.1 is mandatory only in the development extra and CI tests. The
 test helper constructs Matching(H_Z) for x and Matching(H_X) for z, validates
 matrix-column order/vector length/check equations, and uses final noiseless
 syndromes from metadata. It performs no temporal or circuit-level inference.
@@ -671,7 +671,7 @@ quantum gate, raw measurement or boundary relation is synthesized. This ordering
 allows arbitrary detector permutations even when records were produced at very
 different times. Physical timing and absolute detector coordinates are unchanged.
 
-Stim 1.15.0 re-extracts the selected DEM from the physical circuit. A physical
+Stim re-extracts the selected DEM from the physical circuit. A physical
 fault affecting kept and excluded detectors survives on its retained support.
 Default extraction preserves hyperedges; requested decomposition keeps Stim's
 correlated ^ semantics. There is no direct DEM projection path, probability

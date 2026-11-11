@@ -1,5 +1,22 @@
 # STATUS — Research validation
 
+## Minimum dependency compatibility (2026-11-11)
+
+Golden-memory/Knill now accept Stim >=1.15.0 with packaging.version.Version.
+Original manifests remain generation provenance, not an installed-version lock.
+All 22 frozen payload/manifest files, generator/source hashes, exact stimflow
+Git verification and signed physical/noise/fault/DEM assertions remain intact.
+Separate Linux/Python 3.12.7 environments pass the complete eight-worker suite:
+**1,598 in 538.12 s** with Stim 1.15.0/PyMatching 2.3.1, and **1,598 in
+482.09 s** with Stim 1.16.0/PyMatching 2.4.0. No failures or skips.
+The focused golden/dependency/packaging suites pass **202 in 114.54 s** and
+**202 in 117.26 s**, respectively. Both pip checks, Ruff checks, wheel/sdist
+builds and exact dependency-metadata audits pass. No compatibility failure
+was observed. The eight-job remote CI matrix is configured but has not run.
+
+See [the compatibility record](../docs/dependency_compatibility.md).
+
+
 ## Independent three-patch Knill golden (2026-11-11)
 
 Implemented `golden_knill/` with two independent oracles: actual Hex at

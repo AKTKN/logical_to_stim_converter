@@ -1,5 +1,12 @@
 # Research beta 0.0.1: decisions and verification
 
+Dependency policy update (2026-11-11): version/pin tables below record the
+original generation and verification environments. Current PyPI requirements use
+minimum versions; stimflow retains its exact source commit. See the
+[compatibility record](dependency_compatibility.md) and current
+[development instructions](development.md). Historical results remain unchanged.
+
+
 This package is a research dependency for trusted collaborators using
 `knill_bench`, `lomatching` and similar external simulation repositories.
 Distribution is through GitHub at a pinned commit. This is an internal research

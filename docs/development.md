@@ -11,19 +11,24 @@ promised.
 
 Use Python 3.11 or later with a compatible Stim wheel, Git on PATH, and network
 access to GitHub and the package index for runtime/build dependencies. The
-configured CI matrix is Ubuntu/Windows with Python 3.11/3.12; all four jobs passed
+configured CI matrix is Ubuntu/Windows with Python 3.11/3.12 and Stim 1.15.0/1.16.0
+(eight separate environments). All four original Python/OS jobs passed
 for baseline `d8654898` in [run 42552076079](https://github.com/AKTKN/logical_to_stim_converter/actions/runs/42552076079).
 That run is historical baseline evidence, not CI for this documentation revision.
 Other Python versions/platforms are not certified by that matrix. Current
 observed CI status and its exact SHA are recorded in the
 [Phase 5 gate](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09).
 
-The full SHA below is the pushed Phase 4 integration, containing version
+The historical full SHA below is the pushed Phase 4 integration, containing version
 **0.0.1**. Phase 5 installed it in a separate fresh environment with pip caching
 disabled, verifying both converter and pinned stimflow Git source fetches. The
 local wheel was checked separately; installed runtime source is identical. See
 the [final gate and handoff](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09).
-A version check alone cannot distinguish commits that share 0.0.1; retain the installation SHA in downstream records.
+That historical recipe retains the original exact PyPI constraints. To use the
+current minimum-version policy, install from a checkout of this revision with
+`python -m pip install .` (or the editable command below), or select a newer full
+Git commit containing this change. A version check alone cannot distinguish
+commits sharing 0.0.1; retain the installation SHA in downstream records.
 
 ```bash
 python -m venv .venv
@@ -91,24 +96,28 @@ are not required.
 
 ## Reproducible upstream integration
 
-`pyproject.toml` pins these validated integration dependencies:
+`pyproject.toml` declares minimum PyPI versions and one pinned source dependency:
 
-- `stim==1.15.0` (wheel).
-- `lark==1.3.1` (runtime grammar/parser); grammar.lark ships in both distributions.
+- `stim>=1.15.0` (wheel); CI selects 1.15.0 and 1.16.0 separately.
+- `lark>=1.3.1` (runtime grammar/parser); grammar.lark ships in both distributions.
 - `stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow`
   (`stimflow.__version__ == "1.17.dev0"`).
 
 Git and network access to GitHub are required when pip installs the pinned source
 package. The stimflow source checkout itself reports a development Stim version;
-we deliberately use the separately pinned **1.15.0** Stim wheel. This combination
-is checked using the APIs actually used by this package, not a promise that every
-upstream stimflow feature is compatible. NumPy/SciPy and dev tooling retain bounded
-minimum versions; this is an integration pin, not a full transitive lockfile.
+the released Stim wheel is installed separately. Source identity stays exact while
+PyPI dependencies use minimum versions without upper bounds. The exercised APIs
+are checked by the existing physical and golden suites, not every upstream
+stimflow feature. NumPy/SciPy and existing tooling minimums are unchanged; this
+is not a transitive lockfile. The [compatibility record](dependency_compatibility.md)
+reports actual environment versions and results. Original golden manifests retain
+their generation metadata; version acceptance never bypasses fixture hashes,
+source provenance, exact physical/noise comparisons or native DEM equality.
 
 CI installs directly from these declarations without relying on local paths. It
 is configured for Ubuntu and Windows, Python 3.11 and 3.12, with tests, Ruff, build,
 and nine circuit/view/ordinary-memory/Knill-memory/LSTIM/M9 examples. Tests use
-pytest-xdist 3.8.0 (`.[dev]`) with eight workers; build tests use private source
+pytest-xdist >=3.8.0 (`.[dev]`) with eight workers; build tests use private source
 trees to avoid shared setuptools output. The isolated wheel test runs outside
 the checkout with optional/example/test/reference imports blocked, exercises
 both .lstim inputs and checks every loaded converter module came from the wheel.
@@ -157,14 +166,14 @@ The Bell example must independently inspect physical intermediate XX/ZZ and loca
 expectations, then reconstruct raw final outputs. A gate followed by its own
 inverse alone is insufficient evidence of the intended Clifford action.
 
-The pinned dependencies are unchanged for M3. ChunkReflow and Stim signed Pauli
+The original M3 checkpoint used the dependency versions recorded in STATUS. ChunkReflow and Stim signed Pauli
 conjugation/tableau APIs are used directly. No local external source import is
 required. Commit/push only at explicit maintainer direction; the user authorized
 both after this milestone's implementation and verification.
 
 ## M5 regression requirements
 
-The development extra pins **PyMatching 2.3.1**; tests import it unconditionally.
+The development extra requires **PyMatching >=2.3.1**; tests import it unconditionally.
 It is absent from mandatory runtime dependencies and production imports. CI runs
 the full physics suite and nine examples on Ubuntu/Windows Python 3.11/3.12.
 The M5/M6 sections below retain the regression rationale for those milestones.
@@ -207,7 +216,7 @@ M6-B contract before implementing consumers.
 
 ## M6-C regression requirements
 
-Retain all 368 M1–M6-B regressions. Require PyMatching 2.3.1 (no optional skip)
+Retain all 368 M1–M6-B regressions. Require PyMatching >=2.3.1 (no optional skip)
 and Matplotlib in the dev environment, with neither imported by runtime code.
 Test noiseless d=3/5 X/Z R=d, signed raw/frame/expected-value truth, nonzero noise
 with exact XOR failure counts, reproducibility, strict/local mixed-patch remapping,

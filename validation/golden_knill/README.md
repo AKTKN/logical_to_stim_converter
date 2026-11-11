@@ -171,3 +171,14 @@ execution claim; actual CI status is recorded separately in the execution report
 Certification remains bounded to the specified one-teleportation d=3/5 protocols;
 no decoder/LER, reuse, other schedule or Hex-vs-converter noisy equivalence is
 claimed.
+
+## Dependency compatibility
+
+Stim >=1.15.0 is accepted using PEP 440 version ordering. Frozen manifest
+versions describe their original generation environments and are never
+rewritten to accept a newer wheel. The stimflow package/source checks remain
+exact, including its Git commit. SHA-256, generator provenance, signed flows,
+physical schedules, fault/noise locations and native DEM comparisons remain
+unchanged. A newer version must pass those same checks; a behavior mismatch
+is a compatibility failure. See the
+[two-version execution record](../../docs/dependency_compatibility.md).

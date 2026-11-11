@@ -2,7 +2,8 @@
 
 The public memory/Clifford API is exported from `__init__.py`: code/layout/block models,
 backend/context/fragment contracts, memory operations, H/CNOT/Pauli primitives, ordered operand contexts, affine frames,
-compiler/artifact, and noise types. Stim/stimflow are pinned required dependencies. Surface-sim,
+compiler/artifact, and noise types. Stim >=1.15.0 is required; stimflow retains its
+exact Git source pin. Surface-sim,
 Hex, lomatching, and knill_bench must not be imported here. BellStatePrep, KnillEC, CompositeOperation, and PhysicalPauliFrame are public. Do not export future
 placeholder operations until implemented with physics tests. Preserve the `src/`
 layout and consult per-directory AGENTS/STATUS before changes.
@@ -16,8 +17,8 @@ imports stay deferred until lowering/compilation. M8-C exports LogicalProgram,
 parse_logical_circuit/parse_logical_file/format_logical_circuit and typed errors
 from root and language. The formatter statically validates and grammar-roundtrips
 the unexpanded AST with exact typed semantic signatures. UTF-8 reads preserve
-path/CRLF offsets and original file/encoding causes. The shipped Lark 1.3.1
-grammar remains the syntax authority; installed wheel checks block optional and
+path/CRLF offsets and original file/encoding causes. The shipped grammar
+(Lark >=1.3.1) remains the syntax authority; installed wheel checks block optional and
 repository imports. M8-D certifies the documented d=3/5 physical/noisy E2E matrix
 against independent public-operation references and unchanged external decoder
 adapters. No decoder or simulator enters the installed runtime. Match authored

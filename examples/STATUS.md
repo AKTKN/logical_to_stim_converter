@@ -1,5 +1,13 @@
 # STATUS — Examples
 
+## Dependency-version reporting (2026-11-11)
+
+The ordinary-memory summary reports the installed PyMatching version instead
+of a hard-coded 2.3.1 label. Sampling, matching and frame algorithms are unchanged.
+The separate Stim 1.15.0/1.16.0 environments and full regressions are recorded in
+[the compatibility report](../docs/dependency_compatibility.md).
+
+
 ## Phase 5 — Established example integration gate (2026-11-09)
 
 All nine exact workflow example commands pass, executed from a private source

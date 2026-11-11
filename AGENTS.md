@@ -163,3 +163,11 @@ inert terminal faults. Frozen `.stim` and Knill fixture JSON bytes remain LF via
 `.gitattributes`; regeneration is explicit maintenance, never a default test.
 The envelope remains one teleportation, d=3/5 X/Z and resources d rounds; this
 adds no production decoder/LER, reuse or broader schedule claim.
+
+
+PyPI dependencies use minimum versions without upper bounds; stimflow retains
+its exact Git source commit. Compare installed dependency versions with
+PEP 440 ordering, not strings or fixture generation metadata. Keep frozen
+manifest bytes and all SHA-256/source/physics/DEM assertions intact; report
+new-version incompatibilities instead of regenerating fixtures or weakening
+physics. CI selects Stim 1.15.0 and 1.16.0 in separate Python/OS environments.

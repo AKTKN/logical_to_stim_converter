@@ -1,5 +1,12 @@
 # STATUS — Package root
 
+## Dependency guidance (2026-11-11)
+
+Package AGENTS now distinguishes minimum Stim/Lark versions from the exact
+stimflow source pin. No production Python, parser, circuit/noise/decoder/frame
+algorithm or public API changes. See [the compatibility record](../../docs/dependency_compatibility.md).
+
+
 ## M9 follow-up — 2026-11-09
 
 ResourcePreparationNoise now rejects p_st_transversal outside [0,.75] even when

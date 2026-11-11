@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 import stim
+from packaging.version import Version
 
 ROOT = Path(__file__).parent
 FIXTURES = ROOT / "fixtures"
@@ -82,7 +83,8 @@ def verify_manifest(directory=FIXTURES):
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
     require(manifest["schema"] == 1, "Knill fixture manifest schema mismatch")
     require(
-        stim.__version__ == manifest["environment"]["stim"], "Knill fixture Stim version mismatch"
+        Version(stim.__version__) >= Version("1.15.0"),
+        f"Knill fixture Stim version {stim.__version__} is below required minimum 1.15.0",
     )
     require(
         importlib.metadata.version("stimflow") == manifest["environment"]["stimflow"],

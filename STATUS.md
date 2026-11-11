@@ -4,6 +4,30 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Minimum dependency compatibility (2026-11-11)
+
+Changed only the four exact PyPI requirements to their existing minimum versions:
+Stim >=1.15.0, Lark >=1.3.1, PyMatching >=2.3.1 and pytest-xdist >=3.8.0.
+All existing minimums and the exact stimflow Git source commit are unchanged.
+Both golden loaders now use PEP 440 Stim minimum checks while retaining exact
+stimflow source/version, SHA-256/generator provenance and physical/DEM checks.
+No golden payload/manifest is regenerated. Production Python algorithms are
+unchanged; the example decoder label reports its actual installed version.
+CI now has eight Stim/Python/OS environments while retaining the full suite,
+build and existing examples. Current installation/development docs distinguish
+minimum requirements from historical generation/verification versions.
+
+Separate Linux/Python 3.12.7 environments pass the complete eight-worker suite:
+**1,598 in 538.12 s** with Stim 1.15.0/PyMatching 2.3.1, and **1,598 in
+482.09 s** with Stim 1.16.0/PyMatching 2.4.0. No failures or skips.
+The focused golden/dependency/packaging suites pass **202 in 114.54 s** and
+**202 in 117.26 s**, respectively. Both pip checks, Ruff checks, wheel/sdist
+builds and exact dependency-metadata audits pass. No compatibility failure
+was observed. The eight-job remote CI matrix is configured but has not run.
+
+See the [compatibility record](docs/dependency_compatibility.md) for exact
+constraints, separate installations, commands, observed results and CI limits.
+
 ## Independent three-patch Knill golden certification (2026-11-11)
 
 Added research-only `validation/golden_knill/` with actual pinned Hex ideal

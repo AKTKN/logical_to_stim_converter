@@ -11,6 +11,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 import stim
+from packaging.version import Version
 
 from .compare import (
     common_noise_equivalence,
@@ -85,9 +86,12 @@ def verify_fixture(distance, basis, directory=FIXTURES):
         "Golden generator source changed; review fixtures",
     )
     require(
-        manifest["stim_version"] == stim.__version__
-        and manifest["stimflow_version"] == importlib.metadata.version("stimflow"),
-        "Golden dependency version mismatch; inspect pinned API and review fixtures",
+        Version(stim.__version__) >= Version("1.15.0"),
+        f"Golden Stim version {stim.__version__} is below required minimum 1.15.0",
+    )
+    require(
+        manifest["stimflow_version"] == importlib.metadata.version("stimflow"),
+        "Golden stimflow version mismatch; inspect pinned source API",
     )
     installed_source = json.loads(
         importlib.metadata.distribution("stimflow").read_text("direct_url.json")

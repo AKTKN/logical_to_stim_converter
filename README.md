@@ -39,8 +39,7 @@ and M9 schedules with a separate direct-Stim oracle.
 
 Use Python 3.11+ with a compatible Stim wheel, Git on PATH and network access to
 GitHub and the package index. Configure Git credentials separately if needed.
-The following pushed full commit contains version **0.0.1**; its GitHub install
-was verified in a fresh environment during Phase 5 (2026-11-09):
+Use a checkout containing this dependency-policy revision. Create an environment:
 
 ```sh
 python -m venv .venv
@@ -50,14 +49,18 @@ Activate with `source .venv/bin/activate` on Linux/macOS or
 `.\.venv\Scripts\Activate.ps1` in Windows PowerShell, then install:
 
 ```sh
-python -m pip install "logical-to-stim-converter @ git+https://github.com/AKTKN/logical_to_stim_converter.git@c45bf1f19081b55a414db7183557a1ec34b9a797"
+python -m pip install .
 python -c "from importlib.metadata import version; print(version('logical-to-stim-converter'))"
 ```
 
 The version command prints `0.0.1`. There is no published version tag or PyPI
-release. The install pins Stim 1.15.0, Lark 1.3.1 and stimflow's upstream Git source
-at `ffe0d043598ed5df0851a3e6b4920359a23fafbd` (`glue/stimflow`). Git/network access
+release. Current runtime minimums include `stim>=1.15.0` and `lark>=1.3.1`;
+stimflow's upstream Git source remains pinned at
+`ffe0d043598ed5df0851a3e6b4920359a23fafbd` (`glue/stimflow`). Git/network access
 is needed for that source dependency; local reference clones are not required.
+Older source commits retain their original dependency declarations. For a Git
+installation, select a full commit containing this change. See the
+[dependency compatibility record](docs/dependency_compatibility.md) for tested versions.
 Full prerequisites, dependency details and offline constraints are in
 [installation and development](docs/development.md).
 

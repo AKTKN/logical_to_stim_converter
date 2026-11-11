@@ -113,7 +113,7 @@ class MemoryRun:
             "sampling_seconds": self.sampling_seconds,
             "global_dem_errors": self.global_dem.num_errors,
             "observable_metadata": [asdict(o) for o in self.compiled.observables],
-            "decoder": "PyMatching 2.3.1 two-pass correlated MWPM (heuristic)",
+            "decoder": f"PyMatching {pymatching.__version__} two-pass correlated MWPM (heuristic)",
             "strategies": [
                 {
                     "strategy": result.strategy,

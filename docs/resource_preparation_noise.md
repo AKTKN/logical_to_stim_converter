@@ -133,7 +133,7 @@ fingerprints stay unchanged. Cached views/requests/plans from another policy,
 probability, boundary or epoch must be regenerated. No runtime decoder dependency
 is added; PyMatching and the restricted example adapters remain in dev/examples.
 
-**DEM compatibility:** pinned Stim 1.15.0 cannot extract an exact DEM for an
+**DEM compatibility:** the minimum supported Stim 1.15.0 cannot extract an exact DEM for an
 over-mixing `DEPOLARIZE1(p > 3/4)` channel. The M9 policy therefore rejects these
 probabilities at construction. The mathematical channel definition above is
 unchanged. Compilation validates the actual noisy circuit directly with Stim;

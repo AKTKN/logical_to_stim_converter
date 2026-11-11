@@ -164,3 +164,14 @@ source baseline, commands, counts, checksums and limitations. This certification
 does not extend to H/Pauli/CNOT logical operations, multiple patches, M9, Knill,
 reuse, other distances/round counts, decoder performance or platform coverage.
 Those retain their separate existing regressions and research reports.
+
+## Dependency compatibility
+
+Stim >=1.15.0 is accepted using PEP 440 version ordering. Frozen manifest
+versions describe their original generation environments and are never
+rewritten to accept a newer wheel. The stimflow package/source checks remain
+exact, including its Git commit. SHA-256, generator provenance, signed flows,
+physical schedules, fault/noise locations and native DEM comparisons remain
+unchanged. A newer version must pass those same checks; a behavior mismatch
+is a compatibility failure. See the
+[two-version execution record](../../docs/dependency_compatibility.md).

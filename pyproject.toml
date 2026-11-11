@@ -17,19 +17,19 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-  "stim==1.15.0",
+  "stim>=1.15.0",
   "stimflow @ git+https://github.com/quantumlib/Stim.git@ffe0d043598ed5df0851a3e6b4920359a23fafbd#subdirectory=glue/stimflow",
   "numpy>=1.26",
   "scipy>=1.11",
-  "lark==1.3.1",
+  "lark>=1.3.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pymatching==2.3.1",
+  "pymatching>=2.3.1",
   "matplotlib>=3.8",
   "pytest>=8",
-  "pytest-xdist==3.8.0",
+  "pytest-xdist>=3.8.0",
   "ruff>=0.9",
   "build>=1.2",
   "setuptools>=69",

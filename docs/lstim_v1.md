@@ -172,7 +172,7 @@ physical code-generation backend is introduced.
 
 `language/grammar.lark` is the single syntax authority. It is loaded through
 `importlib.resources` from either the source installation or a wheel. Tested
-runtime: `lark==1.3.1`, LALR with contextual lexing and positional metadata.
+runtime minimum: `lark>=1.3.1`, LALR with contextual lexing and positional metadata.
 `language.parse_ast(source, source_name='<string>')` returns a frozen FileNode
 with a HeaderNode, ordered statements and SourceSpans. The limited internal
 `lex_source` diagnostic API returns immutable tokens from the same contextual
@@ -314,7 +314,7 @@ physical compilation runs. Formatting drops comments/blank lines and uses four
 spaces per block, lowercase booleans, LF and exactly one final newline. It is
 deterministic and idempotent; source spans naturally change after formatting.
 
-Lark 1.3.1 is a required runtime dependency; grammar.lark is loaded through
+Lark >=1.3.1 is a required runtime dependency; grammar.lark is loaded through
 importlib.resources and included in wheel and sdist. The wheel has no dependency
 on examples/tests/reference clones, PyMatching or Matplotlib. Source distributions
 include both exact samples from section 2 under examples/lstim/. Portable
@@ -322,7 +322,7 @@ isolated-wheel tests build a wheel from the sdist and compile both samples throu
 the root API, checking real metadata/DEMs, source labels and independent noise.
 CI runs these checks on Ubuntu/Windows with Python 3.11/3.12; actual local and
 remote evidence is distinguished in STATUS.md. The [development guide](development.md)
-records dependency pins and the eight-worker pytest-xdist invocation.
+records dependency minimums, the stimflow source pin and the eight-worker pytest-xdist invocation.
 
 ## 10. Physical and simulation certification
 
