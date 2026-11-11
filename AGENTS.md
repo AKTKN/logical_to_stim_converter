@@ -130,3 +130,17 @@ the actual noisy circuit without caps/fallbacks. Enabled direct NoiseInjector.ap
 requires an explicit verified tuple; None/omitted fails, () declares no resources.
 Only standard compilation resolves/validates full Bell eligibility; do not add a
 second resolver or infer it from primitive stages/names.
+
+
+Independent golden-memory certification lives in `validation/golden_memory/`
+and stays outside the installed runtime. Keep A signed ideal affine/instrument
+semantics, B matched elementary reset/readout faults across different schedules,
+and C exact independently authored physical/noise schedules separate. The direct
+reference must never import production construction/noise logic or read DUT
+circuits/metadata. Preserve occupied-coordinate alignment, signed Stim flow
+multiplication, every TICK, causal wire order, multiplicity and exact probability.
+Frozen fixtures are generated only from the independent builder with an explicit
+maintenance flag; normal tests/CLI verify hashes without rewriting them. Standard
+post-final-MR resets are individually checked inert, never silently discarded.
+The certified envelope is d=3/5, X/Z, exactly three SE rounds, ordinary noise;
+this adds no decoder, compiler, M9/Knill or broader physical-program contract.

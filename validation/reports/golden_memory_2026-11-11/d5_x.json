@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "workers": 8,
+  "reports": [
+    {
+      "level": "A",
+      "distance": 5,
+      "basis": "X",
+      "verified": {
+        "DUT_round_signed_flows": 150,
+        "Stim_round_signed_flows": 150,
+        "affine_rank": 73,
+        "free_record_bits": 24,
+        "occupied_sites": 49,
+        "measurements": 97,
+        "detectors": 72,
+        "observables": 1
+      }
+    },
+    {
+      "level": "B",
+      "distance": 5,
+      "basis": "X",
+      "verified": {
+        "matched_elementary_faults": 194,
+        "matched_zero_signature": 0,
+        "unmatched_inert_terminal_MR_resets": 24,
+        "distinct_matched_signatures": 114
+      }
+    },
+    {
+      "level": "C1",
+      "distance": 5,
+      "basis": "X",
+      "verified": {
+        "moments": 20,
+        "ticks": 19,
+        "noise_locations": {},
+        "exact_native_dem": true,
+        "deterministic_Pauli_probes": 27
+      }
+    },
+    {
+      "level": "C2",
+      "distance": 5,
+      "basis": "X",
+      "verified": {
+        "moments": 20,
+        "ticks": 19,
+        "noise_locations": {
+          "reset": 97,
+          "DEPOLARIZE1": 306,
+          "DEPOLARIZE2": 240,
+          "measurement_flip": 97
+        },
+        "exact_native_dem": true,
+        "deterministic_Pauli_probes": 27
+      }
+    }
+  ]
+}

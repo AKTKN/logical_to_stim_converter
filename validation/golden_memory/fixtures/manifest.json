@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "generation_source": "validation/golden_memory/reference_same_schedule.py",
+  "generator_sha256": "7513a979b5ff078f7e56c59483351d72daddf5df266ada77be22c62ffa985e21",
+  "converter_baseline_commit": "5086c236bfc34e35a3dc040862f1174770a4699d",
+  "stim_version": "1.15.0",
+  "stimflow_version": "1.17.dev0",
+  "stimflow_source_commit": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+  "stimflow_direct_url": {
+    "subdirectory": "glue/stimflow",
+    "url": "https://github.com/quantumlib/Stim.git",
+    "vcs_info": {
+      "commit_id": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+      "requested_revision": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+      "vcs": "git"
+    }
+  },
+  "provenance": "Independent elementary plaquettes and written physical schedule; no converter output or third-party source copied. d3 supports, CSS algebra, four layers, counts and signed flows reviewed in tests.",
+  "fixtures": {
+    "d3_x.stim": {
+      "sha256": "ea2c65d1b43a73de10e15bf0d2754ef8f624d7aa9ac95c72b1b51d2e40721aff",
+      "occupied_sites": 17,
+      "measurements": 33,
+      "detectors": 24,
+      "observables": 1,
+      "ticks": 19
+    },
+    "d3_z.stim": {
+      "sha256": "aa7a040f590803ff3b4be9708a3dfa5ce1e8c8ae2d6a2f3e8b3118107ee4413d",
+      "occupied_sites": 17,
+      "measurements": 33,
+      "detectors": 24,
+      "observables": 1,
+      "ticks": 19
+    },
+    "d5_x.stim": {
+      "sha256": "1d00d9b170e75cda462f1e2d3d24132ce348c906e174a63f3dabdd0316eeb4c9",
+      "occupied_sites": 49,
+      "measurements": 97,
+      "detectors": 72,
+      "observables": 1,
+      "ticks": 19
+    },
+    "d5_z.stim": {
+      "sha256": "f4d5de965d01f0e994f2a884d5a764baaf017ab99380f4f620c8506ffc8c9b1e",
+      "occupied_sites": 49,
+      "measurements": 97,
+      "detectors": 72,
+      "observables": 1,
+      "ticks": 19
+    }
+  }
+}

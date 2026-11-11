@@ -1,5 +1,33 @@
 # STATUS — Research validation
 
+## Independent golden memory (2026-11-11)
+
+Implemented `golden_memory/` with a production-independent dual-grid/direct-Stim
+reference, four frozen ideal fixtures and version/source/hash manifest, semantic
+raw-record alignment, complete signed Stim-flow elimination, data/check round
+instrument proofs, independent annotation and DUT metadata checks, elementary
+shared reset/readout fault pairing, causal per-wire schedule normalization,
+atomic noise Counters and native exact DEM comparison. A/B/C remain separate;
+normal tests and CLI cannot rewrite fixtures. The CLI uses up to eight spawned
+workers and 16 tasks for a complete matrix. See the
+[protocol](golden_memory/README.md) and
+[dated execution report](reports/golden_memory_2026-11-11/REPORT.md).
+
+All d=3/5 X/Z three-round cases pass: ideal affine ranks 25/73 and free dimensions
+8/24; 520 matched elementary responses and 64 individually inert unmatched
+terminal MR resets; four ideal plus four full-noisy exact schedules, specified
+reset/CX/result/idle counts and 216 paired Pauli probes. All deliberate negative
+controls reject their corruptions. The full eight-worker repository suite passes
+**1,446 tests in 472.92 s**, including 49 new tests; Ruff and whitespace pass.
+The final focused eight-worker run passes **49 in 27.72 s**; all four
+requested CLI invocations and the complete eight-worker matrix pass (**24.045
+s**), with identical per-case/matrix reports. Source baseline
+is `5086c236bfc34e35a3dc040862f1174770a4699d`; Stim 1.15.0 and stimflow
+1.17.dev0 at `ffe0d043598ed5df0851a3e6b4920359a23fafbd` remain pinned.
+No installed runtime, source dependency, API, decoder or license changed. No
+unexpected physical mismatch or production fix was found; broader programs,
+noise policies, decoding/LER and remote/Windows evidence remain outside scope.
+
 ## Phase 3 — M9-only Knill fault enumeration and fits (2026-11-09)
 
 Implemented research-only `m9_knill_faults.py` and `m9_knill.py`, with a

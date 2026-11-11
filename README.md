@@ -28,7 +28,9 @@ See the [implementation and limitations matrix](docs/index.md#current-implementa
 The separate [research validators](validation/README.md) record exact d=3/5
 one-layer code-capacity counts, an ordinary-circuit physical fault census, and
 complete d=3 weight-two M9 Knill fault assignments with eight-worker MWPM
-sampling.
+sampling. The [independent golden-memory suite](validation/golden_memory/README.md)
+also certifies three-round d=3/5 X/Z ideal semantics, shared reset/readout fault
+responses, and exact independently authored physical/noise schedules.
 
 ## Installation
 

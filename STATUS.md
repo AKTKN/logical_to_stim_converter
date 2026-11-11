@@ -1,8 +1,39 @@
 # STATUS — Repository-wide development ledger
 
-**As of:** 2026-11-09
+**As of:** 2026-11-11
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
+
+## Independent golden-memory certification (2026-11-11)
+
+Added research-only `validation/golden_memory/` with three distinct independent
+checks of exactly three-round d=3/5 X/Z memory: A proves complete signed ideal
+record spaces and data/check round flows against Stim's standard generator;
+B checks every shared elementary reset/readout fault across different schedules;
+C1/C2 compare independently authored direct-Stim ideal/noisy physical schedules,
+all TICKs, causal per-wire order, atomic noise multisets and native exact DEMs.
+Frozen ideal fixtures have version/source/SHA-256 provenance and explicit-only
+regeneration; ordinary tests/CLI are read-only. Corruption controls and metadata
+cross-checks fail on physical, parity, frame-sign and noise regressions.
+
+Affine ranks are **25/73**, with **8/24** free raw bits. All **520** matched
+reset/readout mechanisms and **64** unmatched inert post-final-MR resets are
+individually proved using deterministic signed Stim responses. All four ideal
+and four noisy schedule comparisons match the specified counts, including
+**130/306** idle sites and final readout-layer idles. The
+[dated execution report](validation/reports/golden_memory_2026-11-11/REPORT.md)
+and [protocol](validation/golden_memory/README.md) contain exact provenance,
+fixtures/checksums, commands, results, negative controls and limits.
+
+The full eight-worker repository suite passes **1,446 tests in 472.92 s**,
+including **49** new golden-memory cases; no failures/skips/warnings. Ruff
+src/tests/examples/validation and whitespace checks pass. The final focused run passes **49 in 27.72 s**; all four requested CLI
+runs and the 16-task eight-worker matrix pass (matrix **24.045 s**). No production
+source, dependency pin, package version, license or upstream reference changed.
+The envelope is one patch, d=3/5, X/Z, three rounds and ordinary noise; decoder
+performance, interacting programs, M9/Knill and new platform CI remain outside
+this certification. No implemented-but-unverified extension is claimed. Commit
+and push are explicitly authorized for this task on the current branch.
 
 ## Research validation Phase 3 — M9-only Knill faults (2026-11-09)
 

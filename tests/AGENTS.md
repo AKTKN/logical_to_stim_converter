@@ -83,3 +83,15 @@ state and native DEM/view construction at .75. Reject omitted enabled injector
 metadata before noise setup, distinguish explicit (), and compare exact direct/
 compiler/original-rule circuits and DEMs. Keep historical p=1 results labelled
 pre-restriction; the current policy rejects them.
+
+
+Independent golden memory: prove the full signed measurement-only affine space
+and data/check round instrument against Stim's standard generator; first
+complementary checks are random. Compare every matched elementary reset/readout
+fault separately, including no-effect faults and unmatched inert terminal MR
+resets. C compares independent direct-Stim fixtures, causal per-wire moments,
+noise multisets and native exact DEMs. Each mutation must establish the baseline
+and fail the designated physical/parity/noise assertion with useful diagnostics.
+Never regenerate tracked fixtures during pytest; maintenance tests use private
+temporary directories. Keep eight-worker checks and the runtime independence
+boundary documented in validation/golden_memory/README.md.

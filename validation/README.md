@@ -1,5 +1,19 @@
 # Research validation
 
+## Independent golden memory
+
+The [golden-memory suite](golden_memory/README.md) checks d=3/5 X/Z memories with
+exactly three syndrome rounds using independent Stim-generator semantics,
+matched elementary reset/readout faults, and a separately authored direct-Stim
+physical schedule with complete gate/reset/readout/idle noise. Frozen fixtures,
+signed affine-space proofs, mutation controls and an eight-worker CLI make the
+checks reproducible. See its [dated report](reports/golden_memory_2026-11-11/REPORT.md).
+
+```sh
+python -m validation.golden_memory.run --matrix --workers 8
+python -m pytest -n 8 tests/test_validation_golden_memory.py -ra
+```
+
 ## Phase 1: code capacity
 
 This directory is research-only. It is excluded from the installed package and

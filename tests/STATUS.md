@@ -1,5 +1,26 @@
 # STATUS — Tests
 
+## Independent golden memory (2026-11-11)
+
+`test_validation_golden_memory.py` adds **49** tests covering all four d=3/5,
+X/Z, three-round A/B/C1/C2 cases, exact complete signed record spaces, random
+complementary first checks, data/check logical round flows, independent geometry
+and CSS algebra, signed Bell-Y elimination, all shared elementary reset/readout
+faults and inert terminal MR resets, frozen ideal fixtures, full causal noisy
+schedules/counters/native DEMs and beginning/middle/end Pauli probes. Deliberate
+gate/support/layer/logical/detector/reset/CX-noise/idle/result/TICK mutations,
+metadata corruption, GF(2) multiplicity, source independence, read-only defaults
+and private fixture maintenance have focused rejection checks. No runtime test
+or existing validator was weakened.
+
+The full eight-worker repository suite passes **1,446 in 472.92 s**, without
+failures/skips/warnings. The final focused eight-worker run passes **49 in
+27.72 s**; all four requested CLI runs and the complete eight-worker matrix
+pass (24.045 s). Ruff src/tests/examples/validation passes. See the
+[execution report](../validation/reports/golden_memory_2026-11-11/REPORT.md) for
+final focused command and four per-case plus eight-worker matrix CLI evidence,
+checksums and bounded certification limits.
+
 ## Research validation Phase 3 — M9 Knill faults (2026-11-09)
 
 `test_validation_m9_knill.py` adds eight focused tests for exact d=3 18/54
