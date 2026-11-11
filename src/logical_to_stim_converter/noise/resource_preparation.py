@@ -145,6 +145,7 @@ def validate_resource_preparation_provenance(compiled):
                   if b.channel_instruction is not None}:
         raise ValueError("Resource post-SE channel instruction provenance disagrees")
     tags = {b.channel_tag for b in boundaries}
+    tags.update(b.channel_tag for b in compiled.post_initialization_boundaries)
     presence = {}
     for b in boundaries:
         index = b.channel_instruction

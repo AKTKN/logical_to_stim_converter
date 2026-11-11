@@ -1,5 +1,12 @@
 # STATUS — Core
 
+## Transversal Pauli backend contract — 2026-11-11
+
+CodeBackend adds optional transversal_pauli with explicit unsupported-backend
+rejection; mathematical code/layout/context contracts remain unchanged. The
+rotated backend supplies signed-flow physics tests. Root STATUS records evidence.
+
+
 ## M7-B update — 2026-11-08
 
 DetectorInfo adds anchor_use_id/source_use_ids, distinct from physical sites and

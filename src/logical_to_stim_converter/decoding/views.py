@@ -161,6 +161,9 @@ def source_fingerprint(compiled):
         # artifacts while binding enabled requests to their stochastic cuts.
         metadata["resource_preparation_v1"] = [
             asdict(b) for b in compiled.resource_preparation_boundaries]
+    if compiled.post_initialization_boundaries:
+        metadata["post_initialization_v1"] = [
+            asdict(b) for b in compiled.post_initialization_boundaries]
     metadata["locations"] = sorted(compiled.logical_to_block.items())
     metadata["dependencies"] = sorted(compiled.preparation_dependencies.items())
     metadata["use_dependencies"] = [(asdict(u), deps) for u, deps in sorted(
@@ -223,10 +226,12 @@ def _parities(circuit):
 
 def _validate_source(compiled):
     """Validate public raw/annotation/use provenance without private compiler state."""
+    from ..noise.post_initialization import validate_post_initialization_provenance
     from ..noise.resource_preparation import validate_resource_preparation_provenance
 
     try:
         validate_resource_preparation_provenance(compiled)
+        validate_post_initialization_provenance(compiled)
     except ValueError as ex:
         raise DecoderViewError(str(ex)) from ex
     circuit = compiled.circuit

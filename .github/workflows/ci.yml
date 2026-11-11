@@ -48,3 +48,7 @@ jobs:
         run: python examples/lstim_equivalence.py --shots 32 --p 0.001 --seed 826
       - name: Opt-in ideal resource initialization and post-SE physical noise
         run: python examples/knill_resource_preparation_noise.py --shots 32 --p 0.001 --p-st 0.003
+      - name: Deep Clifford parallel Knill and terminal signed stabilizers
+        run: python examples/deep_clifford.py --shots 8
+      - name: Deep Clifford with ordinary noisy resource preparation
+        run: python examples/deep_clifford.py --shots 8 --noisy-resource

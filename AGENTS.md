@@ -171,3 +171,13 @@ PEP 440 ordering, not strings or fixture generation metadata. Keep frozen
 manifest bytes and all SHA-256/source/physics/DEM assertions intact; report
 new-version incompatibilities instead of regenerating fixtures or weakening
 physics. CI selects Stim 1.15.0 and 1.16.0 in separate Python/OS environments.
+
+Parallel/deep Clifford additions: LSTIM PARALLEL admits disjoint KnillEC and
+BellStatePrep through the existing planner. Transversal Pauli is a separate
+rotated-code physical mode; physical representative and software frame modes
+retain their meanings. Primitive noise=ideal lowers to NoiseOverride. Explicit
+PostInitializationNoise selects an operation/use pair; its post-SE cut and
+channel provenance are separate from M9 and overlaps fail. Terminal signed
+logical probes derive independent sampler circuits with explicit MPP inversion,
+keep canonical prefix metadata/frames unchanged, and use external frame hypotheses
+for symplectic evaluation. Preserve exact JSON instruction arguments on export.

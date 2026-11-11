@@ -12,6 +12,7 @@ import numpy as np
 import stim
 
 from ..core.lifecycle import BlockUseId
+from ..noise.post_initialization import validate_post_initialization_provenance
 from ..noise.resource_preparation import validate_resource_preparation_provenance
 from .errors import DecoderViewError, UnsupportedProjectionError
 from .records import GF2Map
@@ -79,6 +80,7 @@ def make_conditional_readout_model(compiled, bell):
     start = next(i for i, inst in enumerate(circuit) if inst.tag == resource.module_id)
     try:
         validate_resource_preparation_provenance(compiled)
+        validate_post_initialization_provenance(compiled)
     except ValueError as ex:
         raise DecoderViewError(str(ex)) from ex
     boundaries = [b for b in compiled.resource_preparation_boundaries
@@ -87,6 +89,10 @@ def make_conditional_readout_model(compiled, bell):
     if injected:
         if {b.block_use_id for b in boundaries} != set(resource.block_use_ids):
             raise DecoderViewError("Resource post-SE channels disagree with Bell resource uses")
+    injected.extend(b.channel_instruction for b in compiled.post_initialization_boundaries
+                    if b.block_use_id in resource.block_use_ids
+                    and b.channel_instruction is not None)
+    if injected:
         start = min(injected)
     end = module_end(circuit, bell.z_readout.module_id)
     if injected:

@@ -13,8 +13,12 @@ class LogicalPauli(OperationModule):
 
     def __post_init__(self):
         super().__post_init__()
-        if self.pauli not in ("X", "Y", "Z") or self.mode not in ("physical", "frame"):
-            raise ValueError("LogicalPauli requires X/Y/Z and physical/frame mode")
+        if self.pauli not in ("X", "Y", "Z") or self.mode not in (
+            "physical",
+            "frame",
+            "transversal",
+        ):
+            raise ValueError("LogicalPauli requires X/Y/Z and physical/frame/transversal mode")
 
     def _build(self, backend, operands, context):
         logical, block = next(iter(operands.items()))
@@ -22,7 +26,13 @@ class LogicalPauli(OperationModule):
         components = (
             ()
             if self.mode == "frame"
-            else (backend.pauli(block, logical, self.pauli, orientation),)
+            else (
+                (
+                    backend.transversal_pauli(block, logical, self.pauli, orientation)
+                    if self.mode == "transversal"
+                    else backend.pauli(block, logical, self.pauli, orientation)
+                ),
+            )
         )
         return ModuleFragment(
             context.module_id,

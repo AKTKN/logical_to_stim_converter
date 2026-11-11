@@ -7,6 +7,8 @@ from types import MappingProxyType
 
 import stimflow as sf
 
+from ..core.lifecycle import BlockUseId
+
 
 @dataclass(frozen=True)
 class NoiseOverride:
@@ -83,12 +85,42 @@ class ResourcePreparationNoise:
 
 
 @dataclass(frozen=True)
+class PostInitializationNoise:
+    """Independent data depolarization after one named LogicalInit/use's final SE.
+
+    Both identities must match. Probability zero records the cut without adding
+    a channel. Ordinary initialization noise is controlled separately by overrides.
+    """
+
+    operation_id: str
+    block_use_id: BlockUseId
+    probability: float
+
+    def __post_init__(self):
+        if not isinstance(self.operation_id, str) or not self.operation_id:
+            raise ValueError("Post-initialization noise needs an operation_id")
+        if not isinstance(self.block_use_id, BlockUseId):
+            raise ValueError("Post-initialization noise needs a BlockUseId")
+        p = self.probability
+        if (not isinstance(p, (int, float)) or isinstance(p, bool)
+                or not 0 <= p <= .75 or not math.isfinite(p)):
+            raise ValueError("probability must be finite in [0, 0.75] for exact DEM compatibility")
+
+
+@dataclass(frozen=True)
 class NoiseModel:
     default: NoiseParameters = field(default_factory=NoiseParameters)
     operation_overrides: Mapping[str, NoiseOverride] = field(default_factory=dict)
     resource_preparation: ResourcePreparationNoise = field(default_factory=ResourcePreparationNoise)
+    post_initialization: tuple[PostInitializationNoise, ...] = ()
 
     def __post_init__(self) -> None:
+        policies = tuple(self.post_initialization)
+        if any(not isinstance(p, PostInitializationNoise) for p in policies):
+            raise ValueError("post_initialization requires PostInitializationNoise policies")
+        if len({p.block_use_id for p in policies}) != len(policies):
+            raise ValueError("Duplicate post-initialization physical-use policy")
+        object.__setattr__(self, "post_initialization", policies)
         if not isinstance(self.resource_preparation, ResourcePreparationNoise):
             raise ValueError("resource_preparation must be ResourcePreparationNoise")
         if not isinstance(self.default, NoiseParameters):

@@ -90,6 +90,28 @@ for name, width in [('memory_d3.lstim', 17), ('three_patch_knill_d3.lstim', 51)]
             assert 'before post-SE' in model.boundary_convention
             assert len(model.faults) == 54
     artifacts[name] = (program, first, second, special)
+# New consumer runs from a standalone file, with repository imports still blocked.
+deep = runpy.run_path('deep_consumer.py')
+from logical_to_stim_converter import LogicalPauliProduct, PostInitializationNoise, BlockUseId
+from logical_to_stim_converter.decoding import make_stage_requests
+new_source, stabilizers = deep['deep_clifford_source']()
+new_program = parse_logical_circuit(new_source)
+new_formatted = parse_logical_circuit(format_logical_circuit(new_program))
+assert new_formatted.to_operations() == new_program.to_operations()
+new_compiled = new_program.compile(allow_open_outputs=True, noise_model=deep['experiment_noise'](
+    probability=.001, input_error=.003))
+new_compiled.validate_metadata()
+new_plan = new_compiled.make_frame_plan()
+new_requests = make_stage_requests(new_compiled)
+new_probe = new_compiled.make_terminal_observable_probe(stabilizers)
+new_samples = new_probe.circuit.compile_sampler(seed=51).sample(2)
+new_raw, terminal = new_probe.split_measurements(new_samples)
+assert new_raw.shape == (2, len(new_compiled.measurements)) and terminal.shape == (2, 4)
+assert len(new_compiled.post_initialization_boundaries) == 4
+assert len(new_requests.readouts) == 16
+import json
+assert json.loads(json.dumps(new_compiled.export_metadata()))['schema'] == 'compiled-metadata-v1'
+assert len(new_compiled.logical_output_stabilizers) == 4
 sys.path.insert(0, str(pathlib.Path.cwd()))
 runpy.run_path('consumer_checks.py')['run'](installed, samples, artifacts)
 for name, module in tuple(sys.modules.items()):
@@ -160,7 +182,8 @@ def test_wheel_sdist_and_installed_public_api_without_checkout_or_optional_impor
     consumer_cwd = tmp_path / "consumer"
     consumer_cwd.mkdir()
     for origin, name in ((root / 'examples/installed_consumer.py', 'installed_consumer.py'),
-                         (root / 'tests/installed_consumer_checks.py', 'consumer_checks.py')):
+                         (root / 'tests/installed_consumer_checks.py', 'consumer_checks.py'),
+                         (root / 'examples/deep_clifford.py', 'deep_consumer.py')):
         (consumer_cwd / name).write_bytes(origin.read_bytes())
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)

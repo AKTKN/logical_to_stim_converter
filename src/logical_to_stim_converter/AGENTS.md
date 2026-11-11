@@ -50,3 +50,9 @@ Default disabled behavior and source identities remain compatible; enabled cuts
 participate in fingerprints. See docs/resource_preparation_noise.md for exact
 physical/conditional boundaries, the DEM-compatible [0,.75] policy range and
 the direct injector's required explicit boundary tuple when enabled.
+
+The additive deep Clifford API exports LogicalPauliProduct, TerminalObservableInfo,
+TerminalObservableProbe and PostInitializationNoise. CompiledCircuit retains
+intended active logical_output_stabilizers, post_initialization_boundaries and
+provides make_terminal_observable_probe/export_metadata. Terminal samples have a
+separate appended suffix; canonical decoder/frame records remain unchanged.

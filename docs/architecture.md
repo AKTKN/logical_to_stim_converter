@@ -779,3 +779,28 @@ Canonical full DEMs/correlations remain available for alternative joint consumer
 No decoder algorithm, LER runner or plotting import enters runtime package code.
 Exclusive wall times distinguish one-time validated compilation/maps/models from
 raw sampling, m2d, batch decoding and record/frame transformations.
+
+## Parallel deep Clifford consumer extension (2026-11-11)
+
+LSTIM parallel composites reuse _plan.py's existing child-stream merge and
+_parallel.py's physical layer alignment; there is no frontend scheduler. Primitive
+noise=ideal lowers to NoiseOverride, while transversal Pauli delegates to a
+rotated-code backend method with complete signed Stim flows on all data sites.
+
+Explicit PostInitializationNoise selects one operation/use pair after verified
+ideal assembly. The injector adds its uniquely tagged data channel at the final
+SE cut after ordinary idle accounting; M9 retains its own resolver and suppression
+intervals. Overlap on the same use is rejected. Both cut types are excluded from
+preparation probes and included in appropriate conditional windows. Empty policies
+retain existing physical circuits and v3 identities.
+
+Compiler terminal.py snapshots intended active logical stabilizers by signed
+elimination of retired slots, independently of noisy hypotheses. It validates
+commuting signed logical products, lifts through current bindings/orientations
+with Y=iXZ, and appends explicit signed MPP targets to an exact copied experiment.
+Canonical detector/observable/record/frame artifacts remain unchanged; terminal
+records never become decoder truth. The public probe evaluates user-supplied
+OfflineFrameBatch supports with a symplectic product after source/raw alignment.
+export.py serializes public provenance and exact instruction arguments without
+including compiler-private objects or sampled state. Algorithms and shot loops
+remain in downstream consumers. See api_reference.md for contracts and scope.

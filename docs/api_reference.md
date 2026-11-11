@@ -127,7 +127,7 @@ compiles. Syntax-only `language.parse_ast` is distinct from semantic validation.
 The [README program](../README.md#quick-start) is the minimal executable example.
 The [language guide](lstim.md) covers file/formatter use; the
 [v1 contract](lstim_v1.md) defines opcodes/defaults and bounded syntax. No generic
-expressions, runtime branching, automatic allocation, text noise/decoder config,
+expressions, runtime branching, automatic allocation, arbitrary text noise/decoder config,
 physical Stim passthrough or CLI is implemented.
 
 All ordinary source failures derive from root-exported `LSTIMError(ValueError)`:
@@ -191,7 +191,7 @@ KnillEC(data, first_resource, output_resource, *, prepare_resource=True,
 ```
 
 Here targets/operand names are logical handles. Basis is X/Z; Pauli is X/Y/Z;
-Pauli mode is physical/frame. Deterministic readout must have a known intended
+Pauli mode is physical/frame/transversal. Deterministic readout must have a known intended
 logical eigenvalue; `mode="random"` retains random classical records without a
 reliable observable. Bell resources default to d complete SE rounds. Existing
 resources may be consumed with `prepare_resource=False`. Geometry, code
@@ -781,3 +781,169 @@ tutorials exercise the installed contract. The
 [Phase 5 gate](research_beta_0.0.1_plan_and_verification.md#phase-5--final-integration-gate-and-handoff-2026-11-09)
 records final bounded verification and remaining legal/platform decisions.
 P1's broader detailed single-fault worked guides remain separate work.
+
+## Parallel Knill and deep Clifford additions (2026-11-11)
+
+`PARALLEL` accepts independent `KNILL_EC` and `BELL_PREP` statements as well as
+primitives. Lowering preserves a tuple of existing operation objects; the same
+Python planner expands and aligns their primitive stages. Same-handle/patch
+conflicts fail before execution. Explicit BIND, unique child/module IDs, resource
+ancestry, relocation and reset epochs retain their existing meanings. Reuse fresh
+resource handles on released patches between groups. Composites remain forbidden
+inside REPEAT; generate explicit statements for successive cycles.
+
+```text
+PARALLEL {
+    KNILL_EC[ec0_q0](3) Q0 A0 B0
+    KNILL_EC[ec0_q1](3) Q1 A1 B1
+}
+X Q0 mode=transversal
+INIT_X[initial_q2](1) Q2 noise=ideal
+SE[final_se_q0](1) Q0 noise=ideal
+```
+
+`LogicalPauli("Q0", "Y", mode="transversal")` executes Y on all d² data sites
+of an odd-distance rotated surface patch. It supports the current H orientation
+and physical CNOT pairing. Stim verifies signed check/logical conjugation. Every
+data gate receives the resolved one-qubit noise rule. Existing `physical` still
+uses representative support, while `frame` alone has zero duration.
+
+`noise=ideal` is accepted on primitive statements and lowers to
+`NoiseOverride(reset=0, one_qubit=0, two_qubit=0, measurement=0, idle=0)`.
+It overrides every noise channel of that primitive, including each SE round
+inside LogicalInit. A different live patch waiting during that operation retains
+its own ordinary idle policy. Omission retains instance > type > default
+inheritance. Composite noise options and arbitrary probability text remain
+unsupported; use typed Python policies.
+
+### Independent post-initialization data noise
+
+Root exports `PostInitializationNoise(operation_id: str, block_use_id: BlockUseId,
+probability: float)`; `NoiseModel` adds `post_initialization: tuple[...] = ()`.
+A policy must resolve to exactly one LogicalInit with both identities. This
+supports any input patch and explicitly selected later epochs. It does not make
+initialization ideal; use the operation override independently. Probabilities
+are finite non-boolean [0,.75], preserving native exact Stim DEM construction.
+
+```python
+from logical_to_stim_converter import (
+    BlockUseId, NoiseModel, NoiseParameters, PostInitializationNoise,
+    ResourcePreparationNoise,
+)
+
+case_a = NoiseModel(
+    NoiseParameters(.001, .001, .001, .001, .001),
+    resource_preparation=ResourcePreparationNoise(True, .003),
+    post_initialization=(
+        PostInitializationNoise("initial_q0", BlockUseId("P0", 0), .002),
+    ),
+)
+case_b = NoiseModel(NoiseParameters(.001, .001, .001, .001, .001))
+```
+
+Case A reuses M9: only Bell-owned initialization/reset/SE is ideal, with post-SE
+resource data depolarization; later CNOT/readout and other waiting noise remain
+ordinary. Case B uses ordinary noisy resource preparation for the authored
+rounds (choose d). No post-SE resource channel is added. The independent input
+policy inserts one DEPOLARIZE1 per data site after the selected init's final SE
+and its existing TICK/idle accounting, before the next physical gate. If the init
+ends the open circuit, insertion follows final-layer idle accounting without
+adding a TICK. Concurrent cuts are contiguous. Empty policies preserve existing
+circuits/fingerprints; probability zero retains explicit cut metadata but adds
+no physical channel. Overlapping M9 and explicit policies on the same use fail.
+
+`compiled.post_initialization_boundaries` contains frozen
+`PostInitializationBoundary` values (also exported by `noise`): `operation_id`,
+`preparation_module_id`, `block_use_id`, `final_se_layer`, exclusive
+`ideal_boundary_instruction`, ordered `data_sites`, exact `probability`,
+`channel_instruction` and `channel_tag`. Channel indices address the selected
+canonical noisy circuit; None means zero probability. Tags use
+`initialization_post_se:MODULE`, distinct from M9's `resource_post_se:MODULE`.
+Metadata validation checks exact targets/probability/position and multiplicity.
+Preparation boundary model probes precede these channels. Conditional Bell
+models include explicitly targeted resource channels at their actual cuts;
+intermediate operand SE boundaries still require unsupported extra hypotheses
+and fail explicitly. Direct NoiseInjector use requires a verified boundary tuple
+when these policies are nonempty; standard compilation resolves it once.
+
+### Terminal signed logical observables
+
+Root exports these frozen types and the CompiledCircuit method:
+
+```text
+LogicalPauliProduct(factors: Mapping[str, str] | tuple[tuple[str, str], ...],
+                    sign: int = 1, label: str | None = None)
+compiled.logical_output_stabilizers -> tuple[LogicalPauliProduct, ...]
+compiled.make_terminal_observable_probe(logical_observables, *,
+                                        require_stabilizers=True)
+    -> TerminalObservableProbe
+```
+
+Factors name distinct active logical outputs with X/Y/Z; omit identities.
+The sign is ±1. Generators describe the intended logical state, including
+virtual Paulis, with retired tableau slots eliminated using signed products.
+Requested products must commute and have a known ideal expectation. By default
+each signed product must stabilize that state (expectation +1). With
+`require_stabilizers=False`, expectation -1 is also accepted and exported as bit
+1. Random products, retired/reserved targets and noncommuting requests fail.
+For example, a Bell state's YY stabilizer is
+`LogicalPauliProduct({"Q0": "Y", "Q1": "Y"}, sign=-1)`.
+
+The probe resolves final bindings, active use IDs and H orientations. Physical Y
+is lifted as iXZ with its sign preserved; Stim MPP inversion is encoded explicitly
+instead of using the sign-dropping PauliString append shorthand in Stim 1.15.
+Noiseless *frame-corrected* terminal outcomes match the ideal signs. Raw probe
+bits can depend on preparation gauges, Bell byproducts and software frames.
+
+`probe.circuit` returns an independent sampler-ready copy of the selected
+physical circuit with ideal terminal MPPs. Its canonical measurement/detector/
+observable prefix is unchanged. It never changes the original artifact, DEM or
+frame plan. `probe.original_measurement_count`, `original_qubit_count`,
+`source_fingerprint`, `measurement_indices` and `observables` describe the new
+record columns. Each `TerminalObservableInfo` provides the original
+`logical_observable`, absolute `measurement_index`, global-wire `physical_x`
+and `physical_z` supports (their intersection is Y), `physical_sign`, ideal
+`expected_value` bit and `block_use_ids`.
+
+```python
+compiled = program.compile(noise_model=case_a, allow_open_outputs=True)
+plan = compiled.make_frame_plan()
+probe = compiled.make_terminal_observable_probe(logical_stabilizers)
+samples = probe.circuit.compile_sampler(seed=113).sample(shots=32)
+raw, terminal_records = probe.split_measurements(samples)
+frames = plan.start(raw, source_fingerprint=plan.source_fingerprint)
+# External decoder supplies source/use/input-order-bound CorrectionBatch values.
+# for correction in corrections: frames.apply(correction)
+failures = probe.corrected_flips(samples, frames)
+```
+
+`split_measurements` returns owned canonical-prefix and terminal-column copies.
+`corrected_flips` verifies source identity and exact raw-prefix equality, then
+computes terminal bit XOR sum(final_x[physical_z]) XOR
+sum(final_z[physical_x]) XOR expected_value, modulo two. This is a vectorized
+symplectic evaluation of the caller's frame hypothesis, not correction selection
+or a noisy decoding guarantee. Terminal records never enter stage requests.
+
+### Export and standalone consumer
+
+`compiled.export_metadata()` returns owned JSON-compatible values with schema
+`compiled-metadata-v1`: global measurement/detector/observable/frame metadata,
+operation/module/stage identities, bindings, epochs, ancestry, relocations,
+physical-site mapping, intended output stabilizers, both noise-boundary kinds,
+source fingerprint and installed package/Stim/stimflow versions. Non-string map
+keys are explicit pairs. `ideal_instructions` and `selected_instructions` preserve
+exact floating arguments, Stim target spellings and tags; reconstruct each
+expanded instruction with `stim.GateTarget(target)` and `Circuit.append`.
+Stim text can round probabilities, so retain this JSON with exported `.stim`
+files for exact reproduction.
+
+[deep_clifford.py](../examples/deep_clifford.py) is a standalone installed-API
+consumer with four logical qubits, two/three Clifford layers, one/two parallel
+Knill cycles per layer, exactly three patches per logical qubit, transversal
+Paulis, ideal input/final SE, both resource policies, terminal stabilizers and
+metadata export. The [default LSTIM](../examples/lstim/deep_clifford_d3.lstim)
+is directly parseable. Run `python examples/deep_clifford.py --output /tmp/deep`
+or add `--noisy-resource`, `--depth 3`, or `--cycles 2`. Its noiseless recorded-sector
+recovery demonstrates public CorrectionBatch replay; noisy samples/models are
+exported without claiming a noisy decoder or LER. SE/Knill-memory consumers
+continue using the existing APIs and examples.

@@ -34,6 +34,11 @@ from ..core.protocol import (
 )
 from ..noise.injector import NoiseInjector
 from ..noise.model import NoiseModel
+from ..noise.post_initialization import (
+    PostInitializationBoundary,
+    resolve_post_initialization_boundaries,
+    validate_post_initialization_provenance,
+)
 from ..noise.resource_preparation import (
     ResourcePreparationBoundary,
     resolve_resource_preparation_boundaries,
@@ -52,6 +57,7 @@ from ._metadata import (
 from ._parallel import parallel_chunk
 from ._plan import plan_program
 from ._teleport import ProtocolAssembly
+from .terminal import LogicalPauliProduct, output_stabilizers
 
 
 @dataclass(frozen=True)
@@ -85,6 +91,8 @@ class CompiledCircuit:
     available_blocks: tuple[str, ...] = ()
     use_preparation_dependencies: Mapping[BlockUseId, tuple[str, ...]] = field(default_factory=dict)
     resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] = ()
+    logical_output_stabilizers: tuple[LogicalPauliProduct, ...] = ()
+    post_initialization_boundaries: tuple[PostInitializationBoundary, ...] = ()
     _evaluation_steps: tuple = field(default=(), repr=False, compare=False)
     _compiler: object = field(default=None, repr=False, compare=False)
     _program: tuple = field(default=(), repr=False, compare=False)
@@ -141,6 +149,7 @@ class CompiledCircuit:
 
         validate_metadata(self)
         validate_resource_preparation_provenance(self)
+        validate_post_initialization_provenance(self)
 
     def make_decoder_view(self, **options):
         """Select offline decoder inputs from this physical experiment; never resample."""
@@ -153,6 +162,19 @@ class CompiledCircuit:
         from ._frame_plan import make_frame_plan
 
         return make_frame_plan(self)
+
+    def make_terminal_observable_probe(self, logical_observables, *, require_stabilizers=True):
+        """Return an independent sampler-ready terminal signed logical MPP experiment."""
+        from .terminal import make_terminal_observable_probe
+
+        return make_terminal_observable_probe(
+            self, logical_observables, require_stabilizers=require_stabilizers)
+
+    def export_metadata(self):
+        """Return JSON-compatible provenance and exact physical instruction arguments."""
+        from .export import export_metadata
+
+        return export_metadata(self)
 
     def interpreted_measurements(self, measurements, *, preparation_corrections=None,
                                  validation="noiseless"):
@@ -405,6 +427,7 @@ class CircuitCompiler:
             binding_history=context.binding_history,
             available_blocks=context.available_blocks,
             use_preparation_dependencies=protocol.use_dependencies,
+            logical_output_stabilizers=output_stabilizers(context),
             _evaluation_steps=tuple(evaluation_steps), _compiler=self,
             _program=program, _noise_model=noise_model,
         )
@@ -413,17 +436,23 @@ class CircuitCompiler:
             boundaries = ()
             if noise_model.resource_preparation.enabled:
                 boundaries = resolve_resource_preparation_boundaries(result, context.blocks)
+            post_boundaries = resolve_post_initialization_boundaries(
+                result, noise_model.post_initialization)
             noisy = NoiseInjector().apply(
                 ideal, model=noise_model, physical_map=physical_map,
                 layers=context.layers, fragments=fragment_tuple,
                 resource_preparation_boundaries=boundaries,
+                post_initialization_boundaries=post_boundaries,
             )
             noisy.detector_error_model()
-            channel_tags = {b.channel_tag for b in boundaries}
+            channel_tags = {b.channel_tag for b in (*boundaries, *post_boundaries)}
             channels = {inst.tag: i for i, inst in enumerate(noisy) if inst.tag in channel_tags}
             boundaries = tuple(replace(b, channel_instruction=channels.get(b.channel_tag))
                                for b in boundaries)
+            post_boundaries = tuple(replace(b, channel_instruction=channels.get(b.channel_tag))
+                                    for b in post_boundaries)
             result = replace(result, noisy_circuit=noisy,
+                             post_initialization_boundaries=post_boundaries,
                              resource_preparation_boundaries=boundaries)
             result.validate_metadata()
         return result

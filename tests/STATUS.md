@@ -1,5 +1,18 @@
 # STATUS — Tests
 
+## Parallel/deep Clifford API checks — 2026-11-11
+
+Added independent signed Pauli/Clifford/probe checks, actual physical-layer
+overlap for 1/2/4 Knill modules, conflicts, multiple recycling epochs, isolated
+ancestry, stage/correction identity, exact idle/gate/post-init noise and metadata
+export roundtrips. Terminal negative signs and Y products require explicit MPP
+inversion in Stim 1.15; deterministic logical error insertion checks outcome
+flips. Public-only depth2/3 cases and installed-wheel consumer cover integration.
+Updated two obsolete composite-prohibition assertions; existing golden files
+and tests are preserved. Focused checkpoint 261 passed in 114.59 s with -n8;
+root STATUS records final expanded/full gates and exact limitations.
+
+
 ## Minimum dependency compatibility (2026-11-11)
 
 Added 24 focused tests for PEP 440 acceptance/rejection, manifest immutability,

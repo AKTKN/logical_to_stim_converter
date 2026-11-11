@@ -1,5 +1,14 @@
 # STATUS — Package root
 
+## Parallel/deep Clifford API — 2026-11-11
+
+Root exports signed logical product/probe types and PostInitializationNoise.
+Existing public compilation/decoder/stage/frame APIs are reused. New artifact
+fields expose intended active stabilizers and explicit init-noise cuts; methods
+produce independent terminal sampling experiments and JSON metadata exports.
+Focused 261-test eight-worker checkpoint passed; final evidence in root STATUS.
+
+
 ## Dependency guidance (2026-11-11)
 
 Package AGENTS now distinguishes minimum Stim/Lark versions from the exact

@@ -1,5 +1,16 @@
 # STATUS — Compiler
 
+## Parallel/deep Clifford API — 2026-11-11
+
+Existing composite planner/physical parallel adapter reused unchanged. Added
+terminal.py for signed intended active-state elimination, commuting logical
+product validation, use/orientation-aware Y=iXZ lifting, explicit signed MPPs on
+copied circuits and source/raw-aligned frame evaluation. export.py serializes
+exact physical instruction arguments and provenance. Compiler resolves explicit
+post-init noise after ideal validation and audits exact noisy cut metadata.
+Focused checkpoint 261 passed with -n8; root STATUS records final full gate.
+
+
 ## M9 follow-up — 2026-11-09
 
 Removed the over-mixing exception branch and temporary .75 validation circuit.

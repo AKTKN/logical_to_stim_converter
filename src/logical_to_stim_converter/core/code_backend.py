@@ -39,3 +39,7 @@ class CodeBackend(ABC):
 
     def pauli(self, block, logical_id, basis, orientation=0):
         raise ValueError("Backend does not support logical Paulis")
+
+    def transversal_pauli(self, block, logical_id, basis, orientation=0):
+        """Reject unless the backend verifies data-wide signed logical action."""
+        raise ValueError("Backend does not support transversal logical Paulis")

@@ -34,3 +34,9 @@ NoiseInjector.apply uses None for omitted metadata: enabled calls fail before
 noise setup; explicit () is the caller's declared resource-free plan. Reject
 other container/element types, retain duplicate checks and ordinary disabled
 omission behavior. The compiler supplies the fully resolved tuple in every case.
+
+PostInitializationNoise explicitly selects operation_id and BlockUseId; its
+verified final-SE boundary receives one data DEPOLARIZE1 channel after final idle
+accounting. Keep probability [0,.75], distinct provenance and public exact location
+metadata. Reject M9 overlap on one use. Empty policies preserve old circuits and
+source identities. Never infer a target from logical names or primitive stages.

@@ -1,5 +1,15 @@
 # STATUS — Documentation
 
+## Parallel/deep Clifford consumer documentation — 2026-11-11
+
+Updated API reference, LSTIM contract/guide, architecture and README for parallel
+composites, transversal Paulis, primitive ideal noise, explicit init data noise,
+signed terminal probes and exact metadata export. Documents M9/ordinary resource
+policies, canonical-prefix/suffix separation and external noisy-decoder limits.
+No dependency declaration or existing golden report/fixture was changed.
+Root STATUS records execution evidence.
+
+
 **As of:** 2026-11-11
 
 ## Minimum dependency compatibility (2026-11-11)

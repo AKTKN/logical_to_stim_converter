@@ -27,7 +27,6 @@ _SIGNATURES = MappingProxyType({
     "BELL_PREP": (2, "optional"), "KNILL_EC": (3, "optional"),
 })
 _REPEAT_OPCODES = frozenset({"SE", "H", "CX", "X", "Y", "Z"})
-_COMPOSITES = frozenset({"BELL_PREP", "KNILL_EC"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,11 +109,14 @@ class _Validator:
             options[option.name] = option.value
             if option.name == "mode" and node.opcode in {"X", "Y", "Z", "MX", "MZ"}:
                 modes = (
-                    ("physical", "frame") if node.opcode in {"X", "Y", "Z"}
+                    ("physical", "frame", "transversal") if node.opcode in {"X", "Y", "Z"}
                     else ("deterministic", "random")
                 )
                 if type(option.value) is not str or option.value not in modes:
                     self.fail(f"{node.opcode} mode must be {'|'.join(modes)}", option.span)
+            elif option.name == "noise" and node.opcode not in {"BELL_PREP", "KNILL_EC"}:
+                if option.value != "ideal" or type(option.value) is not str:
+                    self.fail("noise must be ideal", option.span)
             elif option.name == "prepare_resource" and node.opcode == "KNILL_EC":
                 if type(option.value) is not bool:
                     self.fail("prepare_resource must be true or false", option.span)
@@ -141,10 +143,10 @@ class _Validator:
             self.fail(f"Block nesting exceeds {MAX_BLOCK_DEPTH} levels", node.span)
         if isinstance(node, ParallelNode):
             if len(node.operations) < 2:
-                self.fail("PARALLEL requires at least two primitive operations", node.span)
+                self.fail("PARALLEL requires at least two operations", node.span)
             for operation in node.operations:
-                if not isinstance(operation, OperationNode) or operation.opcode in _COMPOSITES:
-                    self.fail("PARALLEL contains primitive operations only", operation.span)
+                if not isinstance(operation, OperationNode):
+                    self.fail("PARALLEL contains operations only", operation.span)
                 self.operation(operation, in_repeat=in_repeat)
             cost = len(node.operations)
         elif isinstance(node, RepeatNode):

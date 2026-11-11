@@ -1,5 +1,16 @@
 # STATUS — `decoding`
 
+## Explicit init-noise cut integration — 2026-11-11
+
+Source fingerprints optionally include post-initialization cut metadata without
+changing empty-policy identities. Source validation audits exact new provenance.
+Preparation model prefixes exclude channels at the matching final-SE cut;
+conditional Bell windows include explicit resource init channels and retain
+unsupported intermediate-SE rejection. Stage/CorrectionBatch/FramePlan semantic
+contracts remain unchanged. Terminal appended records remain outside these APIs.
+Root STATUS records focused and complete gate evidence.
+
+
 ## M9 follow-up — 2026-11-09
 
 No decoder implementation, model window, atom map, frame/source schema or

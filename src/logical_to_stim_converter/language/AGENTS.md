@@ -26,3 +26,8 @@ in physical identity. Replay/decoder adapters remain in examples/tests; physics
 and reset/Bell feedback proofs remain independent of decoder agreement.
 Preserve statement/target/option order, explicit bindings and block nesting.
 Update this ledger and root/test ledgers with actual checkpoint evidence.
+
+PARALLEL now accepts disjoint BELL_PREP/KNILL_EC operations and retains the existing
+Python composite planner. REPEAT restrictions are unchanged. Pauli mode also
+accepts transversal; all primitives accept noise=ideal lowered to the existing
+all-zero NoiseOverride. Keep option order/type semantics in formatting.

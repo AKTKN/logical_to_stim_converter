@@ -58,3 +58,10 @@ TICK/annotation ordering. ResourcePreparationNoise enforces [0,.75] for native
 exact DEM compatibility. Validate the actual noisy circuit directly and propagate
 Stim errors; never cap/reweight resource probabilities. Always pass an explicit
 boundary tuple to NoiseInjector.apply, including () for resource-free programs.
+
+terminal.py owns signed intended active-state snapshots and derived ideal terminal
+MPP probes. Eliminate retired slots by signed stabilizer multiplication, preserve
+Y=iXZ and explicitly invert MPP targets (Stim 1.15 drops PauliString append signs).
+Probe frame evaluation must check source/raw alignment. export.py emits exact
+JSON instruction arguments and public provenance. Post-init noise plans resolve
+after ideal validation; preserve M9's sole structural Bell resolver.

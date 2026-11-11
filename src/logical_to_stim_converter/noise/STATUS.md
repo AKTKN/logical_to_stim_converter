@@ -1,5 +1,17 @@
 # STATUS — Noise
 
+## Explicit post-initialization data channel — 2026-11-11
+
+Added frozen PostInitializationNoise(operation_id, block_use_id, probability)
+and NoiseModel.post_initialization tuple. Resolve exact init final-SE cuts after
+ideal verification; inject after existing final idle accounting and before later
+gates, including final open outputs with no extra TICK. Public frozen boundaries
+retain use/module/data-site/probability/instruction provenance. Reject duplicate
+uses, stale selectors and overlap with M9. Empty policies retain old behavior.
+M9's eligibility/suppression/resolver are reused, not reimplemented. Public direct
+injection requires explicit verified metadata. Root STATUS records gate evidence.
+
+
 ## M9 follow-up — 2026-11-09
 
 The policy's closed supported range is now [0,.75], enforced at construction

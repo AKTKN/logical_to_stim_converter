@@ -1,5 +1,16 @@
 # STATUS — LSTIM language
 
+## Parallel composites and primitive ideal override — 2026-11-11
+
+Grammar permits operations (including KNILL_EC/BELL_PREP) in PARALLEL; validation
+retains minimum two, REPEAT restrictions, labels/options and compiler-owned
+conflict/lifecycle checks. Existing lowering sends composite tuples to Python
+planner; formatter roundtrips all fields/order without a scheduler. Pauli mode
+adds transversal and primitive noise=ideal lowers to all-zero NoiseOverride.
+Two obsolete syntax/semantic prohibitions were updated; golden tests unchanged.
+Focused 261 checks pass with eight workers; root STATUS records full evidence.
+
+
 ## M8-D certification — 2026-11-08
 
 The existing frontend passes independent physical/simulation equivalence; no

@@ -20,6 +20,8 @@ API or a general quantum-programming frontend.
 - Operation-aware gate/result/idle noise on composed physical time layers.
 - Decoder-neutral views, temporal/conditional models and offline record/Pauli frames.
 - Opt-in M9 ideal Bell-owned initialization plus post-SE data depolarization.
+- Parallel Knill/Bell LSTIM, transversal X/Y/Z and primitive `noise=ideal`.
+- Explicit per-init data noise, signed terminal stabilizer probes and metadata export.
 
 The verified physical/test envelope emphasizes odd distances 3 and 5. Other code
 families, non-Clifford gates, automatic allocation and adaptive execution remain
@@ -94,6 +96,13 @@ It prints `17 40 1`. `compiled.circuit` selects the noisy circuit when requested
 physical measurements, not decoded logical bits. Sampling and correction selection
 belong to the caller. The [API reference](docs/api_reference.md) specifies array
 orders, reference-relative labels and source-bound offline correction contracts.
+
+For four-qubit deep Clifford circuits with parallel Knill and three patches per
+logical qubit, run `python examples/deep_clifford.py --shots 16`. Add
+`--noisy-resource` for ordinary d-round preparation, or `--output outputs/deep`
+for LSTIM/Stim/metadata export. The example verifies noiseless frame-corrected
+stabilizers and samples noisy circuits; noisy decoding remains external. See the
+[public API additions](docs/api_reference.md#parallel-knill-and-deep-clifford-additions-2026-11-11).
 
 ## Documentation
 

@@ -225,6 +225,14 @@ def make_boundary_request(compiled, fragment, prep):
         measurement_selector=tuple(m.index for m in records),
     )
     end = module_end(compiled.circuit, fragment.module_id)
+    cuts = (*compiled.resource_preparation_boundaries, *compiled.post_initialization_boundaries)
+    own_cuts = [b for b in cuts if b.preparation_module_id == fragment.module_id]
+    if own_cuts:
+        layers = {b.final_se_layer for b in own_cuts}
+        indices = [b.channel_instruction for b in cuts if b.final_se_layer in layers
+                   and b.channel_instruction is not None]
+        if indices:
+            end = min(end, min(indices))
     model = stim.Circuit()
     detector_index = 0
     for inst in compiled.circuit[:end]:

@@ -79,7 +79,7 @@ PARALLEL {
 }
 ```
 
-This lowers to a **single tuple/list of disjoint existing Python operations**, with no physical `TICK` authored by the parser. Adjacent top-level lines are sequential logical barriers. The existing compiler determines physical gate/TICK alignment and idle noise. In v1, `PARALLEL` contains only primitive operation statements, not nested `PARALLEL`/`REPEAT`, declarations or `BIND` (these remain sequential top-level directives).
+This lowers to a **single tuple/list of disjoint existing Python operations**, with no physical `TICK` authored by the parser. Adjacent top-level lines are sequential logical barriers. The existing compiler determines physical gate/TICK alignment and idle noise. In v1, `PARALLEL` contains primitive or composite operation statements, not nested `PARALLEL`/`REPEAT`, declarations or `BIND` (these remain sequential top-level directives).
 
 ## 3. Syntax and semantics table
 
@@ -95,6 +95,7 @@ This lowers to a **single tuple/list of disjoint existing Python operations**, w
 | `H D` | `TransversalH('D')` | Existing backend's physical logical H |
 | `CX D A` | `TransversalCNOT('D','A')` | First is control, second target |
 | `X D`, `Y D`, `Z D` | `LogicalPauli('D', axis, mode='physical')` | Physical encoded Pauli, default mode |
+| `Y D mode=transversal` | `LogicalPauli(..., mode='transversal')` | All d² data sites, ordinary one-qubit gate noise |
 | `X D mode=frame` | `LogicalPauli(..., mode='frame')` | Zero-duration software frame update |
 | `MX D`, `MZ D` | `LogicalMeasure('D', basis, mode='deterministic')` | Destructive readout; observable if deterministic |
 | `MX D mode=random` | `LogicalMeasure(..., mode='random')` | Random readout; no asserted deterministic observable |
@@ -104,7 +105,7 @@ This lowers to a **single tuple/list of disjoint existing Python operations**, w
 | `KNILL_EC[tag](3) D A B` | `KnillEC(..., operation_id='tag')` | Stable source label, not a stage or epoch |
 | `REPEAT N { ... }` | bounded static unrolling | `N` positive; see restrictions below |
 
-For v1 `BELL_PREP` and `KNILL_EC`, a missing `(rounds)` lowers to `rounds=None`, retaining the existing Python default. For `KNILL_EC prepare_resource=false`, reject an explicit unused rounds argument rather than silently ignoring it. Accept `mode=physical|frame` only for Pauli instructions, `mode=deterministic|random` only for readout, and `prepare_resource=true|false` only for `KNILL_EC`. Do not interpret arbitrary key/value options or silently ignore unknown options.
+For v1 `BELL_PREP` and `KNILL_EC`, a missing `(rounds)` lowers to `rounds=None`, retaining the existing Python default. For `KNILL_EC prepare_resource=false`, reject an explicit unused rounds argument rather than silently ignoring it. Accept `mode=physical|frame|transversal` only for Pauli instructions, `mode=deterministic|random` only for readout, and `prepare_resource=true|false` only for `KNILL_EC`. Do not interpret arbitrary key/value options or silently ignore unknown options.
 
 Use the optional operation label `[name]` **before** `(rounds)` when both are present, as in `KNILL_EC[cycle1](3) D A B`. Labelled operations lower to existing `operation_id`; labels must be globally unique in the fully lowered program. The syntax `NAME(args) targets` is similar to Stim, but the source is **not** a Stim `.stim` circuit.
 
@@ -201,8 +202,8 @@ program API is introduced in M8-A.
   choice between one more target and the first option. A target cannot follow
   an option. Options preserve order and scalar string/int/bool types; unknown
   keys, duplicate keys, unsupported values, rounds and arities are checked by M8-B semantics.
-- PARALLEL contains primitive operation lines only, with no nested groups,
-  declarations, bindings or composites. REPEAT contains operation lines,
+- PARALLEL contains primitive/composite operation lines, with no nested groups,
+  declarations or bindings. REPEAT contains operation lines,
   PARALLEL groups and nested REPEAT. Empty blocks and resource-changing operation
   lines in REPEAT parse structurally; minimum cardinality and allowed repeated
   opcodes/labels/counts are semantic restrictions described in section 4.
@@ -342,3 +343,32 @@ and LER. Batch slicing and replaceable external adapters are checked. Independen
 tableau/Bell-branch/reference and physical fault tests remain mandatory; decoder
 agreement alone does not establish physical correctness. Supported scope is the
 explicit matrix, with finite seeded batches and the existing restricted decoders.
+
+## Parallel composites and ideal primitive overrides (2026-11-11)
+
+PARALLEL accepts independent BELL_PREP/KNILL_EC through the existing Python
+composite planner. Their resource preparation, entangling and Bell-readout stages
+share physical layers; sequential statements remain barriers. Handle/patch
+conflicts, stale aliases and invalid reuse fail in compilation. Retain explicit
+BIND directives between groups for recycling. Composites remain forbidden inside
+REPEAT. The minimum parallel size remains two operations.
+
+Every primitive accepts the optional `noise=ideal`; it lowers to the existing
+NoiseOverride with all five channels zero. Omission preserves ordinary inheritance.
+Other values and noise options on composites fail static validation. Typed
+NoiseModel policies select resource and post-initialization data channels; no
+probability expression or new scheduling syntax is added.
+
+```text
+INIT_X[initial_q0](1) Q0 noise=ideal
+PARALLEL {
+    KNILL_EC[ec0_q0](3) Q0 A0 B0
+    KNILL_EC[ec0_q1](3) Q1 A1 B1
+}
+Y Q0 mode=transversal
+SE[final_se_q0](1) Q0 noise=ideal
+```
+
+See the complete [deep Clifford source](../examples/lstim/deep_clifford_d3.lstim)
+and [API contracts](api_reference.md#parallel-knill-and-deep-clifford-additions-2026-11-11)
+for explicit bindings and decoder-neutral terminal signed stabilizers.

@@ -1,5 +1,18 @@
 # STATUS — Examples
 
+## Four-qubit deep Clifford public consumer — 2026-11-11
+
+Added standalone deep_clifford.py and generated lstim/deep_clifford_d3.lstim.
+Four persistent logical qubits use twelve patches through depth2/3 Clifford
+layers and one/two parallel Knill cycles per layer; explicit schedule reuses
+three patches each. Uses transversal Paulis, ideal input/final SE, M9 or ordinary
+resource preparation, optional explicit input errors, signed terminal probes,
+stage/DEM/frame APIs and exact JSON/Stim export. A recorded-sector baseline checks
+noiseless outcomes; noisy sampling has no claimed decoding/LER. Imports only
+installed public converter APIs, NumPy/Stim and standard library. CI runs both
+resource policies. Root STATUS records final execution evidence.
+
+
 ## Dependency-version reporting (2026-11-11)
 
 The ordinary-memory summary reports the installed PyMatching version instead

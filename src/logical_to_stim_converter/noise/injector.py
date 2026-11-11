@@ -9,6 +9,7 @@ from ..core.compiler_context import TimeLayer
 from ..core.logical_block import GlobalSiteId
 from ..core.module_fragment import ModuleFragment
 from .model import NoiseModel
+from .post_initialization import PostInitializationBoundary
 from .resource_preparation import ResourcePreparationBoundary
 
 
@@ -23,6 +24,7 @@ class NoiseInjector:
         layers: tuple[TimeLayer, ...],
         fragments: tuple[ModuleFragment, ...],
         resource_preparation_boundaries: tuple[ResourcePreparationBoundary, ...] | None = None,
+        post_initialization_boundaries: tuple[PostInitializationBoundary, ...] | None = None,
     ) -> stim.Circuit:
         """Return a noisy copy using inclusive reset-to-readout use intervals.
 
@@ -48,11 +50,29 @@ class NoiseInjector:
                              "ResourcePreparationBoundary objects")
         if resource_preparation_boundaries and not model.resource_preparation.enabled:
             raise ValueError("Resource preparation boundaries require an enabled policy")
+        if post_initialization_boundaries is None:
+            if model.post_initialization:
+                raise ValueError("Post-initialization policies require explicit "
+                                 "verified boundaries")
+            post_initialization_boundaries = ()
+        if (not isinstance(post_initialization_boundaries, tuple)
+                or any(not isinstance(b, PostInitializationBoundary)
+                       for b in post_initialization_boundaries)):
+            raise ValueError("post_initialization_boundaries must be a verified boundary tuple")
+        expected_policies = {(p.operation_id, p.block_use_id, p.probability)
+                             for p in model.post_initialization}
+        if (len(post_initialization_boundaries) != len(expected_policies)
+                or {(b.operation_id, b.block_use_id, b.probability)
+                    for b in post_initialization_boundaries} != expected_policies):
+            raise ValueError("Post-initialization policies and boundaries disagree")
+        if ({b.block_use_id for b in resource_preparation_boundaries}
+                & {b.block_use_id for b in post_initialization_boundaries}):
+            raise ValueError("M9 and post-initialization noise cannot target the same use")
         eligible = {b.preparation_module_id for b in resource_preparation_boundaries}
         intervals = {b.block_use_id: (b.first_layer, b.final_se_layer)
                      for b in resource_preparation_boundaries}
         insertions = {}
-        for boundary in resource_preparation_boundaries:
+        for boundary in (*resource_preparation_boundaries, *post_initialization_boundaries):
             insertions.setdefault(boundary.ideal_boundary_instruction, []).append(boundary)
         if (len(eligible) != len(resource_preparation_boundaries)
                 or len(intervals) != len(resource_preparation_boundaries)):
@@ -89,7 +109,8 @@ class NoiseInjector:
                 result.append(instruction)
                 layer_index += 1
                 for boundary in insertions.get(index + 1, ()):
-                    p = model.resource_preparation.p_st_transversal
+                    p = (boundary.probability if isinstance(boundary, PostInitializationBoundary)
+                         else model.resource_preparation.p_st_transversal)
                     if p:
                         result.append(
                             "DEPOLARIZE1", [physical_map[s] for s in boundary.data_sites],
@@ -113,4 +134,11 @@ class NoiseInjector:
                     raise ValueError("Physical instructions require module noise provenance")
                 result.append(instruction)
         append_idle()
+        if ideal and ideal[-1].name != "TICK":
+            for boundary in insertions.get(len(ideal), ()):
+                p = (boundary.probability if isinstance(boundary, PostInitializationBoundary)
+                     else model.resource_preparation.p_st_transversal)
+                if p:
+                    result.append("DEPOLARIZE1", [physical_map[s] for s in boundary.data_sites],
+                                  p, tag=boundary.channel_tag)
         return result

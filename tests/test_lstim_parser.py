@@ -202,7 +202,6 @@ def test_ast_is_recursively_immutable_and_line_ending_independent():
     "FORMAT(1)\nREPEAT 2 { SE(1) D }", "FORMAT(1)\nREPEAT 2 {\nH D}",
     "FORMAT(1)\nREPEAT 2 {\nH D\n", "FORMAT(1)\nPARALLEL {\nH D\n]",
     "FORMAT(1)\nPARALLEL {\nBIND D P0\n}",
-    "FORMAT(1)\nPARALLEL {\nBELL_PREP A B\n}",
     "FORMAT(1)\nPARALLEL {\nREPEAT 2 {\nH D\n}\n}",
     "FORMAT(1)\nPARALLEL {\nPARALLEL {\nH D\n}\n}",
     "FORMAT(1)\nREPEAT 2 {\nCODE sc ROTATED_SURFACE(3)\n}",

@@ -60,3 +60,9 @@ prefixes end at the existing TICK before the channels. Conditional Bell models
 start at their actual two resource channels; preserve every categorical atom and
 survivor correlation. Enabled nonzero windows crossing intermediate operand SE
 measurements require unsupported extra temporal hypotheses and fail explicitly.
+
+Explicit post-init channels also have source-bound cut metadata. Preparation
+model prefixes exclude all channels at that same cut, including an open final
+init without a trailing TICK. Conditional resource windows include explicit
+resource post-init channels and retain intermediate-SE rejection. Terminal probe
+suffixes are outside StageRequests, DecoderView and OfflineFramePlan inputs.

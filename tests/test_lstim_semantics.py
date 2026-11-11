@@ -219,7 +219,7 @@ def test_manual_ast_cannot_bypass_signature_validation(change):
         validate_ast(replace(ast, statements=(*ast.statements[:-1], bad)), source)
 
 
-def test_manual_ast_cannot_hide_binding_declaration_composite_or_excess_nesting():
+def test_manual_ast_cannot_hide_binding_declaration_or_excess_nesting():
     source = BOUND + "H D"
     ast = parse_ast(source)
     operation = ast.statements[-1]
@@ -229,8 +229,9 @@ def test_manual_ast_cannot_hide_binding_declaration_composite_or_excess_nesting(
             validate_ast(replace(ast, statements=(*ast.statements[:-1], repeat)), source)
     composite = replace(operation, opcode="BELL_PREP", targets=("D", "A"))
     parallel = ParallelNode((operation, composite), operation.span)
-    with pytest.raises(LSTIMSemanticError, match="primitive operations only"):
-        validate_ast(replace(ast, statements=(*ast.statements[:-1], parallel)), source)
+    assert validate_ast(
+        replace(ast, statements=(*ast.statements[:-1], parallel)), source
+    ).expanded_operation_count == 5
     nested = operation
     for _ in range(65):
         nested = RepeatNode(1, (nested,), operation.span)

@@ -1,5 +1,13 @@
 # STATUS — Backends
 
+## Data-wide signed Paulis — 2026-11-11
+
+Added transversal_pauli on every rotated-code data site, with signed Stim
+conjugation flows for every check and both logical axes. Tests cover d3/5/7,
+X/Y/Z, both H orientations and missing-site negative controls. Representative
+pauli implementation remains unchanged. Root STATUS records final evidence.
+
+
 ## M5 verification — 2026-11-07
 
 The unchanged signed memory/Clifford backend primitives now support BellStatePrep

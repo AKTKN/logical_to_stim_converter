@@ -1,5 +1,32 @@
 # STATUS — Repository-wide development ledger
 
+## Parallel Knill and deep Clifford API — 2026-11-11
+
+Fetched remote refs and confirmed main be734ce and validation 64e139d: 0 behind,
+5 ahead. Fast-forwarded/pushed main to 64e139d16dd5e66dd8ecb33a1baaf5ca4364d302.
+Created feature/parallel-knill-deep-clifford-api from that main and preserved the
+checkout's existing 110f6ab dependency-compatibility commit by fast-forward. No
+new dependency specification or golden validation payload change.
+
+LSTIM now lowers parallel Bell/Knill composites through the existing planner,
+transversal X/Y/Z through the rotated-code backend, and primitive noise=ideal to
+all-zero NoiseOverride. Typed PostInitializationNoise targets one operation/use
+with exact post-SE location/probability metadata, independently of M9. Terminal
+signed logical products use current bindings/orientations, signed Y=iXZ lifting
+and explicit MPP inversion on an independent copied circuit. Canonical metadata,
+records, decoder views and frame plans retain their contracts. Added JSON export
+with exact instruction arguments and standalone four-qubit depth2/3, one/two-cycle
+parallel Knill/reuse consumer plus complete LSTIM and public API documentation.
+
+Inspected installed Stim 1.15.0 and stimflow 1.17.dev0 public Chunk/MPP/noise/flow
+APIs from ffe0d043598ed5df0851a3e6b4920359a23fafbd. Negative-sign tests detected
+Stim 1.15's PauliString append sign loss; explicit inverted MPP targets preserve
+physical signs. First focused updated checkpoint: **261 passed in 114.59 s**,
+pytest-xdist with eight workers. Complete gate and added d3/5/7 Clifford and
+installed-consumer checks are running; final results will be recorded below.
+No runtime decoder, correlated inference or simulation runner was added.
+
+
 **As of:** 2026-11-11
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)

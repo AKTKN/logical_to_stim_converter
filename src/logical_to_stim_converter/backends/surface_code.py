@@ -213,6 +213,19 @@ class RotatedSurfaceCodeBackend(CodeBackend):
             builder.append(axis, [q for q, b in representative.items() if b == axis])
         return self._unitary_flows(builder.finish_chunk(), [code])
 
+    def transversal_pauli(self, block, logical_id, basis, orientation=0):
+        """Apply an odd-distance rotated-code Pauli on every fixed data site.
+
+        Stim verifies signed check/logical conjugation, including Y. Even check
+        weights and odd logical weights give the intended encoded Pauli action.
+        """
+        if basis not in ("X", "Y", "Z"):
+            raise ValueError("Logical Pauli must be X, Y, or Z")
+        code = self.stabilizer_code(block, logical_id, orientation)
+        builder = sf.ChunkBuilder(allowed_qubits=code.data_set)
+        builder.append(basis, code.data_set)
+        return self._unitary_flows(builder.finish_chunk(), [code])
+
     @staticmethod
     def _verify_logical_action(chunk, output_tiles, expected_logicals):
         actual = [f.end for f in chunk.flows if f.obs_name is not None]

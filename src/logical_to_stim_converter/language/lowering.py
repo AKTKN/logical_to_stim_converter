@@ -48,6 +48,7 @@ def lower_ast(validated: ValidatedAst) -> LoweredProgram:
     """
     from ..core.code_spec import CodeSpec
     from ..core.logical_block import LogicalBlock
+    from ..noise.model import NoiseOverride
     from ..operations.bell_preparation import BellStatePrep
     from ..operations.binding import BindPatch
     from ..operations.initialization import LogicalInit
@@ -75,6 +76,8 @@ def lower_ast(validated: ValidatedAst) -> LoweredProgram:
         """Use the existing constructors with exact source flags, order and defaults."""
         options = {option.name: option.value for option in node.options}
         kwargs = {"operation_id": node.label}
+        if options.get("noise") == "ideal":
+            kwargs["noise"] = NoiseOverride(0, 0, 0, 0, 0)
         if node.label is not None:
             labels[node.label] = node.span
         try:

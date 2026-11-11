@@ -2,6 +2,11 @@
 
 from .backends.surface_code import RotatedSurfaceCodeBackend
 from .compiler.circuit_compiler import CircuitCompiler, CompiledCircuit
+from .compiler.terminal import (
+    LogicalPauliProduct,
+    TerminalObservableInfo,
+    TerminalObservableProbe,
+)
 from .core.code_backend import CodeBackend
 from .core.code_spec import CodeSpec
 from .core.compiler_context import (
@@ -48,7 +53,13 @@ from .language import (
     parse_logical_file,
 )
 from .noise.injector import NoiseInjector
-from .noise.model import NoiseModel, NoiseOverride, NoiseParameters, ResourcePreparationNoise
+from .noise.model import (
+    NoiseModel,
+    NoiseOverride,
+    NoiseParameters,
+    PostInitializationNoise,
+    ResourcePreparationNoise,
+)
 from .operations.base import OperationModule
 from .operations.bell_preparation import BellStatePrep
 from .operations.binding import BindPatch
@@ -61,6 +72,9 @@ from .operations.syndrome_extraction import SyndromeExtraction
 from .operations.transversal import TransversalCNOT, TransversalH
 
 __all__ = [
+    "LogicalPauliProduct",
+    "TerminalObservableInfo",
+    "TerminalObservableProbe",
     "LogicalProgram",
     "parse_logical_circuit",
     "parse_logical_file",
@@ -89,6 +103,7 @@ __all__ = [
     "NoiseOverride",
     "NoiseParameters",
     "ResourcePreparationNoise",
+    "PostInitializationNoise",
     "OperationModule",
     "PhysicalLayout",
     "RotatedSurfaceCodeBackend",

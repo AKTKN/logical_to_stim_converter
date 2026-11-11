@@ -1,5 +1,14 @@
 # STATUS — Operations
 
+## Separate transversal Pauli mode — 2026-11-11
+
+LogicalPauli accepts mode=transversal and delegates to the backend's data-wide
+physical operation. Existing physical representative/frame behavior and noise
+resolution remain unchanged. Only frame is zero duration. No composite gadget
+was duplicated; Python parallel composites already supplied required scheduling.
+Root STATUS records physical/action/noise regression evidence.
+
+
 ## M7-A update — 2026-11-08
 
 binding.py adds public immutable BindPatch(logical_id, physical_block_id), a

@@ -6,7 +6,6 @@ code_decl: _CODE NAME _ROTATED_SURFACE "(" INT ")"
 patch_decl: _PATCH NAME NAME _INDEX "=" INT
 bind: _BIND NAME NAME
 operation: (PRIMITIVE_OPCODE | COMPOSITE_OPCODE) label? rounds? NAME+ option*
-primitive_operation: PRIMITIVE_OPCODE label? rounds? NAME+ option* -> operation
 label: "[" NAME "]"
 rounds: "(" INT ")"
 option: OPTION_KEY "=" value
@@ -14,7 +13,7 @@ option: OPTION_KEY "=" value
       | INT -> int_value
       | _TRUE -> true_value
       | _FALSE -> false_value
-parallel: _PARALLEL "{" _NL+ (primitive_operation _NL+)* "}"
+parallel: _PARALLEL "{" _NL+ (operation _NL+)* "}"
 repeat: _REPEAT INT "{" _NL+ (repeat_statement _NL+)* "}"
 ?repeat_statement: operation | parallel | repeat
 
