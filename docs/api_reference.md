@@ -1,11 +1,12 @@
 # Public consumer API reference
 
-This reference describes the **0.0.1 internal research integration**, reviewed
-2026-11-09 against runtime baseline `8a409593ab09441c189ec3fe8742ab3f64055cce`.
-The [installation guide](development.md) pins that reachable revision. Documented
-consumer paths are intended for this integration; there is no durable semantic
-versioning guarantee for every root-exported low-level object. Preserve the commit
-SHA with results. No runtime behavior changes in this documentation phase.
+This reference describes the **0.0.1 internal research integration**, including
+2026-11-11 parallel Knill/deep Clifford additions. Earlier installation pins
+identify historical integrations; additions require a revision containing them.
+Preserve the full source commit with results. There is no durable semantic
+versioning guarantee for every root-exported low-level object. The
+[implementation record](parallel_knill_deep_clifford.md) states tested bounds
+and exact validation evidence.
 
 Use root imports for compilation, operations, language and noise policy;
 `logical_to_stim_converter.decoding` for offline contracts; and

@@ -22,14 +22,23 @@ Inspected installed Stim 1.15.0 and stimflow 1.17.dev0 public Chunk/MPP/noise/fl
 APIs from ffe0d043598ed5df0851a3e6b4920359a23fafbd. Negative-sign tests detected
 Stim 1.15's PauliString append sign loss; explicit inverted MPP targets preserve
 physical signs. First focused updated checkpoint: **261 passed in 114.59 s**,
-pytest-xdist with eight workers. Complete gate and added d3/5/7 Clifford and
-installed-consumer checks are running; final results will be recorded below.
-No runtime decoder, correlated inference or simulation runner was added.
+pytest-xdist with eight workers. Complete eight-worker regression: **1,664 passed in 1,035.32 s**, with no failures
+or skips, including unchanged golden A0–C2, d3/5/7 Clifford and installed-consumer
+checks. Ruff src/tests/examples/validation, pip check and whitespace checks pass.
+Final exact-tree export/packaging evidence and remote CI are recorded in
+[the implementation record](docs/parallel_knill_deep_clifford.md).
+Final exact-tree feature/packaging checks: **68 in 43.66 s** (Stim 1.15.0),
+**68 in 63.67 s** (separate Stim 1.16.0 environment), both with -n8. Private
+wheel/sdist builds and both pip checks pass. Main's four-job merged-validation CI
+completed successfully. The feature runtime b74df32's eight-job CI completed
+successfully on Ubuntu/Windows × Python 3.11/3.12 × Stim 1.15.0/1.16.0, including
+all 1,664 tests, builds and eleven examples per job. The final evidence-only
+commit retains all tested implementation bytes. See the implementation record. No runtime decoder, correlated inference or simulation runner was added.
 
 
 **As of:** 2026-11-11
 **Package:** `logical_to_stim_converter`  
-**Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
+**Overall state:** `M9_CERTIFIED` plus parallel/deep Clifford public APIs (bounded local and CI gates verified)
 
 ## Minimum dependency compatibility (2026-11-11)
 

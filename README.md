@@ -109,6 +109,7 @@ stabilizers and samples noisy circuits; noisy decoding remains external. See the
 - [Documentation index and current scope](docs/index.md)
 - [Installation, development and dependency pins](docs/development.md)
 - [Public consumer API reference and glossary](docs/api_reference.md)
+- [Parallel Knill / deep Clifford implementation and verification](docs/parallel_knill_deep_clifford.md)
 - Installed workflows: [ordinary memory](docs/ordinary_memory_tutorial.md) and
   [three-patch Knill with M9](docs/knill_memory_tutorial.md)
 - [LSTIM guide](docs/lstim.md), [v1 specification](docs/lstim_v1.md) and

@@ -13,6 +13,17 @@ and tests are preserved. Focused checkpoint 261 passed in 114.59 s with -n8;
 root STATUS records final expanded/full gates and exact limitations.
 
 
+Final exact-tree feature/installed-wheel gate: **68 in 43.66 s** at Stim 1.15.0
+and **68 in 63.67 s** at Stim 1.16.0, each with -n8. Both pip checks and private
+wheel/sdist builds pass. Feature CI matrix attribution is in the implementation
+record.
+
+Final complete local gate: **1,664 passed in 1,035.32 s** with eight workers,
+no failures/skips. Ruff and pip checks pass; exact packaging and CI attribution
+are in docs/parallel_knill_deep_clifford.md and root STATUS. All eight runtime
+CI jobs (Ubuntu/Windows, Python 3.11/3.12, Stim 1.15/1.16) pass tests, builds and
+all eleven examples at b74df32; this final follow-up changes documentation only.
+
 ## Minimum dependency compatibility (2026-11-11)
 
 Added 24 focused tests for PEP 440 acceptance/rejection, manifest immutability,

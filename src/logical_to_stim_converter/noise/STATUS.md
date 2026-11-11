@@ -12,6 +12,12 @@ M9's eligibility/suppression/resolver are reused, not reimplemented. Public dire
 injection requires explicit verified metadata. Root STATUS records gate evidence.
 
 
+Final complete local gate: **1,664 passed in 1,035.32 s** with eight workers,
+no failures/skips. Ruff and pip checks pass; exact packaging and CI attribution
+are in docs/parallel_knill_deep_clifford.md and root STATUS. All eight runtime
+CI jobs (Ubuntu/Windows, Python 3.11/3.12, Stim 1.15/1.16) pass tests, builds and
+all eleven examples at b74df32; this final follow-up changes documentation only.
+
 ## M9 follow-up — 2026-11-09
 
 The policy's closed supported range is now [0,.75], enforced at construction

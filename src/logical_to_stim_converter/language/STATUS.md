@@ -11,6 +11,12 @@ Two obsolete syntax/semantic prohibitions were updated; golden tests unchanged.
 Focused 261 checks pass with eight workers; root STATUS records full evidence.
 
 
+Final complete local gate: **1,664 passed in 1,035.32 s** with eight workers,
+no failures/skips. Ruff and pip checks pass; exact packaging and CI attribution
+are in docs/parallel_knill_deep_clifford.md and root STATUS. All eight runtime
+CI jobs (Ubuntu/Windows, Python 3.11/3.12, Stim 1.15/1.16) pass tests, builds and
+all eleven examples at b74df32; this final follow-up changes documentation only.
+
 ## M8-D certification — 2026-11-08
 
 The existing frontend passes independent physical/simulation equivalence; no
