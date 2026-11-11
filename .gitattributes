@@ -3,6 +3,8 @@
 *.md text eol=lf
 *.toml text eol=lf
 *.lstim text eol=lf
+*.stim text eol=lf
+validation/golden_knill/fixtures/*.json text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
 *.bat text eol=crlf

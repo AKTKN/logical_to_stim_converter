@@ -31,6 +31,9 @@ complete d=3 weight-two M9 Knill fault assignments with eight-worker MWPM
 sampling. The [independent golden-memory suite](validation/golden_memory/README.md)
 also certifies three-round d=3/5 X/Z ideal semantics, shared reset/readout fault
 responses, and exact independently authored physical/noise schedules.
+The [independent Knill suite](validation/golden_knill/README.md) compares corrected
+ideal three-patch semantics with pinned Hex and exact physical, ordinary-noise
+and M9 schedules with a separate direct-Stim oracle.
 
 ## Installation
 

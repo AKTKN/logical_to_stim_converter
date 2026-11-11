@@ -1,5 +1,21 @@
 # Research validation
 
+## Independent three-patch Knill
+
+The [Knill golden suite](golden_knill/README.md) separately certifies actual
+pinned Hex corrected ideal geometry/instruments/Bell/teleportation semantics
+and a production-independent direct-Stim physical/annotation/noise/M9 oracle.
+It covers one teleportation, d=3/5 X/Z, open/closed outputs, signed inputs,
+nonzero preparation gauges, all Bell branches, exact prior-preserving DEMs and
+physical fault/survivor checks. Normal tests use frozen fixtures without Hex or
+network access; an explicit live checkout audit is available. See the
+[execution report](reports/knill_golden_2026-11-11/REPORT.md).
+
+```sh
+python -m validation.golden_knill.run --matrix --level all --workers 8
+python -m pytest -n 8 tests/test_validation_golden_knill*.py -ra
+```
+
 ## Independent golden memory
 
 The [golden-memory suite](golden_memory/README.md) checks d=3/5 X/Z memories with

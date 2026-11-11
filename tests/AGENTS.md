@@ -95,3 +95,16 @@ and fail the designated physical/parity/noise assertion with useful diagnostics.
 Never regenerate tracked fixtures during pytest; maintenance tests use private
 temporary directories. Keep eight-worker checks and the runtime independence
 boundary documented in validation/golden_memory/README.md.
+
+
+Golden Knill tests keep actual Hex A0–A3 independent from same-schedule B1–B2/C1–C2.
+Prove signed full affine spaces and genuine two-axis channel flows, then exercise
+nonzero gauges, signed inputs/all Bell branches and physically executed survivor
+frames. Full native Hex annotations may be incomplete; validate their signed
+rows without inventing equality to DUT counts. Verify all physical/noise moments,
+stage/use/parent Counters, exact DEM probabilities/correlations, every Bell-CX
+Pauli alternative and selected boundary/waiting/terminal-idle actions. Each
+mutation must fail its named physical/frame/parity/noise assertion after a valid
+baseline. Default tests need no Hex checkout/optional decoder imports/network.
+Fixture maintenance and Windows Git newline-conversion tests use private trees;
+never rewrite tracked golden bytes during pytest or weaken a hash to hide drift.

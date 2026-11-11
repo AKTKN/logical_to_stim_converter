@@ -1,5 +1,43 @@
 # STATUS — Research validation
 
+## Independent three-patch Knill golden (2026-11-11)
+
+Implemented `golden_knill/` with two independent oracles: actual Hex at
+`5de58f2f80791054411ad3c0885a4fe3671ed56a`, explicitly `surface_code=True`,
+for ideal A0–A3; elementary direct-Stim geometry/protocol/check anchors/noise
+for exact physical/annotation B1–B2 and ordinary/M9 C1–C2. Converter baseline is
+`a11242efff9f36f22a729ef825b9b3ca4c85c10a`. Stim 1.15.0/stimflow 1.17.dev0
+at `ffe0d043598ed5df0851a3e6b4920359a23fafbd` remain pinned. Optional Hex
+extraction dependencies are development-only and absent from normal fixture tests.
+
+All four d=3/5 X/Z cases and their open/closed, physical/virtual signed, Bell/gauge,
+uniform/heterogeneous and M9 variants pass bounded physics checks. Exact complete
+record spaces, original Hex correction placement, full native-annotation signed
+validation, per-wire gate/noise causality, stage/use noise Counters and unrounded
+native common-basis DEMs preserve every physical channel. Physical raw/survivor
+fault responses have an independent NumPy symplectic oracle, all Bell-CX15 atoms,
+and explicit inert terminal classification. Sixteen independent frozen bundles
+have protected LF bytes, provenance/SHA-256 and explicit-only regeneration; actual
+live Hex extraction was run. Native Hex implicit initialization, addressed versus
+allocated sites and incomplete annotations are reported honestly.
+
+There are **128** new tests. Initial primary eight-worker gate passed **82 in
+156.25 s**. After two empty-candidate regressions, final memory/primary checks
+passed **133 in 272.02 s**; final Hex/fixture checks passed **44 in 20.58 s**.
+The complete eight-worker repository run passed **1,574 in 845.00 s**,
+without failures or skips.
+Ruff, formatting, pip and whitespace pass. See the
+[protocol](golden_knill/README.md) and
+[execution report](reports/knill_golden_2026-11-11/REPORT.md) for final full/live
+matrix, exact counts/rowmaps/probabilities, hashes and platform/CI evidence.
+No runtime source, pin, version, decoder or license changed; broader
+multi-teleport/reuse, decoder/LER and cross-schedule noisy claims remain outside
+this certification. No independently reproduced production defect was found.
+
+Both eight-worker CLI matrices passed **40/40 tasks**: live Hex plus closed-noise
+principal matrix **243.101 s**, and open-output noise matrix
+**236.854 s**, including physical survivor actions and exact DEMs.
+
 ## Independent golden memory (2026-11-11)
 
 Implemented `golden_memory/` with a production-independent dual-grid/direct-Stim

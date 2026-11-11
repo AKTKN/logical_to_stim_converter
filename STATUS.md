@@ -4,6 +4,48 @@
 **Package:** `logical_to_stim_converter`  
 **Overall state:** `M9_CERTIFIED` (bounded opt-in physical and same-raw matrix)
 
+## Independent three-patch Knill golden certification (2026-11-11)
+
+Added research-only `validation/golden_knill/` with actual pinned Hex ideal
+A0–A3 and a separate independently authored direct-Stim physical/annotation
+B1–B2, ordinary-noise C1 and M9 C2 oracle. The bounded matrix covers d=3/5 X/Z,
+D one initial SE, resource d SE, one teleportation on three fixed patches,
+open/closed outputs, both input signs, virtual frames, nonzero gauges and all
+Bell branches. Genuine two-axis channel proofs remove D preparation; independent
+CSS/symplectic plans check every survivor frame site on the same DUT records.
+
+All eight direct open/closed ideal cases match exact physical moments and full
+signed record spaces. Closed circuits have **51/147 sites, 186/930 CX pairs,
+29/41 TICKs, 83/339 records, 56/264 detectors and one observable**. Complete signed
+ranks are **57/265**. Ordinary reset/CX/result/idle counts are
+**83/186/83/720** and **339/930/339/2852**; D waiting noise, override precedence,
+M9 enabled-zero suppression and exact post-SE data channels match independently.
+Full common-basis native DEM priors/structure and all selected physical fault
+responses match; explicit terminal faults are recorded inert. Sixteen frozen
+oracles have source/version/hash provenance and read-only defaults; live Hex
+extraction was executed, not substituted. Production source and runtime
+dependencies remain unchanged. The report distinguishes Hex's allocated/addressed sites, native
+incomplete annotations and default-input interpretation rather than forcing
+physical/noisy equality across different schedules.
+
+The initial primary eight-worker suite passed **82 in 156.25 s**. After two
+empty-candidate regressions, the final memory/primary gate passed **133 in
+272.02 s** (49 memory + 84 Knill). All **44** Hex/fixture checks passed in
+**20.58 s**. There are **128** new tests across the three Knill files.
+The complete eight-worker repository run passed **1,574 in 845.00 s**,
+without failures or skips.
+Ruff src/tests/examples/validation, formatting, pip and whitespace checks pass.
+The [execution report](validation/reports/knill_golden_2026-11-11/REPORT.md) and
+[protocol](validation/golden_knill/README.md) record complete cases, commands,
+counts, hashes, fault/negative controls and precise CI state. `.gitattributes`
+now protects Stim/new JSON bytes; a private-Git CRLF-checkout test passes. This
+is one-teleportation physical certification, not decoder/LER, reuse or general
+Hex-vs-converter noisy equivalence. No production defect or source fix was found.
+
+Both eight-worker CLI matrices passed **40/40 tasks**: live Hex plus closed-noise
+principal matrix **243.101 s**, and open-output noise matrix
+**236.854 s**, including physical survivor actions and exact DEMs.
+
 ## Independent golden-memory certification (2026-11-11)
 
 Added research-only `validation/golden_memory/` with three distinct independent

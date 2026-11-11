@@ -1,5 +1,34 @@
 # STATUS — Tests
 
+## Independent three-patch Knill golden (2026-11-11)
+
+Added **128** focused tests: 84 primary A0–C2 cases/negative controls,
+21 actual-Hex signed full-space/coset/channel/placement checks, and 23 frozen
+fixture, independence, read-only maintenance and LF byte checks. Physical and
+virtual signed inputs, nonzero gauge recovery, every Bell branch, genuine
+arbitrary-input two-axis flow, open survivor X/Z and actual public closed parity
+are checked independently. All d=3/5 X/Z direct ideal/noisy schedules and M9
+p=0/.003 zero/nonzero backgrounds have exact native common-basis DEM checks.
+Every Bell-CX Pauli alternative and selected reset/result/SE/wait/boundary/terminal
+faults are checked against independent symplectic algebra; terminal ancilla faults
+are explicitly inert. Mutations validate their named physics/frame/parity/noise
+cause. Source/fixture tests block production/Hex/test imports and network; Git
+checkout conversion is exercised in private temporary repositories.
+
+Initial primary pytest with eight workers: **82 passed in 156.25 s**. The final
+combined gate after two empty-candidate regressions passed **133 in 272.02 s**
+(49 memory + 84 Knill); final Hex/fixture checks passed **44 in 20.58 s**.
+The complete eight-worker repository run passed **1,574 in 845.00 s**,
+without failures or skips.
+Ruff src/tests/examples/validation, new-file formatting and whitespace pass.
+See the [execution report](../validation/reports/knill_golden_2026-11-11/REPORT.md)
+for final complete/live matrix, counts, source/fixture hashes, exact diagnostics
+and separate remote CI state. No existing physics test was weakened or skipped.
+
+Both eight-worker CLI matrices passed **40/40 tasks**: live Hex plus closed-noise
+principal matrix **243.101 s**, and open-output noise matrix
+**236.854 s**, including physical survivor actions and exact DEMs.
+
 ## Independent golden memory (2026-11-11)
 
 `test_validation_golden_memory.py` adds **49** tests covering all four d=3/5,

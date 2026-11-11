@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "creator": "Explicit independent oracle maintenance; no DUT export",
+  "converter_baseline_commit": "a11242efff9f36f22a729ef825b9b3ca4c85c10a",
+  "hex_source_commit": "5de58f2f80791054411ad3c0885a4fe3671ed56a",
+  "hex_source_version": "0.1.0",
+  "stimflow_source_commit": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+  "environment": {
+    "logical-to-stim-converter": "0.0.1",
+    "stim": "1.15.0",
+    "stimflow": "1.17.dev0",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pymatching": "2.3.1",
+    "pytest": "9.2.0",
+    "pytest-xdist": "3.8.0",
+    "ldpc": "2.4.1",
+    "stimbposd": "0.2.0",
+    "sinter": "1.16.0",
+    "stimflow_direct_url": {
+      "subdirectory": "glue/stimflow",
+      "url": "https://github.com/quantumlib/Stim.git",
+      "vcs_info": {
+        "commit_id": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+        "requested_revision": "ffe0d043598ed5df0851a3e6b4920359a23fafbd",
+        "vcs": "git"
+      }
+    }
+  },
+  "generator_sources": {
+    "spec.py": "e655f8ee26f95b3ade16c7a4d7957b07f50d6eb4ec1c9fe01dfb45460dbf56d2",
+    "reference_same_schedule.py": "9f52fcec7ae476cae887a5236af071cd1e64fae5a4cbda214b49953d5e905b33",
+    "reference_noise.py": "3317a4b7c6891162bdb256548bbbe0f7fe130946cefd94d2b5507ed8453b65ef",
+    "hex_adapter.py": "8ba08543d303e9a9f57de9a7a89b945f657b9d4b6e1e2d9ca1211a778a16deb1"
+  },
+  "fixtures": {
+    "same_d3_x_closed.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "d1b5e5fdb8403b0d929e742ddda6dc9c91f948276b21c352ca6218ca8a898ae1",
+      "arguments": {
+        "distance": 3,
+        "basis": "X",
+        "open_output": false
+      },
+      "counts": {
+        "occupied_sites": 51,
+        "addressed_physical_sites": 51,
+        "native_coordinate_annotations": 51,
+        "qubit_index_width": 51,
+        "measurements": 83,
+        "detectors": 56,
+        "observables": 1,
+        "ticks": 29,
+        "CX_pairs": 186
+      }
+    },
+    "same_d3_x_open.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "bd1666fffe5037989f32549cd7c777524ff3bb0aa3de572d6ee77d9e535bd692",
+      "arguments": {
+        "distance": 3,
+        "basis": "X",
+        "open_output": true
+      },
+      "counts": {
+        "occupied_sites": 51,
+        "addressed_physical_sites": 51,
+        "native_coordinate_annotations": 51,
+        "qubit_index_width": 51,
+        "measurements": 74,
+        "detectors": 52,
+        "observables": 0,
+        "ticks": 28,
+        "CX_pairs": 186
+      }
+    },
+    "hex_d3_x_bit0.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "3d9b90081795b84a597d0df0a9cbc3739d521bc2ddd7496bacb2b2502fe8dfb5",
+      "arguments": {
+        "distance": 3,
+        "basis": "X",
+        "bit": 0,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 75,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "open_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 66,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "allocated_patch_sites": 51
+    },
+    "hex_d3_x_bit1.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "682e7b48716fb36dcd4b991ad121c3b0db5fb341ccf32e7650af05af719146f9",
+      "arguments": {
+        "distance": 3,
+        "basis": "X",
+        "bit": 1,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 75,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "open_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 66,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "allocated_patch_sites": 51
+    },
+    "same_d3_z_closed.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "cdb5584634fda69f9a7f5d88f20230f3f0c0600eab29858b4ee30164b2a7ea0f",
+      "arguments": {
+        "distance": 3,
+        "basis": "Z",
+        "open_output": false
+      },
+      "counts": {
+        "occupied_sites": 51,
+        "addressed_physical_sites": 51,
+        "native_coordinate_annotations": 51,
+        "qubit_index_width": 51,
+        "measurements": 83,
+        "detectors": 56,
+        "observables": 1,
+        "ticks": 29,
+        "CX_pairs": 186
+      }
+    },
+    "same_d3_z_open.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "466a2a410662bc6e5427d4e22758b84ab6a69a051a67164d3e173f7ecd5feee5",
+      "arguments": {
+        "distance": 3,
+        "basis": "Z",
+        "open_output": true
+      },
+      "counts": {
+        "occupied_sites": 51,
+        "addressed_physical_sites": 51,
+        "native_coordinate_annotations": 51,
+        "qubit_index_width": 51,
+        "measurements": 74,
+        "detectors": 52,
+        "observables": 0,
+        "ticks": 28,
+        "CX_pairs": 186
+      }
+    },
+    "hex_d3_z_bit0.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "9e73b1072ce4b15ab9ba26421b7a160c233b2398ba5fdb9cb89fab35263aade9",
+      "arguments": {
+        "distance": 3,
+        "basis": "Z",
+        "bit": 0,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 75,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "open_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 66,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "allocated_patch_sites": 51
+    },
+    "hex_d3_z_bit1.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "2abbb0c5c6d9ede4ae2c883a1177f7aaaef7862db4a5f5145a18acff8339c3dd",
+      "arguments": {
+        "distance": 3,
+        "basis": "Z",
+        "bit": 1,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 75,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "open_counts": {
+        "occupied_sites": 43,
+        "addressed_physical_sites": 43,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 51,
+        "measurements": 66,
+        "detectors": 40,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 123
+      },
+      "allocated_patch_sites": 51
+    },
+    "same_d5_x_closed.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "f566cd42ccbfafe571ab1e2daa2a993660b2ddd9361a3c2b1d49b52c097283c4",
+      "arguments": {
+        "distance": 5,
+        "basis": "X",
+        "open_output": false
+      },
+      "counts": {
+        "occupied_sites": 147,
+        "addressed_physical_sites": 147,
+        "native_coordinate_annotations": 147,
+        "qubit_index_width": 147,
+        "measurements": 339,
+        "detectors": 264,
+        "observables": 1,
+        "ticks": 41,
+        "CX_pairs": 930
+      }
+    },
+    "same_d5_x_open.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "1432aeb542fa6ec3bb063c19877754cd13504a28a891313c29e5fdcae4387789",
+      "arguments": {
+        "distance": 5,
+        "basis": "X",
+        "open_output": true
+      },
+      "counts": {
+        "occupied_sites": 147,
+        "addressed_physical_sites": 147,
+        "native_coordinate_annotations": 147,
+        "qubit_index_width": 147,
+        "measurements": 314,
+        "detectors": 252,
+        "observables": 0,
+        "ticks": 40,
+        "CX_pairs": 930
+      }
+    },
+    "hex_d5_x_bit0.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "58e8a9c5535adea1ebadc30dd8017c768d7465603391b93865c19312abd5a234",
+      "arguments": {
+        "distance": 5,
+        "basis": "X",
+        "bit": 0,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 315,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 558
+      },
+      "open_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 290,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 558
+      },
+      "allocated_patch_sites": 147
+    },
+    "hex_d5_x_bit1.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "c79478831a6b5ce316e2882e77cdd71734ff42ce6ae740af69a66d5061855df7",
+      "arguments": {
+        "distance": 5,
+        "basis": "X",
+        "bit": 1,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 315,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 558
+      },
+      "open_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 290,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 558
+      },
+      "allocated_patch_sites": 147
+    },
+    "same_d5_z_closed.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "9524190d3aa3669d6bd343be95c602d5e0cf35ba549fccc720e7083851382d63",
+      "arguments": {
+        "distance": 5,
+        "basis": "Z",
+        "open_output": false
+      },
+      "counts": {
+        "occupied_sites": 147,
+        "addressed_physical_sites": 147,
+        "native_coordinate_annotations": 147,
+        "qubit_index_width": 147,
+        "measurements": 339,
+        "detectors": 264,
+        "observables": 1,
+        "ticks": 41,
+        "CX_pairs": 930
+      }
+    },
+    "same_d5_z_open.stim": {
+      "oracle": "independent_direct_stim",
+      "sha256": "3f6f6031a3fc64e5a04e47e94423158451778996886dd62d54bfb356d8c7c86c",
+      "arguments": {
+        "distance": 5,
+        "basis": "Z",
+        "open_output": true
+      },
+      "counts": {
+        "occupied_sites": 147,
+        "addressed_physical_sites": 147,
+        "native_coordinate_annotations": 147,
+        "qubit_index_width": 147,
+        "measurements": 314,
+        "detectors": 252,
+        "observables": 0,
+        "ticks": 40,
+        "CX_pairs": 930
+      }
+    },
+    "hex_d5_z_bit0.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "bfafba53163791907fe1209edf1abe03029ad887d27a2f368a86bea8d10bd31c",
+      "arguments": {
+        "distance": 5,
+        "basis": "Z",
+        "bit": 0,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 315,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 557
+      },
+      "open_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 290,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 557
+      },
+      "allocated_patch_sites": 147
+    },
+    "hex_d5_z_bit1.json": {
+      "oracle": "actual_pinned_hex_surface_code_true",
+      "sha256": "0218031bed1969003c95e0e781daa2fe874826631617fe32095228320c68d574",
+      "arguments": {
+        "distance": 5,
+        "basis": "Z",
+        "bit": 1,
+        "surface_code": true
+      },
+      "closed_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 315,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 557
+      },
+      "open_counts": {
+        "occupied_sites": 123,
+        "addressed_physical_sites": 123,
+        "native_coordinate_annotations": 0,
+        "qubit_index_width": 147,
+        "measurements": 290,
+        "detectors": 216,
+        "observables": 0,
+        "ticks": 0,
+        "CX_pairs": 557
+      },
+      "allocated_patch_sites": 147
+    }
+  }
+}

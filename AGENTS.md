@@ -144,3 +144,22 @@ maintenance flag; normal tests/CLI verify hashes without rewriting them. Standar
 post-final-MR resets are individually checked inert, never silently discarded.
 The certified envelope is d=3/5, X/Z, exactly three SE rounds, ordinary noise;
 this adds no decoder, compiler, M9/Knill or broader physical-program contract.
+
+
+Independent Knill certification lives in `validation/golden_knill/`. Keep actual
+pinned Hex (`surface_code=True`) ideal A0–A3 separate from independent direct-Stim
+physical/annotation B1–B2 and exact ordinary/M9 noise C1–C2. Never derive expected
+physics from DUT output/metadata or decoder results, and never equate different
+Hex/converter noisy schedules. Default tests load frozen, provenance/hash-checked
+oracles without Hex/network; live extraction is explicit and upstream stays
+read-only. Preserve both signed logical channel axes with D initialization
+removed from the channel proof, nonzero preparation gauges, logical-coset signs,
+physical survivor frames and all Bell branches. Hex's native unitary input uses
+its simulator's default initialized D; full-record analysis labels any explicit
+analysis-only reset and never edits native fixture sections. Noise expectations
+track independent reset/readout lifetimes, waiting D, overrides, M9 suppression
+at p_st=0 and exact post-SE cuts. Keep every physical channel/prior and record
+inert terminal faults. Frozen `.stim` and Knill fixture JSON bytes remain LF via
+`.gitattributes`; regeneration is explicit maintenance, never a default test.
+The envelope remains one teleportation, d=3/5 X/Z and resources d rounds; this
+adds no production decoder/LER, reuse or broader schedule claim.
